@@ -1,0 +1,20 @@
+{
+  "name": "node-blueprint",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Node.js backend project setup tool",
+  "main": "main.js",
+  "bin": "./dist/main.js",
+  "scripts": {},
+  "author": "Yogendra Rana <www.yogendrarana.com.np>",
+  "license": "ISC",
+  "dependencies": {
+    "@inquirer/prompts": "^7.3.1",
+    "commander": "^13.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
