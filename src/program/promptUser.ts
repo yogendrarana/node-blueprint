@@ -1,31 +1,35 @@
+import { ProjectConfig } from "../types/types.js";
 import { input, select, confirm } from "@inquirer/prompts";
-import { DatabaseEnum, FrameworkEnum, OrmEnum } from "./enums.js";
+import { FrameworkEnum, DatabaseEnum, OrmEnum } from "../enums/enums.js";
 
-export interface AnswerType {
-    projectName: string;
-    framework: FrameworkEnum;
-    database: DatabaseEnum;
-    orm: OrmEnum;
-    auth: boolean;
-}
-
-export async function askAllQuestions(): Promise<AnswerType> {
+export async function getProjectConfig(): Promise<ProjectConfig> {
     try {
         // project name
-        const projectName = await input({ message: "What is your project name?" });
+        const projectName = await input({
+            message: "What is your project name?",
+            default: "my-node-project",
+            validate: (value) => {
+                if (!/^[a-z0-9-]+$/.test(value)) {
+                    return "Project name can only contain lowercase letters, numbers, and hyphens";
+                }
+
+                return true;
+            }
+        });
 
         // framework
         const framework = await select({
-            message: "What framework do you want to use?",
+            message: "Choose a framework",
             choices: [
-                { value: FrameworkEnum.express, name: "Express" },
-                { value: FrameworkEnum.fastify, name: "Fastify" }
+                { name: "Express", value: FrameworkEnum.express },
+                { name: "Fastify", value: FrameworkEnum.fastify },
+                { name: "Koa", value: FrameworkEnum.koa }
             ]
         });
 
         // database
         const database = await select({
-            message: "What database do you want to use?",
+            message: "Choose a database",
             choices: [
                 { value: DatabaseEnum.mysql, name: "MySQL" },
                 { value: DatabaseEnum.postgres, name: "PostgreSQL" }
@@ -34,7 +38,7 @@ export async function askAllQuestions(): Promise<AnswerType> {
 
         // orm
         const orm = await select({
-            message: "What ORM do you want to use?",
+            message: "Choose an ORM",
             choices: [
                 { value: OrmEnum.prisma, name: "Prisma" },
                 { value: OrmEnum.drizzle, name: "Drizzle" }
@@ -43,8 +47,8 @@ export async function askAllQuestions(): Promise<AnswerType> {
 
         // auth
         const auth = await confirm({
-            message: "Do you want basic auth (access and refresh token) setup?",
-            default: false
+            message: "Do you want to set up basic authentication?",
+            default: true
         });
 
         return { projectName, framework, database, orm, auth };

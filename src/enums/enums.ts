@@ -1,6 +1,7 @@
 export enum FrameworkEnum {
     express = "express",
-    fastify = "fastify"
+    fastify = "fastify",
+    koa = "koa"
 }
 
 export enum DatabaseEnum {
@@ -16,4 +17,8 @@ export enum OrmEnum {
 export enum AuthEnum {
     yes = "yes",
     no = "no"
+}
+
+export enum CommandType {
+    create = "create"
 }

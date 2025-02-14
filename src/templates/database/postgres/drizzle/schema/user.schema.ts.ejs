@@ -1,0 +1,21 @@
+import { type InferSelectModel, type InferInsertModel } from "drizzle-orm";
+import { pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+
+// schema definition
+export const UserSchema = pgTable(
+    "user",
+
+    {
+        id: uuid("id").primaryKey().unique().notNull().defaultRandom(),
+        name: varchar("name", { length: 50 }),
+        email: varchar("email", { length: 255 }).notNull().unique(),
+        password: text("password"),
+
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at").notNull().defaultNow()
+    }
+);
+
+// type
+export type SelectableUser = InferSelectModel<typeof UserSchema>;
+export type InsertableUser = InferInsertModel<typeof UserSchema>;
