@@ -34,8 +34,8 @@ export const generateFileMappings = (
             output: "src/controllers/user.controller.ts"
         },
         {
-            template: `framework/${config.framework.toLowerCase()}/routes/user.routes.ts.ejs`,
-            output: "src/routes/user.routes.ts"
+            template: `framework/${config.framework.toLowerCase()}/routes/v1/user.routes.ts.ejs`,
+            output: "src/routes/v1/user.routes.ts"
         },
         {
             template: `framework/${config.framework.toLowerCase()}/utils/path.ts.ejs`,
