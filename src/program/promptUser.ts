@@ -20,20 +20,13 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
         // framework
         const framework = await select({
             message: "Choose a framework",
-            choices: [
-                { name: "Express", value: FrameworkEnum.express },
-                { name: "Fastify", value: FrameworkEnum.fastify },
-                { name: "Koa", value: FrameworkEnum.koa }
-            ]
+            choices: [{ name: "Express", value: FrameworkEnum.express }]
         });
 
         // database
         const database = await select({
             message: "Choose a database",
-            choices: [
-                { value: DatabaseEnum.mysql, name: "MySQL" },
-                { value: DatabaseEnum.postgres, name: "PostgreSQL" }
-            ]
+            choices: [{ value: DatabaseEnum.postgres, name: "PostgreSQL" }]
         });
 
         // orm

@@ -68,6 +68,19 @@ export const generateFileMappings = (
         );
     }
 
+    if (config.orm === OrmEnum.prisma) {
+        files.push(
+            {
+                template: `database/${config.database}/prisma/schema.prisma.ejs`,
+                output: "prisma/schema.prisma"
+            },
+            {
+                template: `database/${config.database}/prisma/client.ts.ejs`,
+                output: "src/db/client.ts"
+            }
+        );
+    }
+
     return files;
 };
 
