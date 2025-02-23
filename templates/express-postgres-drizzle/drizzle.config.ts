@@ -6,7 +6,7 @@ const connectionString =
 export default defineConfig({
     dialect: "postgresql",
     schema: "./dist/src/config/db/schema/*",
-    out: "./drizzle",
+    out: "./drizzle/migrations",
     dbCredentials: {
         url: connectionString
     },

@@ -6,7 +6,7 @@ const connectionString =
 export default defineConfig({
     dialect: "mysql",
     schema: "./dist/src/config/db/schema/*",
-    out: "./drizzle",
+    out: "./drizzle/migrations",
     dbCredentials: {
         url: connectionString
     },
