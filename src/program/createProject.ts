@@ -41,7 +41,13 @@ export async function createProject(config: ProjectConfig): Promise<void> {
         };
 
         const files = await fs.readdir(templateDir);
-        for (const file of files.filter((f) => f !== "package.json" && f !== "node_modules")) {
+        for (const file of files.filter(
+            (f) =>
+                f !== "package.json" &&
+                f !== "node_modules" &&
+                f !== "migrations" &&
+                !f.toLowerCase().includes("lock")
+        )) {
             write(file);
         }
 
@@ -56,7 +62,9 @@ export async function createProject(config: ProjectConfig): Promise<void> {
         console.log(`\nProject created. Now run:\n`);
 
         if (root !== cwd) {
-            console.log(`  cd ${cdProjectName.includes(" ") ? `"${cdProjectName}"` : cdProjectName}`);
+            console.log(
+                `  cd ${cdProjectName.includes(" ") ? `"${cdProjectName}"` : cdProjectName}`
+            );
         }
 
         switch (pkgManager) {

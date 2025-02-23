@@ -30,7 +30,7 @@ export const createExpressApp = () => {
 
     // routes
     app.get("/", (req: Request, res: Response) => {
-        res.render("home", { title: "Express Postgres Drizzle Project" });
+        res.render("home", { title: "Node Blueprint Starter" });
     });
     app.use("/api/v1", ...Object.values(routers));
 
