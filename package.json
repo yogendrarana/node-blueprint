@@ -5,14 +5,14 @@
   "description": "Node.js backend project setup tool",
   "main": "main.js",
   "bin": {
-    "node-blueprint": "dist/main.js"
+    "node-blueprint": "dist/index.js"
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "pnpm run clean && tsc && pnpm run copy-templates",
-    "copy-templates": "cp -r src/templates dist/templates",
-    "postbuild": "chmod +x dist/main.js",
-    "node-blueprint": "npx node-blueprint create"
+    "build": "pnpm run clean && tsc",
+    "postbuild": "chmod +x dist/index.js",
+    "node-blueprint": "npx node-blueprint create",
+    "dev": "tsx src/index.ts create"
   },
   "author": "Yogendra Rana <www.yogendrarana.com.np>",
   "license": "ISC",
@@ -20,11 +20,13 @@
     "@inquirer/prompts": "^7.3.1",
     "ejs": "^3.1.10",
     "fs-extra": "^11.3.0",
+    "minimist": "^1.2.8",
     "ora": "^8.2.0"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
     "@types/fs-extra": "^11.0.4",
+    "@types/minimist": "^1.2.5",
     "@types/node": "^22.13.1",
     "del": "^8.0.0",
     "tsx": "^4.19.2",

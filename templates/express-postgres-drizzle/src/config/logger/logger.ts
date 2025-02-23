@@ -9,7 +9,7 @@ const level = () => {
 };
 
 const errorLogsTransport = new winston.transports.DailyRotateFile({
-    filename: 'winston-logs/error-%DATE%.log',
+    filename: '/tmp/winston-logs/error-%DATE%.log',
     datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
     maxSize: '50m',
@@ -18,7 +18,7 @@ const errorLogsTransport = new winston.transports.DailyRotateFile({
 });
 
 const allLogsTransport = new DailyRotateFile({
-    filename: 'winston-logs/all-%DATE%.log',
+    filename: '/tmp/winston-logs/all-%DATE%.log',
     datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
     maxSize: '50m',

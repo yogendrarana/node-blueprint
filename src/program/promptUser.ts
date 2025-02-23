@@ -7,7 +7,7 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
         // project name
         const projectName = await input({
             message: "What is your project name?",
-            default: "my-node-project",
+            default: "node-blueprint-starter",
             validate: (value) => {
                 if (!/^[a-z0-9-]+$/.test(value)) {
                     return "Project name can only contain lowercase letters, numbers, and hyphens";

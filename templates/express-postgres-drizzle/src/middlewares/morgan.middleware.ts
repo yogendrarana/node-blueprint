@@ -1,5 +1,5 @@
 import morgan from "morgan";
-import winstonLogger from "../utils/logger.js";
+import winstonLogger from "../config/logger/logger.js";
 
 const stream = {
     write: (message: string) => winstonLogger.http(message),
