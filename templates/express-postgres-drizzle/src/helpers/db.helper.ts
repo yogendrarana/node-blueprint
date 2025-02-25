@@ -8,7 +8,7 @@ export function getDbUrl() {
         );
     }
     return (
-        process.env.DB_URL || 
+        process.env.DATABASE_URL || 
         "postgresql://postgres:password@localhost:5432/node_api_dev_db"
     );
 }
