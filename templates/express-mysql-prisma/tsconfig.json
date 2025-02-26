@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+      // base options
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "target": "es2022",
+      "allowJs": true,
+      "resolveJsonModule": true,
+      "moduleDetection": "force",
+      "isolatedModules": true,
+      "verbatimModuleSyntax": true,
+      /* Strictness */
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "noImplicitOverride": true,
+      /* If transpiling with TypeScript: */
+      "outDir": "dist",
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext",
+      // other options
+      "allowSyntheticDefaultImports": true,
+      "forceConsistentCasingInFileNames": true,
+      "rootDir": "./",
+    },
+    "include": [
+      "src/**/*.ts",
+    ],
+    "exclude": [
+      "dist",
+      "node_modules",
+      "test/**/*.ts"
+    ]
+  }
