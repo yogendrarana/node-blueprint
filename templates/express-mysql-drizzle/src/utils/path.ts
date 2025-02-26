@@ -1,7 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 
-export function getDirname(metaUrl: string) {
+export function getDirName(metaUrl: string) {
     const filename = fileURLToPath(metaUrl);
     return path.dirname(filename);
 }

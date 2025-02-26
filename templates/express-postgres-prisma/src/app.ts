@@ -1,14 +1,14 @@
 import path from "path";
 import routers from "./routers.js";
 import cookieParser from "cookie-parser";
+import { getDirName } from "./utils/path.js";
 import express, { type Request, type Response } from "express";
 
-const __dirname = getDirname(import.meta.url);
+const __dirname = getDirName(import.meta.url);
 
 // middlewares
 import ErrorMiddleware from "./middlewares/error.middleware.js";
 import MorganMiddleware from "./middlewares/morgan.middleware.js";
-import { getDirname } from "./utils/path.js";
 
 export const createExpressApp = () => {
     const app = express();
