@@ -1,17 +1,15 @@
-import SiteBody from "./components/site-body";
-import Container from "./components/container";
-import SiteFooter from "./components/site-footer";
-import SiteHeader from "./components/site-header";
+import { BrowserRouter, Route, Routes } from "react-router";
+import Index from "./components/pages";
+import NotFound from "./components/pages/not-found";
 
 function App() {
     return (
-        <Container>
-            <div className="py-8 flex flex-col gap-4">
-                <SiteHeader />
-                <SiteBody />
-                <SiteFooter />
-            </div>
-        </Container>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="*" element={<NotFound />} />
+            </Routes>
+        </BrowserRouter>
     );
 }
 
