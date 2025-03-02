@@ -5,12 +5,10 @@ import {
     checkDirExists,
     ensureDirExists,
     createFileWithContent,
-    readTemplateFile
 } from "../utils/utils.js";
 import { FrameworkMap, IFrameworkConfig } from "../maps/framework-map.js";
 import { BaseMap, IBaseConfig } from "../maps/base-map.js";
 import { IOrmConfig, OrmMap } from "../maps/orm-map.js";
-import { create } from "node:domain";
 
 // main function to create the project files and folders
 // and populates the files with the correct content
