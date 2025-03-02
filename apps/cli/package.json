@@ -9,7 +9,8 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "yarn run clean && tsc",
+    "copy": "cp -r src/template dist",
+    "build": "yarn run clean && tsc && yarn run copy",
     "postbuild": "chmod +x dist/index.js",
     "dev": "tsx src/index.ts create"
   },

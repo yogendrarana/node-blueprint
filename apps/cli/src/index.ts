@@ -6,15 +6,13 @@ import { createProject } from "./program/createProject.js";
 import { getProjectConfig } from "./program/promptUser.js";
 
 async function init() {
-
     const argv = minimist(process.argv.slice(2), {
-        default: { framework: "", database: "", orm: "", auth: false },
+        default: { framework: "", database: "", orm: "" },
         alias: {
             n: "name",
             f: "framework",
             d: "database",
-            o: "orm",
-            a: "basic-auth"
+            o: "orm"
         }
     });
 
@@ -24,9 +22,9 @@ async function init() {
                 projectName: argv.name,
                 framework: argv.framework,
                 database: argv.database,
-                orm: argv.orm,
-                auth: argv["auth"]
+                orm: argv.orm
             };
+            console.log(config);
             await createProject(config);
         } else {
             const answers = await getProjectConfig();
