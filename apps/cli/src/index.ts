@@ -13,6 +13,15 @@ async function init() {
             f: "framework",
             d: "database",
             o: "orm"
+        },
+        string: ["name", "framework", "database", "orm"],
+        unknown: (arg) => {
+            if (arg.startsWith("-")) {
+                console.error(`Unknown option: ${arg}`);
+                process.exit(1);
+            }
+
+            return true;
         }
     });
 
