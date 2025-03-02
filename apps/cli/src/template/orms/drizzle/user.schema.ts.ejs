@@ -1,0 +1,38 @@
+<%_ if (database === "postgres") { _%>
+import { type InferSelectModel, type InferInsertModel } from "drizzle-orm";
+import { pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+
+// schema definition
+export const userSchema = pgTable("user",
+    {
+        id: uuid("id").primaryKey().unique().notNull().defaultRandom(),
+        name: varchar("name", { length: 50 }),
+        email: varchar("email", { length: 255 }).notNull().unique(),
+        password: text("password"),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at").notNull().defaultNow()
+    }
+);
+
+// types
+export type SelectableUser = InferSelectModel<typeof userSchema>;
+export type InsertableUser = InferInsertModel<typeof userSchema>;
+<%_ } _%>
+<%_ if (database === "mysql") { _%>
+import { type InferSelectModel, type InferInsertModel } from "drizzle-orm";
+import { mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+
+// schema definition
+export const userSchema = mysqlTable("user", {
+    id: varchar("id", { length: 36 }).primaryKey().notNull(),
+    name: varchar("name", { length: 50 }),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    password: text("password"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+// types
+export type SelectableUser = InferSelectModel<typeof userSchema>;
+export type InsertableUser = InferInsertModel<typeof userSchema>;
+<%_ } _%>

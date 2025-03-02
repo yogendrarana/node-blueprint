@@ -1,0 +1,36 @@
+<%_ if (database === "postgres") { _%>
+import pg from "pg";
+import * as schema from "./schema.js";
+import { drizzle } from "drizzle-orm/node-postgres";
+
+// Create a connection pool using environment variable for connection string
+export const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+});
+
+// Default export with drizzle ORM instance
+const db = drizzle(pool, {
+    schema: schema,
+    mode: "default",
+});
+
+export default db;
+<%_ } _%>
+<%_ if (database === "mysql") { _%>
+import mysql from "mysql2/promise";
+import * as schema from "./schema.js";
+import { drizzle } from "drizzle-orm/mysql2";
+
+// Create a connection pool using environment variable for connection string
+export const pool = mysql.createPool({
+    uri: process.env.DATABASE_URL,
+});
+
+// Default export with drizzle ORM instance
+const db = drizzle(pool, {
+    schema: schema,
+    mode: "default",
+});
+
+export default db;
+<%_ } _%>

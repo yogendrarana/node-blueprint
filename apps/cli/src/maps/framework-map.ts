@@ -1,0 +1,37 @@
+import { ProjectConfig } from "../types/types.js";
+import { readTemplateFile } from "../utils/utils.js";
+
+type FrameworkMapType = Record<string, IFrameworkConfig>;
+
+export type TemplaterFunctionType = (options: ProjectConfig) => Promise<string>;
+
+export interface IFrameworkConfig {
+    name: string;
+    templater: {
+        appTs?: TemplaterFunctionType;
+        serverTs?: TemplaterFunctionType;
+        routersTs?: TemplaterFunctionType;
+        userRoutesTs?: TemplaterFunctionType;
+        userControllerTs?: TemplaterFunctionType;
+        errorMiddlewareTs?: TemplaterFunctionType;
+        errorHandlerTs?: TemplaterFunctionType;
+    };
+}
+
+// framework map
+export const FrameworkMap: FrameworkMapType = {
+    express: {
+        name: "express",
+        templater: {
+            appTs: (options) => readTemplateFile("frameworks/express/app.ts.ejs", options),
+            serverTs: (options) => readTemplateFile("frameworks/express/server.ts.ejs", options),
+            routersTs: (options) => readTemplateFile("frameworks/express/routers.ts.ejs", options),
+            userRoutesTs: (options) =>
+                readTemplateFile("frameworks/express/user.routes.ts.ejs", options),
+            userControllerTs: (options) =>
+                readTemplateFile("frameworks/express/user.controller.ts.ejs", options),
+            errorMiddlewareTs: (options) =>
+                readTemplateFile("frameworks/express/error.middleware.ts.ejs", options)
+        }
+    }
+};
