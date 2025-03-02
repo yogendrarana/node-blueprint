@@ -18,18 +18,18 @@ export async function createProject(config: ProjectConfig): Promise<void> {
 
         if (root !== cwd) {
             console.log(
-                `  cd ${cdProjectName.includes(" ") ? `"${cdProjectName}"` : cdProjectName}`
+                `- cd ${cdProjectName.includes(" ") ? `"${cdProjectName}"` : cdProjectName}`
             );
         }
 
         switch (pkgManager) {
             case "yarn":
-                console.log("  yarn");
-                console.log("  yarn dev");
+                console.log("- yarn");
+                console.log("- yarn dev");
                 break;
             default:
-                console.log(`  ${pkgManager} install`);
-                console.log(`  ${pkgManager} run dev`);
+                console.log(`- ${pkgManager} install`);
+                console.log(`- ${pkgManager} run dev`);
                 break;
         }
     } catch (error: any) {

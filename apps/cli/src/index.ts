@@ -1,14 +1,11 @@
 #!/usr/bin/env node
 
-import path from "path";
 import minimist from "minimist";
-import { fileURLToPath } from "url";
 import { CommandType } from "./enums/enums.js";
 import { createProject } from "./program/createProject.js";
 import { getProjectConfig } from "./program/promptUser.js";
 
 async function init() {
-    path.dirname(fileURLToPath(import.meta.url));
 
     const argv = minimist(process.argv.slice(2), {
         default: { framework: "", database: "", orm: "", auth: false },
