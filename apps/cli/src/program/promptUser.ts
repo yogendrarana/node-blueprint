@@ -1,5 +1,5 @@
 import { ProjectConfig } from "../types/types.js";
-import { input, select, confirm } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { FrameworkEnum, DatabaseEnum, OrmEnum } from "../enums/enums.js";
 
 export async function getProjectConfig(): Promise<ProjectConfig> {
@@ -26,7 +26,10 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
         // database
         const database = await select({
             message: "Choose a database",
-            choices: [{ value: DatabaseEnum.postgres, name: "PostgreSQL" }]
+            choices: [
+                { value: DatabaseEnum.postgres, name: "PostgreSQL" },
+                { value: DatabaseEnum.mysql, name: "MySQL" }
+            ]
         });
 
         // orm
@@ -38,13 +41,7 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
             ]
         });
 
-        // auth
-        const auth = await confirm({
-            message: "Do you want to set up basic authentication?",
-            default: true
-        });
-
-        return { projectName, framework, database, orm, auth };
+        return { projectName, framework, database, orm };
     } catch (error: any) {
         if (error.message?.includes("ExitPromptError") || error?.name === "ExitPromptError") {
             console.log("\nPrompt cancelled. Goodbye!");

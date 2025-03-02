@@ -5,5 +5,4 @@ export interface ProjectConfig {
     framework: FrameworkEnum;
     database: DatabaseEnum;
     orm: OrmEnum;
-    auth: boolean;
 }

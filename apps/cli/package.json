@@ -17,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@inquirer/prompts": "^7.3.1",
+    "ejs": "^3.1.10",
     "fs-extra": "^11.3.0",
     "minimist": "^1.2.8"
   },

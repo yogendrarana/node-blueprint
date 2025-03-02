@@ -1,0 +1,54 @@
+{
+  "name": "<%= projectName %>",
+  "version": "1.0.0",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts"<% 
+    if (orm) { %>,
+    <%- [
+      orm === 'prisma' && `"db:seed": "tsx prisma/seed.ts"`,
+      orm === 'prisma' && `"db:generate": "prisma generate"`,
+      orm === 'prisma' && `"db:push": "prisma db push"`,
+      orm === 'prisma' && `"db:migrate": "prisma migrate dev"`,
+      orm === 'prisma' && `"db:reset": "prisma migrate reset"`,
+      orm === 'prisma' && `"db:introspect": "prisma db pull"`,
+      orm === 'prisma' && `"db:deploy": "prisma migrate deploy"`,
+      orm === 'prisma' && `"db:studio": "prisma studio --port 4000"`,
+      
+      orm === 'drizzle' && `"db:seed": "tsx drizzle/seed.ts"`,
+      orm === 'drizzle' && `"db:generate": "drizzle-kit generate"`,
+      orm === 'drizzle' && `"db:push": "drizzle-kit push"`,
+      orm === 'drizzle' && `"db:migrate": "tsx drizzle/migrate.ts"`,
+      orm === 'drizzle' && `"db:drop-migration": "drizzle-kit drop"`,
+      orm === 'drizzle' && `"db:introspect": "drizzle-kit introspect"`,
+      orm === 'drizzle' && `"db:studio": "drizzle-kit studio --port 4000"`
+    ].filter(Boolean).join(",\n    ") %><% } %>
+  },
+  "dependencies": {
+    <%- [
+      '"cookie-parser": "^1.4.6"',
+      '"dotenv": "^16.3.1"',
+      '"ejs": "^3.1.9"',
+      framework === 'express' && '"express": "^4.18.2"',
+      framework === 'fastify' && '"fastify": "^4.23.2"',
+      database === 'postgres' && '"pg": "^8.11.3"',
+      database === 'mysql' && '"mysql2": "^3.6.5"',
+      orm === 'prisma' && '"@prisma/client": "^5.5.2"',
+      orm === 'drizzle' && '"drizzle-orm": "^0.28.5"'
+    ].filter(Boolean).join(",\n    ") %>
+  },
+  "devDependencies": {
+    <%- [
+      '"@types/cookie-parser": "^1.4.6"',
+      '"@types/node": "^20.8.0"',
+      '"tsx": "^4.6.2"',
+      '"typescript": "^5.2.2"',
+      framework === 'express' && '"@types/express": "^4.17.21"',
+      orm === 'prisma' && '"prisma": "^5.5.2"',
+      orm === 'drizzle' && '"drizzle-kit": "^0.20.13"'
+    ].filter(Boolean).join(",\n    ") %>
+  }
+}
