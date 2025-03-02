@@ -33,7 +33,6 @@ async function init() {
                 database: argv.database,
                 orm: argv.orm
             };
-            console.log(config);
             await createProject(config);
         } else {
             const answers = await getProjectConfig();
