@@ -146,7 +146,7 @@ export default function SiteBody() {
                     <div className="border-b bg-gray-50 px-4 py-3 flex items-center">
                         Project Structure
                     </div>
-                    <div className="p-4 overflow-y-auto" style={{ maxHeight: "400px" }}>
+                    <div className="p-4 overflow-y-auto">
                         <ProjectStructure name={projectName} orm={selectedOrm} />
                     </div>
                 </div>
