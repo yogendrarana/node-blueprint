@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import { Label } from "./ui/label";
+import { Badge } from "./ui/badge";
 import { CommandOption } from "@/constants/constants";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Badge } from "./ui/badge";
 
 const RadioOption: React.FC<{
     id: string;
