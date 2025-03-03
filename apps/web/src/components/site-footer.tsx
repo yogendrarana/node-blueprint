@@ -24,8 +24,8 @@ export default function SiteFooter() {
 
             <p
                 className={cn(
-                    "text-start text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50  to-neutral-300",
-                    "md:text-3xl lg:text-5xl",
+                    "text-start text-xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50  to-neutral-300",
+                    "md:text-2xl lg:text-3xl",
                     "dark:from-neutral-950 dark:to-neutral-800"
                 )}
             >
