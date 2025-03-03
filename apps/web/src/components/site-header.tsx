@@ -1,6 +1,7 @@
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
+import { Badge } from "./ui/badge";
 
 export default function SiteHeader() {
     const [stars, setStars] = useState(0);
@@ -30,8 +31,8 @@ export default function SiteHeader() {
 
     return (
         <div className="flex justify-between items-center">
-            <a href="/" className="text-lg font-semibold">
-                Node Blueprint
+            <a href="/" className="text-lg font-semibold flex items-center gap-2">
+                Node Blueprint <Badge variant="outline">under construction</Badge>
             </a>
 
             <motion.a
