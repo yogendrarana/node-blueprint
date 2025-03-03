@@ -16,18 +16,18 @@ export default function SiteBody() {
     const [projectName, setProjectName] = useState("node-blueprint-starter");
 
     const getCommand = () => {
-        let command = `npx node-blueprint create ${shortFlag ? "--n" : "-name"} ${projectName}`;
+        let command = `npx node-blueprint create ${shortFlag ? "-n" : "--name"} ${projectName}`;
 
         if (selectedFramework) {
-            command += ` ${shortFlag ? "--f" : "--framework"} ${selectedFramework}`;
+            command += ` ${shortFlag ? "-f" : "--framework"} ${selectedFramework}`;
         }
 
         if (selectedDatabase) {
-            command += ` ${shortFlag ? "--d" : "-database"} ${selectedDatabase}`;
+            command += ` ${shortFlag ? "-d" : "--database"} ${selectedDatabase}`;
         }
 
         if (selectedOrm) {
-            command += ` ${shortFlag ? "--o" : "-orm"} ${selectedOrm}`;
+            command += ` ${shortFlag ? "-o" : "--orm"} ${selectedOrm}`;
         }
 
         return command;
