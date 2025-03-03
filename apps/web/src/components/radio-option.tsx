@@ -22,7 +22,7 @@ const RadioOption: React.FC<{
             <div
                 key={index}
                 className={cn(
-                    "border border-input relative outline-none cursor-pointer",
+                    "border border-input relative outline-none",
                     "first:rounded-t-md last:rounded-b-md ",
                     "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
                 )}
@@ -37,16 +37,18 @@ const RadioOption: React.FC<{
                     <Label htmlFor={option.flag} className="ml-2">
                         {option.label}
                     </Label>
-                    <div className="ml-auto text-muted-foreground text-xs">
-                        <Badge
-                            className={cn("border border-gray-200", {
-                                "bg-gray-200 text-gray-600": option.status === "coming-soon"
-                            })}
-                            variant="outline"
-                        >
-                            {option.status}
-                        </Badge>
-                    </div>
+                    {option.status === "coming-soon" && (
+                        <div className="ml-auto text-muted-foreground text-xs">
+                            <Badge
+                                className={cn("border border-gray-200", {
+                                    "text-gray-600": option.status === "coming-soon"
+                                })}
+                                variant="outline"
+                            >
+                                {option.status}
+                            </Badge>
+                        </div>
+                    )}
                 </div>
             </div>
         ))}
