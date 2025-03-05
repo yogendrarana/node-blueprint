@@ -1,7 +1,15 @@
-import userRouter from "./routes/v1/user.routes.js";
+import { Router } from "express";
+import authRouter from "./routes/auth.routes.js";
+import userRouter from "./routes/user.routes.js";
 
-const routers = {
-    userRouter
-};
+const router: Router = Router();
 
-export default routers;
+// v1 routes
+const v1Routes: Router = Router();
+v1Routes.use("/user", userRouter);
+// add other routes here
+
+// attach v1 routes
+router.use("/api/v1", v1Routes);
+
+export default router;

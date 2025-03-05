@@ -43,10 +43,10 @@ export const createMainFiles = async (
         createFileAndInjectContent(root, "src/views", "home.ejs", "homeEjs", options);
 
         // create routes: src/routes/v1
-        await ensureDirExists(path.resolve(root, "src", "routes", "v1"));
+        await ensureDirExists(path.resolve(root, "src", "routes"));
         createFileAndInjectContent(
             root,
-            "src/routes/v1",
+            "src/routes",
             "user.routes.ts",
             "userRoutesTs",
             options

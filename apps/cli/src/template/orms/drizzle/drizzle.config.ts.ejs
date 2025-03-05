@@ -1,7 +1,7 @@
 import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-    dialect: "<%= database === 'postgres' ? 'postgres' : 'mysql' %>",
+    dialect: "<%= database === 'postgresql' ? 'postgres' : 'mysql' %>",
     schema: "./drizzle/schema/*",
     out: "./drizzle/migrations",
     dbCredentials: {
