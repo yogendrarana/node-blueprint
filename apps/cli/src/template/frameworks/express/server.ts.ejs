@@ -2,6 +2,7 @@ import app from "./app.js";
 import dotenv from "dotenv";
 import http from "node:http";
 import path from "node:path";
+import logger from "./config/logger.js;
 
 // load env variables
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });

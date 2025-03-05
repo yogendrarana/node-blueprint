@@ -60,10 +60,10 @@ export const createMainFiles = async (
 
         // create config: src/config
         await ensureDirExists(path.resolve(root, "src", "config"));
-
-        // create helpers: src/helpers
-        await ensureDirExists(path.resolve(root, "src", "helpers"));
-
+        
+        // create src/middlewares
+        await ensureDirExists(path.resolve(root, "src", "middlewares"));
+        
         // create utils: src/utils
         await ensureDirExists(path.resolve(root, "src", "utils"));
 
@@ -72,8 +72,6 @@ export const createMainFiles = async (
 
         // framework specific files and folders
         if (options.framework === "express") {
-            // create src/middlewares
-            await ensureDirExists(path.resolve(root, "src", "middlewares"));
             await createFileAndInjectContent(
                 root,
                 "src/middlewares",
