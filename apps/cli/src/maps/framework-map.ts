@@ -10,7 +10,7 @@ export interface IFrameworkConfig {
     templater: {
         appTs?: TemplaterFunctionType;
         serverTs?: TemplaterFunctionType;
-        routersTs?: TemplaterFunctionType;
+        routerTs?: TemplaterFunctionType;
         userRoutesTs?: TemplaterFunctionType;
         userControllerTs?: TemplaterFunctionType;
         errorMiddlewareTs?: TemplaterFunctionType;
@@ -25,7 +25,7 @@ export const FrameworkMap: FrameworkMapType = {
         templater: {
             appTs: (options) => readTemplateFile("frameworks/express/app.ts.ejs", options),
             serverTs: (options) => readTemplateFile("frameworks/express/server.ts.ejs", options),
-            routersTs: (options) => readTemplateFile("frameworks/express/routers.ts.ejs", options),
+            routerTs: (options) => readTemplateFile("frameworks/express/router.ts.ejs", options),
             userRoutesTs: (options) =>
                 readTemplateFile("frameworks/express/user.routes.ts.ejs", options),
             userControllerTs: (options) =>

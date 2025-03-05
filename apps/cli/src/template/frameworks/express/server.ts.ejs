@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import http from "node:http";
 import path from "node:path";
 
-// .env
+// load env variables
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 // create server
@@ -12,13 +12,13 @@ const server = http.createServer(app);
 
 // Start server
 server.listen(PORT, () => {
-    console.log(`HTTP Server running on port ${PORT}`);
+    logger.info(`HTTP Server running on port ${PORT}`);
 });
 
 const shutdown = () => {
     server.close(() => {
-      console.log('Server closed');
-      process.exit(0);
+        logger.info('Shutting down server...');
+        process.exit(0);
     });
 };
 

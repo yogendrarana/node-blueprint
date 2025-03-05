@@ -7,7 +7,11 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "yarn workspace @node-blueprint/web dev"
+    "dev:cli": "yarn workspace @node-blueprint/cli dev",
+    "dev:web": "yarn workspace @node-blueprint/web dev",
+    "build:cli": "yarn workspace @node-blueprint/cli build",
+    "build:web": "yarn workspace @node-blueprint/web build",
+    "build:all": "yarn build:cli && yarn build:web"
   },
   "keywords": [
     "node",

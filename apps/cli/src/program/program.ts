@@ -1,14 +1,10 @@
 import path from "node:path";
 import fs from "fs/promises";
 import { ProjectConfig } from "../types/types.js";
-import {
-    checkDirExists,
-    ensureDirExists,
-    createFileWithContent,
-} from "../utils/utils.js";
-import { FrameworkMap, IFrameworkConfig } from "../maps/framework-map.js";
-import { BaseMap, IBaseConfig } from "../maps/base-map.js";
 import { IOrmConfig, OrmMap } from "../maps/orm-map.js";
+import { BaseMap, IBaseConfig } from "../maps/base-map.js";
+import { FrameworkMap, IFrameworkConfig } from "../maps/framework-map.js";
+import { checkDirExists, ensureDirExists, createFileWithContent } from "../utils/utils.js";
 
 // main function to create the project files and folders
 // and populates the files with the correct content
@@ -26,31 +22,25 @@ export const createMainFiles = async (
         await fs.mkdir(root, { recursive: true });
 
         // create base files like package.json, tsconfig.json, .env, .gitignore, etc
-        createFileAndInjectContent(root, "", "package.json", "packageJson", options);
         createFileAndInjectContent(root, "", ".env", "env", options);
+        createFileAndInjectContent(root, "", "README.md", "readme", options);
         createFileAndInjectContent(root, "", ".gitignore", "gitignore", options);
         createFileAndInjectContent(root, "", "tsconfig.json", "tsconfig", options);
-        createFileAndInjectContent(root, "", "README.md", "readme", options);
+        createFileAndInjectContent(root, "", "package.json", "packageJson", options);
 
         // create src and files inside it like app.ts, server.ts, router.ts
         await ensureDirExists(path.resolve(root, "src"));
         createFileAndInjectContent(root, "src", "app.ts", "appTs", options);
         createFileAndInjectContent(root, "src", "server.ts", "serverTs", options);
-        createFileAndInjectContent(root, "src", "routers.ts", "routersTs", options);
+        createFileAndInjectContent(root, "src", "router.ts", "routerTs", options);
 
         // create views: src/views
         await ensureDirExists(path.resolve(root, "src", "views"));
-        createFileAndInjectContent(root, "src/views", "home.ejs", "homeEjs", options);
+        createFileAndInjectContent(root, "src/views", "home.ejs", "indexEjs", options);
 
         // create routes: src/routes/v1
         await ensureDirExists(path.resolve(root, "src", "routes"));
-        createFileAndInjectContent(
-            root,
-            "src/routes",
-            "user.routes.ts",
-            "userRoutesTs",
-            options
-        );
+        createFileAndInjectContent(root, "src/routes", "user.routes.ts", "userRoutesTs", options);
 
         // create conrollers: src/controllers
         await ensureDirExists(path.resolve(root, "src", "controllers"));
@@ -62,11 +52,11 @@ export const createMainFiles = async (
             options
         );
 
-        // create models: src/models
-        await ensureDirExists(path.resolve(root, "src", "models"));
+        // creae scripts: scripts
+        await ensureDirExists(path.resolve(root, "scripts"));
 
-        // create utils: src/utils
-        await ensureDirExists(path.resolve(root, "src", "utils"));
+        // create models: src/constants
+        await ensureDirExists(path.resolve(root, "src", "constants"));
 
         // create config: src/config
         await ensureDirExists(path.resolve(root, "src", "config"));
@@ -74,12 +64,16 @@ export const createMainFiles = async (
         // create helpers: src/helpers
         await ensureDirExists(path.resolve(root, "src", "helpers"));
 
-        // create constants: src/constants
-        await ensureDirExists(path.resolve(root, "src", "constants"));
+        // create utils: src/utils
+        await ensureDirExists(path.resolve(root, "src", "utils"));
 
-        // create src/middlewares
-        await ensureDirExists(path.resolve(root, "src", "middlewares"));
+        // create validations: src/validations
+        await ensureDirExists(path.resolve(root, "src", "validations"));
+
+        // framework specific files and folders
         if (options.framework === "express") {
+            // create src/middlewares
+            await ensureDirExists(path.resolve(root, "src", "middlewares"));
             await createFileAndInjectContent(
                 root,
                 "src/middlewares",
@@ -89,7 +83,7 @@ export const createMainFiles = async (
             );
         }
 
-        // conditionally create orm files
+        // orm specific files and folders
         if (options.orm === "drizzle") {
             await ensureDirExists(path.resolve(root, "drizzle", "schema"));
             await createFileAndInjectContent(
@@ -115,7 +109,13 @@ export const createMainFiles = async (
             await ensureDirExists(path.resolve(root, "prisma"));
             await createFileAndInjectContent(root, "prisma", "index.ts", "indexTs", options);
             await createFileAndInjectContent(root, "prisma", "seed.ts", "seedTs", options);
-            await createFileAndInjectContent(root, "prisma", "schema.prisma", "schemaPrisma", options);
+            await createFileAndInjectContent(
+                root,
+                "prisma",
+                "schema.prisma",
+                "schemaPrisma",
+                options
+            );
         }
     } catch (err: any) {
         console.log("\nAn error occurred while creating project files\n");
@@ -145,7 +145,7 @@ const createFileAndInjectContent = async (
             case "gitignore":
             case "tsconfig":
             case "readme":
-            case "homeEjs":
+            case "indexEjs":
                 const possibleBaseTemplateFunction = BaseMap.base.templater[fileMethod];
                 if (!possibleBaseTemplateFunction) {
                     throw new Error(`Template function for ${fileMethod} is undefined`);
@@ -156,7 +156,7 @@ const createFileAndInjectContent = async (
             // for framework files
             case "appTs":
             case "serverTs":
-            case "routersTs":
+            case "routerTs":
             case "userRoutesTs":
             case "userControllerTs":
             case "errorMiddlewareTs":
