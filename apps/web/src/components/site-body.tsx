@@ -153,7 +153,14 @@ export default function SiteBody() {
                         className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="database"
                         value={selectedDatabase}
-                        onValueChange={(value: string) => setSelectedDatabase(value)}
+                        onValueChange={(value: string) => {
+                            if (value === "mongodb" && selectedOrm === "drizzle") {
+                                setSelectedOrm("");
+                            } else if ((value === "mysql" || value === "postgres") && selectedOrm === "mongoose") {
+                                setSelectedOrm("");
+                            }
+                            setSelectedDatabase(value);
+                        }}
                     >
                         {databases.map((option, index) => (
                             <div
