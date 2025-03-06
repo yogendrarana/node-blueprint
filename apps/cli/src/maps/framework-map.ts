@@ -15,6 +15,7 @@ export interface IFrameworkConfig {
         userControllerTs?: TemplaterFunctionType;
         errorMiddlewareTs?: TemplaterFunctionType;
         errorHandlerTs?: TemplaterFunctionType;
+        loggerTs?: TemplaterFunctionType;
     };
 }
 
@@ -31,7 +32,8 @@ export const FrameworkMap: FrameworkMapType = {
             userControllerTs: (options) =>
                 readTemplateFile("frameworks/express/user.controller.ts.ejs", options),
             errorMiddlewareTs: (options) =>
-                readTemplateFile("frameworks/express/error.middleware.ts.ejs", options)
+                readTemplateFile("frameworks/express/error.middleware.ts.ejs", options),
+            loggerTs: (options) => readTemplateFile("frameworks/express/logger.ts.ejs", options)
         }
     }
 };

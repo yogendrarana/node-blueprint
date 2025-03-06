@@ -1,0 +1,18 @@
+import mongoose from "mongoose";
+
+const DATABASE_URI = process.env.DATABASE_URL || "mongodb://localhost:27017/node-blueprint_db";
+
+const connectDB = async () => {
+    try {
+        await mongoose.connect(DATABASE_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        console.log("MongoDB Connected");
+    } catch (error) {
+        console.error("MongoDB Connection Error:", error);
+        process.exit(1);
+    }
+};
+
+export default connectDB;

@@ -28,7 +28,7 @@ app.set("views", path.join(__dirname, "views"));
 
 // routes
 app.get("/", (req: Request, res: Response) => {
-    res.render("home", { title: "Node Blueprint Starter" });
+    res.render("index", { title: "Node Blueprint Starter" });
 });
 app.use(router);
 

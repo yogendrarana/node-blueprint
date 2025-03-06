@@ -6,12 +6,14 @@ export enum FrameworkEnum {
 
 export enum DatabaseEnum {
     mysql = "mysql",
-    postgres = "postgres"
+    postgres = "postgres",
+    mongodb = "mongodb"
 }
 
 export enum OrmEnum {
     prisma = "prisma",
-    drizzle = "drizzle"
+    drizzle = "drizzle",
+    mongoose = "mongoose"
 }
 
 export enum AuthEnum {

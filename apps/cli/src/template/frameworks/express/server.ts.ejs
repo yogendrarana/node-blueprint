@@ -2,26 +2,38 @@ import app from "./app.js";
 import dotenv from "dotenv";
 import http from "node:http";
 import path from "node:path";
-import logger from "./config/logger.js;
+import logger from "./config/logger.js";
+<%_ if (orm === 'mongoose') { _%>
+import connectDb from "./config/db.config.js";
+<%_ } _%>
 
-// load env variables
+// Load env variables
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-// create server
+// Create server
 const PORT = process.env.PORT || 8000;
 const server = http.createServer(app);
 
-// Start server
-server.listen(PORT, () => {
-    logger.info(`HTTP Server running on port ${PORT}`);
-});
+const startServer = async () => {
+    <%_ if (orm === 'mongoose') { _%>
+    await connectDb(); // No need for try-catch if handled in db.config.ts
+    <%_ } _%>
 
+    server.listen(PORT, () => {
+        logger.info(`🚀 HTTP Server running on port ${PORT}`);
+    });
+};
+
+// Handle graceful shutdown
 const shutdown = () => {
     server.close(() => {
-        logger.info('Shutting down server...');
+        logger.info("Shutting down server...");
         process.exit(0);
     });
 };
 
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+
+// Start the server
+startServer();

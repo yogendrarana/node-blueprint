@@ -28,7 +28,8 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
             message: "Choose a database",
             choices: [
                 { value: DatabaseEnum.postgres, name: "PostgreSQL" },
-                { value: DatabaseEnum.mysql, name: "MySQL" }
+                { value: DatabaseEnum.mysql, name: "MySQL" },
+                { value: DatabaseEnum.mongodb, name: "MongoDB" }
             ]
         });
 
@@ -37,7 +38,16 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
             message: "Choose an ORM",
             choices: [
                 { value: OrmEnum.prisma, name: "Prisma" },
-                { value: OrmEnum.drizzle, name: "Drizzle" }
+                {
+                    value: OrmEnum.drizzle,
+                    name: "Drizzle",
+                    disabled: database === DatabaseEnum.mongodb
+                },
+                {
+                    value: OrmEnum.mongoose,
+                    name: "Mongoose",
+                    disabled: database !== DatabaseEnum.mongodb
+                }
             ]
         });
 
@@ -47,7 +57,7 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
             console.log("\nPrompt cancelled. Goodbye!");
             process.exit(0);
         } else {
-            console.error("An error occurred:", error);
+            console.error("An error occurred:", error.message);
         }
 
         return process.exit(1);

@@ -36,7 +36,7 @@ export const createMainFiles = async (
 
         // create views: src/views
         await ensureDirExists(path.resolve(root, "src", "views"));
-        createFileAndInjectContent(root, "src/views", "home.ejs", "indexEjs", options);
+        createFileAndInjectContent(root, "src/views", "index.ejs", "indexEjs", options);
 
         // create routes: src/routes/v1
         await ensureDirExists(path.resolve(root, "src", "routes"));
@@ -60,10 +60,13 @@ export const createMainFiles = async (
 
         // create config: src/config
         await ensureDirExists(path.resolve(root, "src", "config"));
-        
+
+        // create src/services
+        await ensureDirExists(path.resolve(root, "src", "services"));
+
         // create src/middlewares
         await ensureDirExists(path.resolve(root, "src", "middlewares"));
-        
+
         // create utils: src/utils
         await ensureDirExists(path.resolve(root, "src", "utils"));
 
@@ -79,6 +82,7 @@ export const createMainFiles = async (
                 "errorMiddlewareTs",
                 options
             );
+            await createFileAndInjectContent(root, "src/config", "logger.ts", "loggerTs", options);
         }
 
         // orm specific files and folders
@@ -112,6 +116,24 @@ export const createMainFiles = async (
                 "prisma",
                 "schema.prisma",
                 "schemaPrisma",
+                options
+            );
+        }
+
+        if (options.orm === "mongoose") {
+            await ensureDirExists(path.resolve(root, "src", "models"));
+            await createFileAndInjectContent(
+                root,
+                "src/models",
+                "user.model.ts",
+                "userModelTs",
+                options
+            );
+            await createFileAndInjectContent(
+                root,
+                "src/config",
+                "db.config.ts",
+                "dbConfigTs",
                 options
             );
         }
@@ -158,6 +180,7 @@ const createFileAndInjectContent = async (
             case "userRoutesTs":
             case "userControllerTs":
             case "errorMiddlewareTs":
+            case "loggerTs":
                 const possibleTemplateFunction =
                     FrameworkMap[options.framework].templater[fileMethod];
                 if (!possibleTemplateFunction) {
@@ -173,6 +196,8 @@ const createFileAndInjectContent = async (
             case "seedTs":
             case "drizzleConfig":
             case "schemaPrisma":
+            case "dbConfigTs":
+            case "userModelTs":
                 const possibleOrmTemplateFunction = OrmMap[options.orm].templater[fileMethod];
                 if (!possibleOrmTemplateFunction) {
                     throw new Error(`Template function for ${fileMethod} is undefined`);
