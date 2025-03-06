@@ -13,11 +13,11 @@ export const frameworks: CommandOption[] = [
 export const databases: CommandOption[] = [
     { id: "postgres", label: "PostgreSQL", flag: "postgres", status: "available" },
     { id: "mysql", label: "MySQL", flag: "mysql", status: "available" },
-    { id: "mongodb", label: "MongoDB", flag: "mongodb", status: "coming-soon" }
+    { id: "mongodb", label: "MongoDB", flag: "mongodb", status: "available" }
 ];
 
 export const orms: CommandOption[] = [
     { id: "drizzle", label: "Drizzle", flag: "drizzle", status: "available" },
     { id: "prisma", label: "Prisma", flag: "prisma", status: "available" },
-    { id: "mongoose", label: "Mongoose", flag: "mongoose", status: "coming-soon" }
+    { id: "mongoose", label: "Mongoose", flag: "mongoose", status: "available" }
 ];

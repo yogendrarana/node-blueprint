@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
-import RadioOption from "./radio-option";
 import ProjectStructure from "./project-structure";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Copy, Check, Terminal, PartyPopper } from "lucide-react";
 import { frameworks, orms, databases } from "@/constants/constants";
 
@@ -103,35 +104,155 @@ export default function SiteBody() {
             <div className="grid md:grid-cols-3 gap-6 mb-12">
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Framework</h3>
-                    <RadioOption
+                    <RadioGroup
+                        className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="framework"
-                        options={frameworks}
                         value={selectedFramework}
-                        onChange={setSelectedFramework}
-                        defaultValue="express"
-                    />
+                        onValueChange={(value: string) => setSelectedFramework(value)}
+                    >
+                        {frameworks.map((option, index) => (
+                            <div
+                                key={index}
+                                className={cn(
+                                    "border border-input relative outline-none",
+                                    "first:rounded-t-md last:rounded-b-md ",
+                                    "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
+                                )}
+                            >
+                                <div className={cn("h-12 px-3 flex gap-2 items-center")}>
+                                    <RadioGroupItem
+                                        id={option.flag}
+                                        value={option.flag}
+                                        className="after:absolute after:inset-0"
+                                        disabled={option.status !== "available"}
+                                    />
+                                    <Label htmlFor={option.flag} className="ml-2">
+                                        {option.label}
+                                    </Label>
+                                    {option.status === "coming-soon" && (
+                                        <div className="ml-auto text-muted-foreground text-xs">
+                                            <Badge
+                                                className={cn("border border-gray-200", {
+                                                    "text-gray-600": option.status === "coming-soon"
+                                                })}
+                                                variant="outline"
+                                            >
+                                                {option.status}
+                                            </Badge>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </RadioGroup>
                 </div>
 
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Database</h3>
-                    <RadioOption
+                    <RadioGroup
+                        className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="database"
-                        options={databases}
                         value={selectedDatabase}
-                        onChange={setSelectedDatabase}
-                        defaultValue="postgres"
-                    />
+                        onValueChange={(value: string) => setSelectedDatabase(value)}
+                    >
+                        {databases.map((option, index) => (
+                            <div
+                                key={index}
+                                className={cn(
+                                    "border border-input relative outline-none",
+                                    "first:rounded-t-md last:rounded-b-md ",
+                                    "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
+                                )}
+                            >
+                                <div className={cn("h-12 px-3 flex gap-2 items-center")}>
+                                    <RadioGroupItem
+                                        id={option.flag}
+                                        value={option.flag}
+                                        className="after:absolute after:inset-0"
+                                        disabled={option.status !== "available"}
+                                    />
+                                    <Label htmlFor={option.flag} className="ml-2">
+                                        {option.label}
+                                    </Label>
+                                    {option.status === "coming-soon" && (
+                                        <div className="ml-auto text-muted-foreground text-xs">
+                                            <Badge
+                                                className={cn("border border-gray-200", {
+                                                    "text-gray-600": option.status === "coming-soon"
+                                                })}
+                                                variant="outline"
+                                            >
+                                                {option.status}
+                                            </Badge>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </RadioGroup>
                 </div>
 
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold">ORM</h3>
-                    <RadioOption
+                    <RadioGroup
+                        className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="orm"
-                        options={orms}
                         value={selectedOrm}
-                        onChange={setSelectedOrm}
-                        defaultValue="drizzle"
-                    />
+                        onValueChange={(value: string) => setSelectedOrm(value)}
+                    >
+                        {orms.map((option, index) => (
+                            <div
+                                key={index}
+                                className={cn(
+                                    "border border-input relative outline-none",
+                                    "first:rounded-t-md last:rounded-b-md ",
+                                    "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
+                                )}
+                            >
+                                <div className={cn("h-12 px-3 flex gap-2 items-center")}>
+                                    <RadioGroupItem
+                                        id={option.flag}
+                                        value={option.flag}
+                                        className="after:absolute after:inset-0"
+                                        disabled={
+                                            option.status !== "available" ||
+                                            (selectedDatabase === "mongodb" &&
+                                                option.flag === "drizzle") ||
+                                            ((selectedDatabase === "mysql" ||
+                                                selectedDatabase === "postgres") &&
+                                                option.flag === "mongoose")
+                                        }
+                                    />
+                                    <Label
+                                        htmlFor={option.flag}
+                                        className={cn("ml-2", {
+                                            "text-muted-foreground opacity-50":
+                                                option.status !== "available" ||
+                                                (selectedDatabase === "mongodb" &&
+                                                    option.flag === "drizzle") ||
+                                                ((selectedDatabase === "mysql" ||
+                                                    selectedDatabase === "postgres") &&
+                                                    option.flag === "mongoose")
+                                        })}
+                                    >
+                                        {option.label}
+                                    </Label>
+                                    {option.status === "coming-soon" && (
+                                        <div className="ml-auto text-muted-foreground text-xs">
+                                            <Badge
+                                                className={cn("border border-gray-200", {
+                                                    "text-gray-600": option.status === "coming-soon"
+                                                })}
+                                                variant="outline"
+                                            >
+                                                {option.status}
+                                            </Badge>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </RadioGroup>
                 </div>
             </div>
 
