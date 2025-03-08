@@ -9,7 +9,7 @@ import { checkDirExists, packageManagerCommands, packgeManageFromUserAgent } fro
 export async function createProject(config: ProjectConfig): Promise<void> {
     const cwd = process.cwd();
     const root = path.join(cwd, config.projectName);
-    const spinner = ora("Initializing project setup...").start();
+    const spinner = ora().start();
     const pkgInfo = packgeManageFromUserAgent(process.env.npm_config_user_agent);
 
     try {
