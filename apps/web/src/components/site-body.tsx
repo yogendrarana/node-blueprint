@@ -5,8 +5,35 @@ import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
 import ProjectStructure from "./project-structure";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Copy, Check, Terminal, PartyPopper } from "lucide-react";
+import { Copy, Check, Terminal, PartyPopper, ChevronDown } from "lucide-react";
 import { frameworks, orms, databases } from "@/constants/constants";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import NPM from "./icons/npm";
+import Yarn from "./icons/yarn";
+import Pnpm from "./icons/pnpm";
+
+const packageManagers = [
+    {
+        name: "npm",
+        value: "npm",
+        icon: <NPM className="h-4 w-4" />
+    },
+    {
+        name: "yarn",
+        value: "yarn",
+        icon: <Yarn className="h-4 w-4" />
+    },
+    {
+        name: "pnpm",
+        value: "pnpm",
+        icon: <Pnpm className="h-4 w-4" />
+    }
+];
 
 export default function SiteBody() {
     const [copied, setCopied] = useState(false);
@@ -15,9 +42,13 @@ export default function SiteBody() {
     const [selectedDatabase, setSelectedDatabase] = useState<string>("");
     const [selectedFramework, setSelectedFramework] = useState<string>("");
     const [projectName, setProjectName] = useState("node-blueprint-starter");
+    const [selectedPackageManager, setSelectedPackageManager] = useState("npm");
 
     const getCommand = () => {
-        let command = `npx node-blueprint create ${shortFlag ? "-n" : "--name"} ${projectName}`;
+        // Update command with package manager
+        let command = `${selectedPackageManager} create node-blueprint ${
+            shortFlag ? "-n" : "--name"
+        } ${projectName}`;
 
         if (selectedFramework) {
             command += ` ${shortFlag ? "-f" : "--framework"} ${selectedFramework}`;
@@ -60,12 +91,46 @@ export default function SiteBody() {
             </div>
 
             {/* terminal */}
-            <div className="bg-gray-900 rounded-md p-4 mb-8 relative">
+            <div className={cn("bg-gray-900 rounded-md p-4 mb-8 relative")}>
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                         <Terminal size={16} className="text-gray-400" />
                         <span className="text-gray-400 text-sm">Terminal</span>
                     </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger
+                            asChild
+                            className="flex items-center cursor-pointer gap-1 px-2 py-1 text-sm text-white bg-gray-800 rounded hover:bg-gray-700 ring-0"
+                        >
+                            <button className="flex items-center gap-2">
+                                {
+                                    packageManagers.find(
+                                        (manager) => manager.value === selectedPackageManager
+                                    )?.icon
+                                }
+                                {selectedPackageManager}
+                                <ChevronDown size={14} />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            {packageManagers.map((manager) => (
+                                <DropdownMenuItem
+                                    key={manager.value}
+                                    onClick={() => setSelectedPackageManager(manager.value)}
+                                    className="flex items-center gap-2"
+                                >
+                                    {manager.icon}
+                                    {manager.name}
+                                    {selectedPackageManager === manager.value && (
+                                        <Check className="h-4 w-4" />
+                                    )}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+                <div className="text-green-400 font-mono overflow-x-auto p-2 px-0 text-sm flex justify-between items-center">
+                    {getCommand()}
                     <button
                         onClick={copyToClipboard}
                         className="text-gray-400 transition-colors cursor-pointer"
@@ -74,9 +139,6 @@ export default function SiteBody() {
                         {copied ? <Check size={16} /> : <Copy size={16} />}
                     </button>
                 </div>
-                <pre className="text-green-400 font-mono overflow-x-auto p-2 text-sm">
-                    {getCommand()}
-                </pre>
             </div>
 
             {/* input name */}
@@ -156,7 +218,10 @@ export default function SiteBody() {
                         onValueChange={(value: string) => {
                             if (value === "mongodb" && selectedOrm === "drizzle") {
                                 setSelectedOrm("");
-                            } else if ((value === "mysql" || value === "postgres") && selectedOrm === "mongoose") {
+                            } else if (
+                                (value === "mysql" || value === "postgres") &&
+                                selectedOrm === "mongoose"
+                            ) {
                                 setSelectedOrm("");
                             }
                             setSelectedDatabase(value);
