@@ -1,46 +1,36 @@
 import path from "node:path";
-import fs from "fs/promises";
 import { ProjectConfig } from "../types/types.js";
 import { IOrmConfig, OrmMap } from "../maps/orm-map.js";
 import { BaseMap, IBaseConfig } from "../maps/base-map.js";
 import { FrameworkMap, IFrameworkConfig } from "../maps/framework-map.js";
-import { checkDirExists, ensureDirExists, createFileWithContent } from "../utils/utils.js";
+import { ensureDirExists, createFileWithContent } from "../utils/utils.js";
 
-// main function to create the project files and folders
-// and populates the files with the correct content
-export const createMainFiles = async (
-    options: ProjectConfig,
+// main function to create the project files and folders and populates the files with the correct content
+export const createProjectStructure = async (
+    config: ProjectConfig,
     { root }: { root: string }
 ): Promise<void> => {
     try {
-        // create new directory with the project name
-        const rootExists = await checkDirExists(root);
-        if (rootExists) {
-            console.log("\nDirectory already exists. Please choose a different project name.\n");
-            process.exit(1);
-        }
-        await fs.mkdir(root, { recursive: true });
-
         // create base files like package.json, tsconfig.json, .env, .gitignore, etc
-        createFileAndInjectContent(root, "", ".env", "env", options);
-        createFileAndInjectContent(root, "", "README.md", "readme", options);
-        createFileAndInjectContent(root, "", ".gitignore", "gitignore", options);
-        createFileAndInjectContent(root, "", "tsconfig.json", "tsconfig", options);
-        createFileAndInjectContent(root, "", "package.json", "packageJson", options);
+        createFileAndInjectContent(root, "", ".env", "env", config);
+        createFileAndInjectContent(root, "", "README.md", "readme", config);
+        createFileAndInjectContent(root, "", ".gitignore", "gitignore", config);
+        createFileAndInjectContent(root, "", "tsconfig.json", "tsconfig", config);
+        // createFileAndInjectContent(root, "", "package.json", "packageJson", config);
 
         // create src and files inside it like app.ts, server.ts, router.ts
         await ensureDirExists(path.resolve(root, "src"));
-        createFileAndInjectContent(root, "src", "app.ts", "appTs", options);
-        createFileAndInjectContent(root, "src", "server.ts", "serverTs", options);
-        createFileAndInjectContent(root, "src", "router.ts", "routerTs", options);
+        createFileAndInjectContent(root, "src", "app.ts", "appTs", config);
+        createFileAndInjectContent(root, "src", "server.ts", "serverTs", config);
+        createFileAndInjectContent(root, "src", "router.ts", "routerTs", config);
 
         // create views: src/views
         await ensureDirExists(path.resolve(root, "src", "views"));
-        createFileAndInjectContent(root, "src/views", "index.ejs", "indexEjs", options);
+        createFileAndInjectContent(root, "src/views", "index.ejs", "indexEjs", config);
 
-        // create routes: src/routes/v1
+        // create routes: src/routes
         await ensureDirExists(path.resolve(root, "src", "routes"));
-        createFileAndInjectContent(root, "src/routes", "user.routes.ts", "userRoutesTs", options);
+        createFileAndInjectContent(root, "src/routes", "user.routes.ts", "userRoutesTs", config);
 
         // create conrollers: src/controllers
         await ensureDirExists(path.resolve(root, "src", "controllers"));
@@ -49,7 +39,7 @@ export const createMainFiles = async (
             "src/controllers",
             "user.controller.ts",
             "userControllerTs",
-            options
+            config
         );
 
         // creae scripts: scripts
@@ -74,67 +64,67 @@ export const createMainFiles = async (
         await ensureDirExists(path.resolve(root, "src", "validations"));
 
         // framework specific files and folders
-        if (options.framework === "express") {
+        if (config.framework === "express") {
             await createFileAndInjectContent(
                 root,
                 "src/middlewares",
                 "error.middleware.ts",
                 "errorMiddlewareTs",
-                options
+                config
             );
-            await createFileAndInjectContent(root, "src/config", "logger.ts", "loggerTs", options);
+            await createFileAndInjectContent(root, "src/config", "logger.ts", "loggerTs", config);
         }
 
         // orm specific files and folders
-        if (options.orm === "drizzle") {
+        if (config.orm === "drizzle") {
             await ensureDirExists(path.resolve(root, "drizzle", "schema"));
             await createFileAndInjectContent(
                 root,
                 "",
                 "drizzle.config.ts",
                 "drizzleConfig",
-                options
+                config
             );
-            await createFileAndInjectContent(root, "drizzle", "index.ts", "indexTs", options);
-            await createFileAndInjectContent(root, "drizzle", "seed.ts", "seedTs", options);
-            await createFileAndInjectContent(root, "drizzle", "schema.ts", "schemaTs", options);
+            await createFileAndInjectContent(root, "drizzle", "index.ts", "indexTs", config);
+            await createFileAndInjectContent(root, "drizzle", "seed.ts", "seedTs", config);
+            await createFileAndInjectContent(root, "drizzle", "schema.ts", "schemaTs", config);
             await createFileAndInjectContent(
                 root,
                 "drizzle/schema",
                 "user.schema.ts",
                 "userSchemaTs",
-                options
+                config
             );
         }
 
-        if (options.orm === "prisma") {
+        if (config.orm === "prisma") {
             await ensureDirExists(path.resolve(root, "prisma"));
-            await createFileAndInjectContent(root, "prisma", "index.ts", "indexTs", options);
-            await createFileAndInjectContent(root, "prisma", "seed.ts", "seedTs", options);
+            await createFileAndInjectContent(root, "prisma", "index.ts", "indexTs", config);
+            await createFileAndInjectContent(root, "prisma", "seed.ts", "seedTs", config);
             await createFileAndInjectContent(
                 root,
                 "prisma",
                 "schema.prisma",
                 "schemaPrisma",
-                options
+                config
             );
         }
 
-        if (options.orm === "mongoose") {
+        if (config.orm === "mongoose") {
             await ensureDirExists(path.resolve(root, "src", "models"));
             await createFileAndInjectContent(
                 root,
                 "src/models",
                 "user.model.ts",
                 "userModelTs",
-                options
+                config
             );
             await createFileAndInjectContent(
                 root,
                 "src/config",
                 "db.config.ts",
                 "dbConfigTs",
-                options
+                config
             );
         }
     } catch (err: any) {
@@ -152,7 +142,7 @@ const createFileAndInjectContent = async (
         | keyof IFrameworkConfig["templater"]
         | keyof IBaseConfig["templater"]
         | keyof IOrmConfig["templater"],
-    options: ProjectConfig
+    config: ProjectConfig
 ): Promise<void> => {
     try {
         let templateFunction: (opt: ProjectConfig) => Promise<string>;
@@ -182,7 +172,7 @@ const createFileAndInjectContent = async (
             case "errorMiddlewareTs":
             case "loggerTs":
                 const possibleTemplateFunction =
-                    FrameworkMap[options.framework].templater[fileMethod];
+                    FrameworkMap[config.framework].templater[fileMethod];
                 if (!possibleTemplateFunction) {
                     throw new Error(`Template function for ${fileMethod} is undefined`);
                 }
@@ -198,7 +188,7 @@ const createFileAndInjectContent = async (
             case "schemaPrisma":
             case "dbConfigTs":
             case "userModelTs":
-                const possibleOrmTemplateFunction = OrmMap[options.orm].templater[fileMethod];
+                const possibleOrmTemplateFunction = OrmMap[config.orm].templater[fileMethod];
                 if (!possibleOrmTemplateFunction) {
                     throw new Error(`Template function for ${fileMethod} is undefined`);
                 }
@@ -214,7 +204,7 @@ const createFileAndInjectContent = async (
             throw new Error(`\nNo template found for file method: ${fileMethod}\n`);
         }
 
-        const fileContent = await templateFunction(options);
+        const fileContent = await templateFunction(config);
         await createFileWithContent(fullPath, fileContent);
     } catch (err: any) {
         console.log(`\n${err.message} || An error occurred while creating file: ${fileName}\n`);

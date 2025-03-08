@@ -7,9 +7,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // get package manager from user agent
-export const getPackageManager = () => {
-    const userAgent = process.env.npm_config_user_agent;
-
+export const packgeManageFromUserAgent = (userAgent: string | undefined) => {
     if (!userAgent) {
         return undefined;
     }
@@ -21,6 +19,18 @@ export const getPackageManager = () => {
     return {
         name: pkgManager,
         version: pkgVersion
+    };
+};
+
+export const packageManagerCommands = (pkgManager: string) => {
+    return {
+        install: `${pkgManager} install`,
+        dev: `${pkgManager}${pkgManager === 'npm' ? ' run' : ''} dev`,
+        add: `${pkgManager} ${pkgManager === 'yarn' || pkgManager === 'pnpm' ? 'add' : 'install'
+            }`,
+        addDev: `${pkgManager} ${pkgManager === 'yarn' || pkgManager === 'pnpm' ? 'add -D' : 'install -D'
+            }`,
+        exec: pkgManager === 'npm' ? 'npx' : pkgManager
     };
 };
 
@@ -40,8 +50,7 @@ export const readTemplateFile = async (
     }
 };
 
-// check if dir exists
-// this helps to avoid creating a directory that already exists.
+// check if dir exists. this helps to avoid creating a directory that already exists.
 export const checkDirExists = async (dirPath: string): Promise<boolean> => {
     try {
         await fs.access(dirPath);

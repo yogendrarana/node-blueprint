@@ -1,37 +1,39 @@
 {
-  "name": "@node-blueprint/cli",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "A cli tool to generate nodejs project",
-  "main": "dist/main.js",
-  "bin": {
-    "node-blueprint": "dist/index.js"
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "clean": "rm -rf dist",
-    "copy": "cp -r src/template dist",
-    "build": "yarn run clean && tsc && yarn run copy",
-    "postbuild": "chmod +x dist/index.js",
-    "dev": "tsx src/index.ts create"
-  },
-  "author": "Yogendra Rana <www.yogendrarana.com.np>",
-  "license": "ISC",
-  "dependencies": {
-    "@inquirer/prompts": "^7.3.1",
-    "ejs": "^3.1.10",
-    "fs-extra": "^11.3.0",
-    "minimist": "^1.2.8"
-  },
-  "devDependencies": {
-    "@types/ejs": "^3.1.5",
-    "@types/fs-extra": "^11.0.4",
-    "@types/minimist": "^1.2.5",
-    "@types/node": "^22.13.1",
-    "del": "^8.0.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
-  }
+    "name": "@node-blueprint/cli",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "A cli tool to generate nodejs project",
+    "main": "dist/main.js",
+    "bin": {
+        "node-blueprint": "dist/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "clean": "rm -rf dist",
+        "copy": "cp -r src/template dist",
+        "build": "yarn run clean && tsc && yarn run copy",
+        "postbuild": "chmod +x dist/index.js",
+        "dev": "tsx src/index.ts create"
+    },
+    "author": "Yogendra Rana <www.yogendrarana.com.np>",
+    "license": "ISC",
+    "dependencies": {
+        "@inquirer/prompts": "^7.3.1",
+        "ejs": "^3.1.10",
+        "fs-extra": "^11.3.0",
+        "minimist": "^1.2.8",
+        "ora": "^8.2.0"
+    },
+    "devDependencies": {
+        "@types/ejs": "^3.1.5",
+        "@types/fs-extra": "^11.0.4",
+        "@types/minimist": "^1.2.5",
+        "@types/node": "^22.13.1",
+        "del": "^8.0.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.3"
+    },
+    "keywords": []
 }

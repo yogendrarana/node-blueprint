@@ -1,39 +1,49 @@
-import path from "path";
+import ora from "ora";
+import path from "node:path";
+import fs from "node:fs/promises"
 import { ProjectConfig } from "../types/types.js";
-import { getPackageManager } from "../utils/utils.js";
-import { createMainFiles } from "./program.js";
+import { createPackageJson } from "./createPackageJson.js";
+import { createProjectStructure } from "./createProjectStructure.js";
+import { checkDirExists, packageManagerCommands, packgeManageFromUserAgent } from "../utils/utils.js";
 
 export async function createProject(config: ProjectConfig): Promise<void> {
     const cwd = process.cwd();
-    const root = path.join(process.cwd(), config.projectName);
-    const pkgManager = getPackageManager()?.name || "npm";
+    const root = path.join(cwd, config.projectName);
+    const spinner = ora("Initializing project setup...").start();
+    const pkgInfo = packgeManageFromUserAgent(process.env.npm_config_user_agent);
 
     try {
-        // this function creates the project files and folders
-        await createMainFiles(config, { root });
-
-        // post creation steps
-        const cdProjectName = path.relative(cwd, root);
-        console.log(`\nProject created. Now run:\n`);
-
-        if (root !== cwd) {
-            console.log(
-                `- cd ${cdProjectName.includes(" ") ? `"${cdProjectName}"` : cdProjectName}`
-            );
+        // Validate project directory
+        if (await checkDirExists(root)) {
+            spinner.fail(`Directory "${config.projectName}" already exists.`);
+            process.exit(1);
         }
 
-        switch (pkgManager) {
-            case "yarn":
-                console.log("- yarn");
-                console.log("- yarn dev");
-                break;
-            default:
-                console.log(`- ${pkgManager} install`);
-                console.log(`- ${pkgManager} run dev`);
-                break;
-        }
+        const pmCommands = packageManagerCommands(pkgInfo?.name || "npm");
+    
+        // Create project structure
+        spinner.text = "Creating project files...";
+        await fs.mkdir(root, { recursive: true });
+        await createProjectStructure(config, { root });
+
+        // Then handle package.json creation and dependencies
+        console.log("\n");
+        spinner.text = "Installing dependencies...";
+        await createPackageJson(config, { root, pkgManager: pkgInfo?.name || "npm" });
+
+        // Show success message
+        spinner.succeed("Project setup completed!");
+
+        // Post-install instructions
+        const relativePath = path.relative(cwd, root);
+        console.log("\nNext steps:");
+        console.log(`➜ cd ${relativePath.includes(" ") ? `"${relativePath}"` : relativePath}`);
+        console.log(`➜ ${pmCommands.dev}`);
+        console.log("\nHappy coding! 🚀\n");
+
     } catch (error: any) {
-        console.error("An error occurred:", error);
+        spinner.fail("An error occurred during project setup.");
+        console.error(error.message);
         process.exit(1);
     }
 }

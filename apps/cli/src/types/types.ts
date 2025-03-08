@@ -6,3 +6,5 @@ export interface ProjectConfig {
     database: DatabaseEnum;
     orm: OrmEnum;
 }
+
+export type PackageManager = "npm" | "yarn" | "pnpm";
