@@ -18,8 +18,8 @@ const startServer = async () => {
     <%_ if (orm === 'mongoose') { _%>
     await connectDb(); // No need for try-catch if handled in db.config.ts
     <%_ } _%>
-
     server.listen(PORT, () => {
+        console.log(`🚀 HTTP Server running on port ${PORT}`);
         logger.info(`🚀 HTTP Server running on port ${PORT}`);
     });
 };

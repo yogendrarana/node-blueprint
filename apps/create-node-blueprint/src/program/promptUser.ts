@@ -2,7 +2,7 @@ import { ProjectConfig } from "../types/types.js";
 import { input, select } from "@inquirer/prompts";
 import { FrameworkEnum, DatabaseEnum, OrmEnum } from "../enums/enums.js";
 
-export async function getProjectConfig(): Promise<ProjectConfig> {
+export async function promptUser(): Promise<ProjectConfig> {
     try {
         // project name
         const projectName = await input({

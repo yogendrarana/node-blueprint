@@ -45,7 +45,7 @@ async function installDependencies(root: string, config: ProjectConfig, pkgManag
         "cookie-parser",
         "dotenv",
         "ejs",
-        ...(config.framework === "express" ? ["express"] : []),
+        ...(config.framework === "express" ? ["express", "winston", "winston-daily-rotate-file"] : []),
         ...(config.framework === "fastify" ? ["fastify"] : []),
         ...(config.database === "postgres" ? ["pg"] : []),
         ...(config.database === "mysql" ? ["mysql2"] : []),

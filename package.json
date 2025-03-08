@@ -7,9 +7,9 @@
     "apps/*"
   ],
   "scripts": {
-    "dev:cli": "yarn workspace @node-blueprint/cli dev",
+    "dev:cli": "yarn workspace create-node-blueprint dev",
+    "build:cli": "yarn workspace create-node-blueprint build",
     "dev:web": "yarn workspace @node-blueprint/web dev",
-    "build:cli": "yarn workspace @node-blueprint/cli build",
     "build:web": "yarn workspace @node-blueprint/web build",
     "build:all": "yarn build:cli && yarn build:web"
   },
@@ -21,7 +21,7 @@
     "mysql",
     "mongodb",
     "postgres",
-    "cli"
+    "create-node-blueprint"
   ],
   "license": "ISC"
 }

@@ -1,21 +1,22 @@
 {
-    "name": "@node-blueprint/cli",
+    "name": "create-node-blueprint",
     "version": "1.0.0",
     "type": "module",
     "description": "A cli tool to generate nodejs project",
-    "main": "dist/main.js",
+    "main": "dist/index.js",
     "bin": {
-        "node-blueprint": "dist/index.js"
+        "create-node-blueprint": "dist/index.js"
     },
     "files": [
         "dist"
     ],
     "scripts": {
         "clean": "rm -rf dist",
-        "copy": "cp -r src/template dist",
+        "copy": "cp -r src/template dist/src",
         "build": "yarn run clean && tsc && yarn run copy",
         "postbuild": "chmod +x dist/index.js",
-        "dev": "tsx src/index.ts create"
+        "dev": "tsx index.ts create",
+        "prepublishOnly": "yarn run build"
     },
     "author": "Yogendra Rana <www.yogendrarana.com.np>",
     "license": "ISC",
