@@ -1,7 +1,6 @@
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { Badge } from "./ui/badge";
 
 export default function SiteHeader() {
     const [stars, setStars] = useState(0);
