@@ -97,10 +97,11 @@ export default function SiteBody() {
                         <Terminal size={16} className="text-gray-400" />
                         <span className="text-gray-400 text-sm">Terminal</span>
                     </div>
+
                     <DropdownMenu>
                         <DropdownMenuTrigger
                             asChild
-                            className="flex items-center cursor-pointer gap-1 px-2 py-1 text-sm text-white bg-gray-800 rounded hover:bg-gray-700 ring-0"
+                            className="ml-auto mr-2 flex items-center cursor-pointer gap-1 px-2 py-1 text-sm text-white bg-gray-800 rounded hover:bg-gray-700 ring-0"
                         >
                             <button className="flex items-center gap-2">
                                 {
@@ -128,16 +129,17 @@ export default function SiteBody() {
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
+
+                    <button
+                        onClick={copyToClipboard}
+                        className="flex items-center cursor-pointer gap-1 p-2 text-sm text-white bg-gray-800 rounded hover:bg-gray-700 ring-0"
+                        aria-label="Copy command"
+                    >
+                        {copied ? <Check size={12} /> : <Copy size={12} />}
+                    </button>
                 </div>
                 <div className="text-green-400 font-mono overflow-x-auto p-2 px-0 text-sm flex justify-between items-center">
                     {getCommand()}
-                    <button
-                        onClick={copyToClipboard}
-                        className="text-gray-400 transition-colors cursor-pointer"
-                        aria-label="Copy command"
-                    >
-                        {copied ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
                 </div>
             </div>
 
