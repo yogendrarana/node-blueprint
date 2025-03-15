@@ -32,7 +32,7 @@ export default function SiteHeader() {
     return (
         <div className="flex justify-between items-center">
             <a href="/" className="text-lg font-semibold flex items-center gap-2">
-                Node Blueprint <Badge variant="outline">under construction</Badge>
+                Node Blueprint
             </a>
 
             <motion.a
