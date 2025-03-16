@@ -7,10 +7,10 @@
     "apps/*"
   ],
   "scripts": {
-    "dev:cli": "yarn workspace create-node-blueprint dev",
-    "build:cli": "yarn workspace create-node-blueprint build",
     "dev:web": "yarn workspace @node-blueprint/web dev",
+    "dev:cli": "yarn workspace create-node-blueprint dev",
     "build:web": "yarn workspace @node-blueprint/web build",
+    "build:cli": "yarn workspace create-node-blueprint build",
     "build:all": "yarn build:cli && yarn build:web"
   },
   "keywords": [
