@@ -76,6 +76,7 @@ node-blueprint --version    # Verify local version
 ```
 
 #### Development Scripts
+```plaintext
 {
   "scripts": {
     "dev:web": "yarn workspace @node-blueprint/web dev",
@@ -85,6 +86,7 @@ node-blueprint --version    # Verify local version
     "build:all": "yarn build:cli && yarn build:web"
   }
 }
+```
 
-#### Golden Rule
+## Golden Rule
 Always test template generation with multiple combinations before submitting PR!
