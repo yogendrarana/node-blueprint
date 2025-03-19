@@ -11,7 +11,8 @@ export interface IBaseConfig {
         gitignore?: TemplaterFunctionType;
         tsconfig?: TemplaterFunctionType;
         readme?: TemplaterFunctionType;
-        indexEjs?: TemplaterFunctionType
+        indexEjs?: TemplaterFunctionType;
+        envTs?: TemplaterFunctionType;
     };
 }
 
@@ -25,6 +26,7 @@ export const BaseMap: TBaseMap = {
             tsconfig: (options) => readTemplateFile("base/tsconfig.json.ejs", options),
             readme: (options) => readTemplateFile("base/README.md.ejs", options),
             indexEjs: (options) => readTemplateFile("base/index.ejs", options),
+            envTs: (options) => readTemplateFile("base/env.ts.ejs", options)
         }
     }
 };

@@ -1,7 +1,5 @@
 export enum FrameworkEnum {
-    express = "express",
-    fastify = "fastify",
-    koa = "koa"
+    express = "express"
 }
 
 export enum DatabaseEnum {
