@@ -205,7 +205,7 @@ const createFileAndInjectContent = async (
         const content = await templateFunction(config);
         await createFileWithContent(fullPath, content);
 
-        console.log(`✅ Created ${fullPath}`);
+        console.log(`✅ Created ${fileToCreate}`);
     } catch (error) {
         console.error(`Error creating ${fileToCreate}:`, error);
     }

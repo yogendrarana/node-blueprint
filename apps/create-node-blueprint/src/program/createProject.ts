@@ -10,7 +10,7 @@ export async function createProject(config: ProjectConfig): Promise<void> {
     const cwd = process.cwd();
     const root = path.join(cwd, config.projectName);
     
-    const spinner = ora().start();
+    const spinner = ora().start("\n");
     const pkgInfo = packgeManageFromUserAgent(process.env.npm_config_user_agent);
 
     try {

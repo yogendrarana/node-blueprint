@@ -51,7 +51,7 @@ export async function promptUser(): Promise<ProjectConfig> {
             ]
         });
 
-        return { projectName, framework, database, orm };
+        return { projectName, framework, database, orm, includeAuth: false };
     } catch (error: any) {
         if (error.message?.includes("ExitPromptError") || error?.name === "ExitPromptError") {
             console.log("\nPrompt cancelled. Goodbye!");
