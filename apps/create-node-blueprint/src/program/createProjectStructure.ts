@@ -23,18 +23,39 @@ export const createProjectStructure = async (
         await ensureDirExists(path.resolve(root, "src", "controllers"));
 
         // create base files
-        createFileAndInjectContent(root, "", ".env", "base", "env", config);
-        createFileAndInjectContent(root, "", "README.md", "base", "readme", config);
-        createFileAndInjectContent(root, "", ".gitignore", "base", "gitignore", config);
-        createFileAndInjectContent(root, "", "tsconfig.json", "base", "tsconfig", config);
+        await createFileAndInjectContent(root, "", ".env", "base", "env", config);
+        await createFileAndInjectContent(root, "", "README.md", "base", "readme", config);
+        await createFileAndInjectContent(root, "", ".gitignore", "base", "gitignore", config);
+        await createFileAndInjectContent(root, "", "tsconfig.json", "base", "tsconfig", config);
         await createFileAndInjectContent(root, "src/config", "env.ts", "base", "envTs", config);
-        createFileAndInjectContent(root, "src/views", "index.ejs", "base", "indexEjs", config);
+        await createFileAndInjectContent(
+            root,
+            "src/views",
+            "index.ejs",
+            "base",
+            "indexEjs",
+            config
+        );
 
         // create files common for all frameworks
-        createFileAndInjectContent(root, "src", "app.ts", config.framework, "appTs", config);
-        createFileAndInjectContent(root, "src", "server.ts", config.framework, "serverTs", config);
-        createFileAndInjectContent(root, "src", "router.ts", config.framework, "routerTs", config);
-        createFileAndInjectContent(
+        await createFileAndInjectContent(root, "src", "app.ts", config.framework, "appTs", config);
+        await createFileAndInjectContent(
+            root,
+            "src",
+            "server.ts",
+            config.framework,
+            "serverTs",
+            config
+        );
+        await createFileAndInjectContent(
+            root,
+            "src",
+            "router.ts",
+            config.framework,
+            "routerTs",
+            config
+        );
+        await createFileAndInjectContent(
             root,
             "src/routes",
             "user.routes.ts",
@@ -42,7 +63,7 @@ export const createProjectStructure = async (
             "userRoutesTs",
             config
         );
-        createFileAndInjectContent(
+        await createFileAndInjectContent(
             root,
             "src/controllers",
             "user.controller.ts",
@@ -164,7 +185,7 @@ export const createProjectStructure = async (
     }
 };
 
-// create file with content 
+// create file with content
 const createFileAndInjectContent = async (
     projectPath: string,
     pathToCreate: string,
