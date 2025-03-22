@@ -1,0 +1,166 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { TokenEnum } from '@prisma/client';
+import type { NextFunction, Request, Response } from "express";
+
+import { env } from "../config/env.js";
+import prisma from "../../prisma/prisma-client.js";
+import ErrorHandler from "../utils/error-handler.js";
+import { generateAuthTokens } from "../services/auth-services.js";
+import { loginUserSchema, registerUserSchema } from "../validations/user-validations.js";
+
+export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const validate = registerUserSchema.safeParse({ email, password });
+        if (!validate.success) {
+            throw new ErrorHandler(400, validate.error.errors[0]?.message || "Validation error");
+        }
+
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+            throw new ErrorHandler(400, "The email is already registered. Please login.");
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await prisma.user.create({
+            data: { email, password: hashedPassword }
+        });
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+        await prisma.token.create({
+            data: { type: TokenEnum.refresh_token, value: refreshToken, userId: user.id }
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Registered successfully.",
+            data: { accessToken, user }
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const validate = loginUserSchema.safeParse({ email, password });
+        if (!validate.success) {
+            throw new ErrorHandler(400, validate.error.errors[0]?.message || "Validation error");
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            throw new ErrorHandler(400, "Invalid email or password.");
+        }
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+        await prisma.token.create({
+            data: { type: TokenEnum.refresh_token, value: refreshToken, userId: user.id }
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+
+        const { password: _, ...rest } = user;
+
+        res.status(200).json({
+            success: true,
+            message: "Logged in successfully.",
+            data: { accessToken, user: rest }
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new ErrorHandler(400, "Cannot logout.");
+        }
+
+        const foundToken = await prisma.token.findFirst({ where: { value: refreshToken } });
+        if (!foundToken) {
+            throw new ErrorHandler(400, "Cannot logout.");
+        }
+
+        await prisma.token.delete({ where: { id: foundToken.id } });
+
+        res.clearCookie("refreshToken");
+        res.status(200).json({ success: true, message: "Logged out successfully." });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new ErrorHandler(403, "Refresh token not found in cookie.");
+        }
+
+        jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET!, async (err:any, decoded: any) => {
+            if (err) {
+                throw new ErrorHandler(
+                    401,
+                    err.name === "TokenExpiredError"
+                        ? "Refresh token expired. Login again!"
+                        : "Unauthorized!"
+                );
+            }
+
+            const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+            if (!user) {
+                throw new ErrorHandler(
+                    401,
+                    "User associated with the refresh token does not exist!"
+                );
+            }
+
+            const existingToken = await prisma.token.findFirst({ where: { value: refreshToken } });
+            if (existingToken) {
+                await prisma.token.delete({ where: { id: existingToken.id } });
+            }
+
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateAuthTokens({ userId: user.id });
+
+            await prisma.token.create({
+                data: { type: TokenEnum.refresh_token, value: newRefreshToken, userId: user.id }
+            });
+
+            res.cookie("refreshToken", newRefreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+                maxAge: 30 * 24 * 60 * 60 * 1000
+            });
+
+            res.status(200).json({
+                success: true,
+                message: "Access token generated successfully!",
+                data: { accessToken: newAccessToken, user }
+            });
+        });
+    } catch (err) {
+        next(err);
+    }
+};

@@ -25,20 +25,15 @@ export const packgeManageFromUserAgent = (userAgent: string | undefined) => {
 export const packageManagerCommands = (pkgManager: string) => {
     return {
         install: `${pkgManager} install`,
-        dev: `${pkgManager}${pkgManager === 'npm' ? ' run' : ''} dev`,
-        add: `${pkgManager} ${pkgManager === 'yarn' || pkgManager === 'pnpm' ? 'add' : 'install'
-            }`,
-        addDev: `${pkgManager} ${pkgManager === 'yarn' || pkgManager === 'pnpm' ? 'add -D' : 'install -D'
-            }`,
-        exec: pkgManager === 'npm' ? 'npx' : pkgManager
+        dev: `${pkgManager}${pkgManager === "npm" ? " run" : ""} dev`,
+        add: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add" : "install"}`,
+        addDev: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add -D" : "install -D"}`,
+        exec: pkgManager === "npm" ? "npx" : pkgManager
     };
 };
 
 // read template file
-export const readTemplateFile = async (
-    templatePath: string,
-    options: ProjectConfig | Record<string, any>
-): Promise<string> => {
+export const readTemplateFile = async (templatePath: string, options: ProjectConfig | Record<string, any>): Promise<string> => {
     try {
         const fullTemplatePath = path.resolve(__dirname, "..", "template", templatePath);
         const template = await fs.readFile(fullTemplatePath, "utf-8");

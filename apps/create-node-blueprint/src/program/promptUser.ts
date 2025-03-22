@@ -1,5 +1,5 @@
 import { ProjectConfig } from "../types/types.js";
-import { input, select } from "@inquirer/prompts";
+import { input, select, checkbox } from "@inquirer/prompts";
 import { FrameworkEnum, DatabaseEnum, OrmEnum } from "../enums/enums.js";
 
 export async function promptUser(): Promise<ProjectConfig> {
@@ -37,7 +37,7 @@ export async function promptUser(): Promise<ProjectConfig> {
         const orm = await select({
             message: "Choose an ORM",
             choices: [
-                { value: OrmEnum.prisma, name: "Prisma" },
+                { value: OrmEnum.prisma, name: "Prisma", disabled: database === DatabaseEnum.mongodb },
                 {
                     value: OrmEnum.drizzle,
                     name: "Drizzle",
@@ -51,7 +51,13 @@ export async function promptUser(): Promise<ProjectConfig> {
             ]
         });
 
-        return { projectName, framework, database, orm, includeAuth: false };
+        // auth
+        const features = await checkbox({
+            message: "Select additional features",
+            choices: [{ name: "Include basic jwt authentication", value: "auth" }]
+        });
+
+        return { projectName, framework, database, orm, features };
     } catch (error: any) {
         if (error.message?.includes("ExitPromptError") || error?.name === "ExitPromptError") {
             console.log("\nPrompt cancelled. Goodbye!");

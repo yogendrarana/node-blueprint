@@ -1,0 +1,215 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import type { NextFunction, Request, Response } from "express";
+
+import { env } from "../config/env.js";
+import User from "../models/user-model.js";
+import Token from "../models/token-model.js";
+import { TokenEnum } from "../types/enums/token-enum.js";
+import ErrorHandler from "../utils/error-handler.js";
+import { generateAuthTokens } from "../services/auth-services.js";
+import { loginUserSchema, registerUserSchema } from "../validations/user-validations.js";
+
+// register user controller
+export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const validate = registerUserSchema.safeParse({ email, password });
+        if (!validate.success) {
+            const errorMessage = validate.error.errors[0]?.message || "Validation error";
+            throw new ErrorHandler(400, errorMessage);
+        }
+
+        // check if user exists in database
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            throw new ErrorHandler(400, "The email is already registered. Please login.");
+        }
+
+        // encrypt password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // create new user
+        const user = await User.create({
+            email,
+            password: hashedPassword
+        });
+
+        if (!user) {
+            throw new ErrorHandler(500, "User registration failed.");
+        }
+
+        // generate tokens
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user._id });
+
+        // save refresh token in database
+        await Token.create({
+            type: TokenEnum.REFRESH_TOKEN,
+            value: refreshToken,
+            userId: user._id
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Registered successfully.",
+            data: {
+                accessToken,
+                user
+            }
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// login user controller
+export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const validate = loginUserSchema.safeParse({ email, password });
+        if (!validate.success) {
+            const errorMessage = validate.error.errors[0]?.message || "Validation error";
+            throw new ErrorHandler(400, errorMessage);
+        }
+
+        // Find user by email
+        const user = await User.findOne({ email }).select("+password");
+        if (!user) {
+            throw new ErrorHandler(400, "Invalid email or password.");
+        }
+
+        // Compare password
+        const isCorrectPassword = await bcrypt.compare(password, user.password);
+        if (!isCorrectPassword) {
+            throw new ErrorHandler(400, "Invalid email or password.");
+        }
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user._id });
+
+        // save refresh token in database
+        await Token.create({
+            type: TokenEnum.REFRESH_TOKEN,
+            value: refreshToken,
+            userId: user._id
+        });
+
+        // set refresh token in cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Logged in successfully.",
+            data: {
+                accessToken,
+                user: user.toJSON()
+            }
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// logout user controller
+export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new ErrorHandler(400, "Cannot logout.");
+        }
+
+        // Find token in database
+        const foundRefreshToken = await Token.findOne({ value: refreshToken });
+        if (!foundRefreshToken) {
+            throw new ErrorHandler(400, "Cannot logout.");
+        }
+
+        // delete refresh token from database
+        await Token.deleteOne({ value: refreshToken });
+
+        // clear cookie
+        res.clearCookie("refreshToken");
+
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully."
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// refresh and issue new tokens
+export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new ErrorHandler(403, "Refresh token not found in cookie.");
+        }
+
+        jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET!, async (err: any, decoded: any) => {
+            if (err) {
+                throw new ErrorHandler(
+                    401,
+                    err.name === "TokenExpiredError"
+                        ? "Refresh token expired. Login again!"
+                        : "Unauthorized!"
+                );
+            }
+
+            // get user associated with refresh token
+            const user = await User.findById(decoded.userId);
+            if (!user) {
+                throw new ErrorHandler(
+                    401,
+                    "User associated with the refresh token does not exist!"
+                );
+            }
+
+            // delete the last refresh token from database
+            await Token.deleteOne({ value: refreshToken });
+
+            // create new access token and refresh token
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+                generateAuthTokens({ userId: user._id });
+
+            // insert new refresh token in database
+            await Token.create({
+                type: TokenEnum.REFRESH_TOKEN,
+                value: newRefreshToken,
+                userId: user._id
+            });
+
+            res.cookie("refreshToken", newRefreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+                maxAge: 30 * 24 * 60 * 60 * 1000
+            });
+
+            res.status(200).json({
+                success: true,
+                message: "Access token generated successfully!",
+                data: {
+                    accessToken: newAccessToken,
+                    user
+                }
+            });
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};

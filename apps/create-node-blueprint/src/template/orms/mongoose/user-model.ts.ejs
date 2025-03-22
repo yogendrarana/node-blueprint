@@ -1,10 +1,12 @@
 import { Schema, model, Document } from "mongoose";
+import { RoleEnum } from "../types/enums/role-enum.js";
 
 // Define User interface
 interface IUser extends Document {
     name?: string;
     email: string;
     password: string;
+    role: RoleEnum;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -14,10 +16,17 @@ const userSchema = new Schema<IUser>(
     {
         name: { type: String, maxlength: 50, trim: true },
         email: { type: String, required: true, unique: true, maxlength: 255, lowercase: true },
-        password: { type: String },
+        password: { type: String, required: true, select: false },
+        role: { type: String, enum: RoleEnum, default: RoleEnum.USER },
     },
     {
-        timestamps: true
+        timestamps: true,
+        toJSON: {
+            transform: function (doc, ret) {
+                delete ret.password;
+                return ret;
+            },
+        }
     }
 );
 

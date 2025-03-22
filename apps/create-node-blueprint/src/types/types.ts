@@ -5,7 +5,7 @@ export interface ProjectConfig {
     framework: FrameworkEnum;
     database: DatabaseEnum;
     orm: OrmEnum;
-    includeAuth?: boolean;
+    features: Array<string>;
 }
 
 export type PackageManager = "npm" | "yarn" | "pnpm";

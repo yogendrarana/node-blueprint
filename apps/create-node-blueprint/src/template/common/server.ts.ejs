@@ -1,10 +1,11 @@
+<% if (framework === 'express') { %>
 import app from "./app.js";
 import dotenv from "dotenv";
 import http from "node:http";
 import path from "node:path";
 import logger from "./config/logger.js";
 <%_ if (orm === 'mongoose') { _%>
-import connectDb from "./config/db.config.js";
+import connectDb from "./config/db.js";
 <%_ } _%>
 
 // Load env variables
@@ -37,3 +38,4 @@ process.on("SIGINT", shutdown);
 
 // Start the server
 startServer();
+<% } %>

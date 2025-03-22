@@ -1,0 +1,31 @@
+import { Schema, model, Document, Types } from "mongoose";
+import { TokenEnum } from "../types/enums/token-enum.js";
+
+// Define Token interface
+interface IToken extends Document {
+    userId: Types.ObjectId;
+    value: string;
+    type: TokenEnum;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+// Mongoose Schema
+const TokenSchema = new Schema<IToken>(
+    {
+        value: { type: String, required: true },
+        type: { 
+            type: String, 
+            enum: Object.values(TokenEnum),
+            required: true 
+        },
+        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    },
+    {
+        timestamps: true
+    }
+);
+
+// create and export Token model
+const Token = model<IToken>("Token", TokenSchema);
+export default Token;

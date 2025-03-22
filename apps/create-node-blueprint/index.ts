@@ -29,7 +29,8 @@ async function init() {
             projectName: argv.name,
             framework: argv.framework,
             database: argv.database,
-            orm: argv.orm
+            orm: argv.orm,
+            features: []
         };
         await createProject(config);
     } else {

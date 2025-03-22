@@ -5,12 +5,9 @@ import { exec } from "node:child_process";
 import { ProjectConfig } from "../types/types.js";
 import { packageManagerCommands } from "../utils/utils.js";
 
-const execAsync = promisify(exec)
+const execAsync = promisify(exec);
 
-export async function createPackageJson(
-    config: ProjectConfig,
-    { root, pkgManager }: { root: string, pkgManager: string }
-): Promise<void> {
+export async function createPackageJson(config: ProjectConfig, { root, pkgManager }: { root: string; pkgManager: string }): Promise<void> {
     try {
         const packageJsonPath = path.join(root, "package.json");
 
@@ -24,10 +21,7 @@ export async function createPackageJson(
             author: "",
             license: "ISC"
         };
-        await fs.writeFile(
-            packageJsonPath,
-            JSON.stringify(defaultPackageJson, null, 2)
-        );
+        await fs.writeFile(packageJsonPath, JSON.stringify(defaultPackageJson, null, 2));
 
         // Now proceed with modifications
         await modifyPackageJson(root, config);
@@ -39,18 +33,20 @@ export async function createPackageJson(
 }
 
 async function installDependencies(root: string, config: ProjectConfig, pkgManager: string) {
-    const pmCommands = packageManagerCommands(pkgManager || "npm");
+    const pkgManagerCommands = packageManagerCommands(pkgManager || "npm");
 
     const dependencies = [
         "cookie-parser",
         "dotenv",
         "ejs",
+        "zod",
         ...(config.framework === "express" ? ["express", "winston", "winston-daily-rotate-file"] : []),
         ...(config.database === "postgres" ? ["pg"] : []),
         ...(config.database === "mysql" ? ["mysql2"] : []),
         ...(config.orm === "prisma" ? ["@prisma/client"] : []),
         ...(config.orm === "drizzle" ? ["drizzle-orm"] : []),
-        ...(config.orm === "mongoose" ? ["mongoose"] : [])
+        ...(config.orm === "mongoose" ? ["mongoose"] : []),
+        ...(config.features.includes("auth") ? ["jsonwebtoken", "bcrypt"] : [])
     ];
 
     const devDependencies = [
@@ -58,21 +54,23 @@ async function installDependencies(root: string, config: ProjectConfig, pkgManag
         "@types/node",
         "tsx",
         "typescript",
+        ...(config.database === "postgres" ? ["@types/pg"] : []),
         ...(config.framework === "express" ? ["@types/express"] : []),
         ...(config.orm === "mongoose" ? ["@types/mongoose"] : []),
         ...(config.orm === "drizzle" ? ["drizzle-kit"] : []),
-        ...(config.orm === "prisma" ? ["prisma"] : [])
+        ...(config.orm === "prisma" ? ["prisma"] : []),
+        ...(config.features.includes("auth") ? ["@types/bcrypt", "@types/jsonwebtoken"] : [])
     ];
 
     try {
         // Install dependencies
         if (dependencies.length > 0) {
-            await execAsync(`${pmCommands.add} ${dependencies.join(' ')}`, { cwd: root });
+            await execAsync(`${pkgManagerCommands.add} ${dependencies.join(" ")}`, { cwd: root });
         }
 
         // Install dev dependencies
         if (devDependencies.length > 0) {
-            await execAsync(`${pmCommands.addDev} ${devDependencies.join(' ')}`, { cwd: root });
+            await execAsync(`${pkgManagerCommands.addDev} ${devDependencies.join(" ")}`, { cwd: root });
         }
     } catch (error: any) {
         console.error(error.message);
@@ -95,7 +93,8 @@ async function modifyPackageJson(root: string, config: ProjectConfig) {
             start: "node dist/server.js",
             dev: "tsx watch src/server.ts",
             ...(config.orm === "prisma" && getPrismaScripts()),
-            ...(config.orm === "drizzle" && getDrizzleScripts())
+            ...(config.orm === "drizzle" && getDrizzleScripts()),
+            ...(config.orm === "mongoose" && getMongooseScripts())
         }
     });
 
@@ -131,5 +130,11 @@ function getDrizzleScripts() {
         "db:drop-migration": "drizzle-kit drop",
         "db:introspect": "drizzle-kit introspect",
         "db:studio": "drizzle-kit studio --port 4000"
+    };
+}
+
+function getMongooseScripts() {
+    return {
+        "db:seed": "tsx src/models/seed.ts"
     };
 }

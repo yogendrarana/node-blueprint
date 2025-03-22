@@ -1,0 +1,22 @@
+<%_ if (framework === 'express') { _%>
+import { Router } from "express";
+import userRouter from "./routes/user-routes.js";
+<%_ if (features.includes("auth")) { _%>
+import authRouter from "./routes/auth-routes.js";
+<%_ } _%>
+
+const router: Router = Router();
+
+// v1 routes
+const v1Routes: Router = Router();
+v1Routes.use("/user", userRouter);
+<%_ if (features.includes("auth")) { _%>
+v1Routes.use("/auth", authRouter);
+<%_ } _%>
+
+// attach v1 routes
+router.use("/api/v1", v1Routes);
+
+export default router;
+<%_ } _%>
+    

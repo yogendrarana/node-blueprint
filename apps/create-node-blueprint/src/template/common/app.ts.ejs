@@ -1,3 +1,4 @@
+<%_ if (framework === 'express') { _%>
 import path from "path";
 import router from "./router.js";
 import { fileURLToPath } from "url";
@@ -7,7 +8,7 @@ import express, { type Request, type Response } from "express";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // middlewares
-import ErrorMiddleware from "./middlewares/error.middleware.js";
+import ErrorMiddleware from "./middlewares/error-middleware.js";
 
 // create express app instance
 const app = express();
@@ -37,3 +38,4 @@ app.use(ErrorMiddleware);
 
 // export express app
 export default app;
+<%_ } _%>

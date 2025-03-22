@@ -3,17 +3,91 @@ generator client {
 }
   
 datasource db {
-    provider = "<%= database === 'postgres' ? 'postgresql' : 'mysql' %>"
+    provider = "<%= database === 'postgres' ? 'postgresql' : database === 'mongodb' ? 'mongodb' : 'mysql' %>"
     url      = env("DATABASE_URL")
 }
-  
-  
+
+<%_ if (database === 'mongodb') { _%>
+enum RoleEnum {
+    admin
+    user
+}
+
+model User {
+    id       String   @id @default(auto()) @map("_id") @db.ObjectId
+    name     String?
+    email    String   @unique
+    password String
+    role     RoleEnum     @default(user)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    <%_ if (features.includes("auth")) { _%>
+
+    tokens Token[]
+    <%_ } _%>
+}
+
+
+<%_ if (features.includes("auth")) { _%>
+enum TokenEnum {
+    refresh_token
+    reset_password_token
+    verify_email_token
+}
+
+model Token {
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    value     String
+    type      TokenEnum
+    userId    String    @db.ObjectId
+    user      User      @relation(fields: [userId], references: [id])
+    
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    @@index([userId])
+}
+<%_ } _%>
+<%_ } else { _%>
+enum RoleEnum {
+    admin
+    user
+}
+    
 model User {
     id       String  @id @unique @default(uuid())
     name     String? @db.VarChar(50)
     email    String  @unique @db.VarChar(255)
     password String
+    role     RoleEnum    @default(user)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    <%_ if (features.includes("auth")) { _%>
+
+    tokens Token[]
+    <%_ } _%>
 }
+
+<%_ if (features.includes("auth")) { _%>
+enum TokenEnum {
+    refresh_token
+    reset_password_token
+    verify_email_token
+}
+
+model Token {
+    id        String    @id @unique @default(uuid())
+    value     String
+    type      TokenEnum
+    userId    String
+    user      User      @relation(fields: [userId], references: [id])
+    
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    @@index([userId])
+}
+<%_ } _%>
+<%_ } _%>

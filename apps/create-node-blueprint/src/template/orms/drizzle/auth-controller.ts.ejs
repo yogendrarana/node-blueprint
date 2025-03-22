@@ -1,0 +1,240 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { eq } from "drizzle-orm";
+import type { NextFunction, Request, Response } from "express";
+
+import { env } from "../config/env.js";
+import db from "../../drizzle/index.js";
+import ErrorHandler from "../utils/error-handler.js";
+import { TokenEnum } from "../types/enums/token-enum.js";
+import { userSchema } from "../../drizzle/schema/user-schema.js";
+import { generateAuthTokens } from "../services/auth-services.js";
+import { tokenSchema } from "../../drizzle/schema/token-schema.js";
+import { loginUserSchema, registerUserSchema } from "../validations/user-validations.js";
+
+// register user controller
+export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const validate = registerUserSchema.safeParse({ email, password });
+        if (!validate.success) {
+            const errorMessage = validate.error.errors[0]?.message || "Validation error";
+            throw new ErrorHandler(400, errorMessage);
+        }
+
+        // check if user exists in database
+        const [existingUser] = await db
+            .select()
+            .from(userSchema)
+            .where(eq(userSchema.email, email))
+            .limit(1);
+        if (existingUser) {
+            throw new ErrorHandler(400, "The email is already registered. Please login.");
+        }
+
+        // encrypt password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        <%_ if (database === "postgres") { _%> 
+        const [user] = await db
+            .insert(userSchema)
+            .values({
+                email,
+                password: hashedPassword
+            })
+            .returning();
+        if (!user) {
+            throw new ErrorHandler(500, "User registration failed.");
+        }
+        <%_ } _%>
+        <%_ if (database === "mysql") { _%> 
+        const insertResult = await db
+            .insert(userSchema)
+            .values({
+                email,
+                password: hashedPassword
+            })
+        const lastInsertId = insertResult[0].insertId;
+        if (!lastInsertId) {
+            throw new ErrorHandler(500, "User registration failed.");
+        }
+        const [user] = await db.select().from(userSchema).where(eq(userSchema.id, lastInsertId)).limit(1);
+        if (!user) {
+            throw new ErrorHandler(500, "User registration failed.");
+        }
+        <%_ } _%>
+
+        // generate tokens
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+        // save refresh token in database
+        await db.insert(tokenSchema).values({
+            type: TokenEnum.REFRESH_TOKEN,
+            value: refreshToken,
+            userId: user.id
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days because the refresh token is valid for 30 days, change as you like
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Registered successfully.",
+            data: {
+                accessToken,
+                user
+            }
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// login user controller
+export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const validate = loginUserSchema.safeParse({ email, password });
+        if (!validate.success) {
+            const errorMessage = validate.error.errors[0]?.message || "Validation error";
+            throw new ErrorHandler(400, errorMessage);
+        }
+
+        const [user] = await db.select().from(userSchema).where(eq(userSchema.email, email)).limit(1);
+        const isCorrectPassword = await bcrypt.compare(password, user?.password || "");
+        if (!user || !isCorrectPassword) {
+            throw new ErrorHandler(400, "Invalid email or password.");
+        }
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+        // save refresh token in database
+        await db.insert(tokenSchema).values({
+            type: TokenEnum.REFRESH_TOKEN,
+            value: refreshToken,
+            userId: user.id
+        });
+
+        // set refresh token in cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password: userPassword, createdAt, updatedAt, ...rest } = user;
+
+        res.status(200).json({
+            success: true,
+            message: "Logged in successfully.",
+            data: {
+                accessToken,
+                user: rest
+            }
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// logout user controller
+export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new ErrorHandler(400, "Cannot logout.");
+        }
+
+        const foundRefreshToken = await db
+            .select()
+            .from(tokenSchema)
+            .where(eq(tokenSchema.value, refreshToken))
+            .limit(1);
+
+        if (!foundRefreshToken[0]) {
+            throw new ErrorHandler(400, "Cannot logout.");
+        }
+
+        // delete refresh token from database
+        await db.delete(tokenSchema).where(eq(tokenSchema.value, refreshToken));
+
+        // clear cookie
+        res.clearCookie("refreshToken");
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully."
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// refresh and issue new tokens
+export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new ErrorHandler(403, "Refresh token not found in cookie.");
+        }
+
+        jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET!, async (err: any, decoded: any) => {
+            if (err) {
+                throw new ErrorHandler(
+                    401,
+                    err.name === "TokenExpiredError"
+                        ? "Refresh token expired. Login again!"
+                        : "Unauthorized!"
+                );
+            }
+
+            // get user associated with refresh token
+            const [user] = await db.select().from(userSchema).where(eq(userSchema.id, decoded.userId)).limit(1);
+            if (!user) {
+                throw new ErrorHandler(
+                    401,
+                    "User associated with the refresh token does not exist!"
+                );
+            }
+
+            const [existingToken] = await db.select().from(tokenSchema).where(eq(tokenSchema.value, refreshToken)).limit(1);
+            if (existingToken) {
+                await db.delete(tokenSchema).where(eq(tokenSchema.value, refreshToken));
+            }
+
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateAuthTokens({ userId: user.id });
+
+            // insert new refresh token in database
+            await db.insert(tokenSchema).values({
+                type: TokenEnum.REFRESH_TOKEN,
+                value: newRefreshToken,
+                userId: user.id
+            });
+
+            res.cookie("refreshToken", newRefreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+                maxAge: 30 * 24 * 60 * 60 * 1000
+            });
+
+            res.status(200).json({
+                success: true,
+                message: "Access token generated successfully!",
+                data: {
+                    accessToken: newAccessToken,
+                    user
+                }
+            });
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
