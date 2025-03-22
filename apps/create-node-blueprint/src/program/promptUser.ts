@@ -37,7 +37,11 @@ export async function promptUser(): Promise<ProjectConfig> {
         const orm = await select({
             message: "Choose an ORM",
             choices: [
-                { value: OrmEnum.prisma, name: "Prisma", disabled: database === DatabaseEnum.mongodb },
+                {
+                    value: OrmEnum.prisma,
+                    name: "Prisma",
+                    disabled: database === DatabaseEnum.mongodb
+                },
                 {
                     value: OrmEnum.drizzle,
                     name: "Drizzle",

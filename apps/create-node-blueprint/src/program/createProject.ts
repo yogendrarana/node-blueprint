@@ -1,6 +1,6 @@
 import ora from "ora";
 import path from "node:path";
-import fs from "node:fs/promises"
+import fs from "node:fs/promises";
 import { ProjectConfig } from "../types/types.js";
 import { createPackageJson } from "./createPackageJson.js";
 import { createProjectStructure } from "./createProjectStructure.js";
@@ -9,7 +9,7 @@ import { checkDirExists, packageManagerCommands, packgeManageFromUserAgent } fro
 export async function createProject(config: ProjectConfig): Promise<void> {
     const cwd = process.cwd();
     const root = path.join(cwd, config.projectName);
-    
+
     const spinner = ora().start("\n");
     const pkgInfo = packgeManageFromUserAgent(process.env.npm_config_user_agent);
 
@@ -21,7 +21,7 @@ export async function createProject(config: ProjectConfig): Promise<void> {
         }
 
         const pmCommands = packageManagerCommands(pkgInfo?.name || "npm");
-    
+
         // Create project structure
         spinner.text = "Creating project files...";
         await fs.mkdir(root, { recursive: true });
@@ -41,7 +41,6 @@ export async function createProject(config: ProjectConfig): Promise<void> {
         console.log(`➜ cd ${relativePath.includes(" ") ? `"${relativePath}"` : relativePath}`);
         console.log(`➜ ${pmCommands.dev}`);
         console.log("\nHappy coding! 🚀\n");
-
     } catch (error: any) {
         spinner.fail("An error occurred during project setup.");
         console.error(error.message);

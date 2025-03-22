@@ -70,7 +70,9 @@ async function installDependencies(root: string, config: ProjectConfig, pkgManag
 
         // Install dev dependencies
         if (devDependencies.length > 0) {
-            await execAsync(`${pkgManagerCommands.addDev} ${devDependencies.join(" ")}`, { cwd: root });
+            await execAsync(`${pkgManagerCommands.addDev} ${devDependencies.join(" ")}`, {
+                cwd: root
+            });
         }
     } catch (error: any) {
         console.error(error.message);

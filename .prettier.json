@@ -4,6 +4,6 @@
     "tabWidth": 4,
     "singleQuote": false,
     "quoteProps": "as-needed",
-    "printWidth": 500,
+    "printWidth": 200,
     "arrowParens": "always"
 }

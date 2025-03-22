@@ -99,7 +99,14 @@ export const createProjectStructure = async (config: ProjectConfig, { root }: { 
 };
 
 // create file with content
-const createFileAndInjectContent = async (projectPath: string, pathToCreate: string, fileToCreate: string, type: TemplaterKey, fileMethodKey: keyof ITemplateConfig["templater"], config: ProjectConfig): Promise<void> => {
+const createFileAndInjectContent = async (
+    projectPath: string,
+    pathToCreate: string,
+    fileToCreate: string,
+    type: TemplaterKey,
+    fileMethodKey: keyof ITemplateConfig["templater"],
+    config: ProjectConfig
+): Promise<void> => {
     try {
         // Retrieve the correct templater function
         const templateFunction = TemplaterMap[type]?.templater[fileMethodKey];
