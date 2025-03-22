@@ -1,0 +1,70 @@
+<%_ if (database === "postgres") { _%>
+import { type InferSelectModel, type InferInsertModel, relations } from "drizzle-orm";
+import { pgTable, text, timestamp, uuid, varchar, pgEnum } from "drizzle-orm/pg-core";
+
+<%_ if (features.includes("auth")) { _%>
+import { tokenSchema } from "./token-schema.js";
+<%_ } _%>
+import { RoleEnum } from "../../src/types/enums/role-enum.js";
+
+// create role enum type
+const roleEnum = pgEnum("role", Object.values(RoleEnum) as [string, ...string[]]);
+
+// schema definition
+export const userSchema = pgTable("user",
+    {
+        id: uuid("id").primaryKey().unique().notNull().defaultRandom(),
+        name: varchar("name", { length: 50 }),
+        email: varchar("email", { length: 255 }).notNull().unique(),
+        password: text("password").notNull(),
+        role: roleEnum().notNull().default(RoleEnum.USER),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at").notNull().defaultNow()
+    }
+);
+
+<%_ if (features.includes("auth")) { _%>
+// relations
+export const userRelations = relations(userSchema, ({ many }) => ({
+    tokens: many(tokenSchema)
+}));
+<%_ } _%>
+
+// types
+export type SelectableUser = InferSelectModel<typeof userSchema>;
+export type InsertableUser = InferInsertModel<typeof userSchema>;
+<%_ } _%>
+<%_ if (database === "mysql") { _%>
+import { type InferSelectModel, type InferInsertModel, relations } from "drizzle-orm";
+import { mysqlTable, text, timestamp, varchar, mysqlEnum, int } from "drizzle-orm/mysql-core";
+
+<%_ if (features.includes("auth")) { _%>
+import { tokenSchema } from "./token-schema.js";
+<%_ } _%>
+import { RoleEnum } from "../../src/types/enums/role-enum.js";
+
+// create role enum type
+const roleEnum = mysqlEnum(Object.values(RoleEnum) as [string, ...string[]]);
+
+// schema definition
+export const userSchema = mysqlTable("user", {
+    id: int("id").primaryKey().autoincrement(),
+    name: varchar("name", { length: 50 }),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    password: text("password").notNull(),
+    role: roleEnum.notNull().default(RoleEnum.USER),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+<%_ if (features.includes("auth")) { _%>
+// relations
+export const userRelations = relations(userSchema, ({ many }) => ({
+    tokens: many(tokenSchema)
+}));
+<%_ } _%>
+
+// types
+export type SelectableUser = InferSelectModel<typeof userSchema>;
+export type InsertableUser = InferInsertModel<typeof userSchema>;
+<%_ } _%>

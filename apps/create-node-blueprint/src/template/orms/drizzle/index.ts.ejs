@@ -1,17 +1,17 @@
 <%_ if (database === "postgres") { _%>
 import pg from "pg";
-import * as schema from "./schema.js";
 import { drizzle } from "drizzle-orm/node-postgres";
+
+import * as schema from "./schema.js";
+import { env } from "../src/config/env.js";
 
 // Create a connection pool using environment variable for connection string
 export const pool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: env.DATABASE_URL,
 });
 
-// Default export with drizzle ORM instance
 const db = drizzle(pool, {
     schema: schema,
-    mode: "default",
 });
 
 export default db;

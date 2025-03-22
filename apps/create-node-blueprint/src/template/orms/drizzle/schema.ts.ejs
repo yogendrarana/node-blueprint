@@ -1,1 +1,4 @@
-export * from "./schema/user.schema.js";
+export * from "./schema/user-schema.js";
+<%_ if (features.includes("auth")) { _%>
+export * from "./schema/token-schema.js";
+<%_ } _%>

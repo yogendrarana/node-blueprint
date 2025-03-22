@@ -1,0 +1,69 @@
+<%_ if (features.includes("auth")) { _%>
+<%_ if (database === "postgres") { _%>
+import { relations } from "drizzle-orm";
+import { type InferInsertModel, type InferSelectModel } from "drizzle-orm";
+import { pgTable, text, timestamp, uuid, pgEnum } from "drizzle-orm/pg-core";
+
+import { userSchema } from "./user-schema.js";
+import { TokenEnum } from "../../src/types/enums/token-enum.js";
+
+// create token enum type
+const tokenTypeEnum = pgEnum("type", Object.values(TokenEnum) as [string, ...string[]]);
+
+// schema definition
+export const tokenSchema = pgTable(
+    "token",
+    {
+        id: uuid("id").primaryKey().unique().notNull().defaultRandom(),
+        userId: uuid("user_id").notNull(),
+        value: text("value").notNull(),
+        type: tokenTypeEnum().notNull(),
+
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at").defaultNow().notNull()
+    }
+);
+
+// define relationships
+export const tokenRelations = relations(tokenSchema, ({ one }) => ({
+    user: one(userSchema, { fields: [tokenSchema.userId], references: [userSchema.id] })
+}));
+
+// export the types
+export type SelectableToken = InferSelectModel<typeof tokenSchema>;
+export type InsertableToken = InferInsertModel<typeof tokenSchema>;
+<%_ } _%>
+<%_ if (database === "mysql") { _%>
+import { type InferInsertModel, type InferSelectModel, relations } from "drizzle-orm";
+import { mysqlTable, text, timestamp, mysqlEnum, int } from "drizzle-orm/mysql-core";
+
+import { userSchema } from "./user-schema.js";
+import { TokenEnum } from "../../src/types/enums/token-enum.js";
+
+// create token enum type
+const tokenTypeEnum = mysqlEnum(Object.values(TokenEnum) as [string, ...string[]]);
+
+// schema definition for MySQL
+export const tokenSchema = mysqlTable(
+    "token",
+    {
+        id: int("id").primaryKey().autoincrement(),
+        userId: int("user_id").notNull(),
+        value: text("value").notNull(),
+        type: tokenTypeEnum.notNull(),
+
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at").defaultNow().notNull()
+    }
+);
+
+// define relationships
+export const tokenRelations = relations(tokenSchema, ({ one }) => ({
+    user: one(userSchema, { fields: [tokenSchema.userId], references: [userSchema.id] })
+}));
+
+// export the types
+export type SelectableToken = InferSelectModel<typeof tokenSchema>;
+export type InsertableToken = InferInsertModel<typeof tokenSchema>;
+<%_ } _%>
+<%_ } _%>    
