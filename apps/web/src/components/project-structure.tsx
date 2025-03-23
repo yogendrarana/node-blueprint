@@ -2,15 +2,22 @@ import React from "react";
 import { FileType, generateProjectStructure } from "@/lib/helpers";
 import { ChevronDown, ChevronRight, Folder, FolderOpen, File } from "lucide-react";
 
-export default function ProjectStructure({ name, orm }: { name: string; orm: string }) {
+export interface ProjectConfig {
+    name: string;
+    orm: string;
+    framework: string;
+    features: string[];
+}
+
+export default function ProjectStructure({ name, orm, framework, features }: ProjectConfig) {
     const [structure, setStructure] = React.useState<FileType[]>([]);
     const [expandedFolders, setExpandedFolders] = React.useState<Set<string>>(new Set());
 
     React.useEffect(() => {
-        const s = generateProjectStructure({ name, orm });
-        console.log(s);
+        const s = generateProjectStructure({ name, framework, orm, features });
+        console.log(features);
         setStructure(s);
-    }, [name, orm]);
+    }, [name, orm, features, framework]);
 
     // toggle folder open/close
     const toggleFolder = (path: string) => {

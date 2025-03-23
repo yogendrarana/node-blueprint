@@ -1,3 +1,5 @@
+import { ProjectConfig } from "@/components/project-structure";
+
 export interface FileType {
     name: string;
     type: "file" | "directory";
@@ -31,11 +33,10 @@ const sortFileStructure = (a: FileType, b: FileType): number => {
 
 export const generateProjectStructure = ({
     name,
-    orm
-}: {
-    name: string;
-    orm: string;
-}): FileType[] => {
+    framework,
+    orm,
+    features
+}: ProjectConfig): FileType[] => {
     const baseStructure: FileType[] = [
         {
             name: name,
@@ -54,23 +55,38 @@ export const generateProjectStructure = ({
                         { name: "routers.ts", type: "file" },
                         { name: "server.ts", type: "file" },
                         {
-                            name: "controllers",
-                            type: "directory",
-                            children: [
-                                {
-                                    name: "user.controller.ts",
-                                    type: "file"
-                                }
-                            ]
-                        },
-                        {
                             name: "routes",
                             type: "directory",
                             children: [
                                 {
-                                    name: "user.routes.ts",
+                                    name: "user-routes.ts",
                                     type: "file"
-                                }
+                                },
+                                ...(features?.includes("auth")
+                                    ? [{ name: "auth-routes.ts", type: "file" } as const]
+                                    : [])
+                            ]
+                        },
+                        {
+                            name: "controllers",
+                            type: "directory",
+                            children: [
+                                {
+                                    name: "user-controller.ts",
+                                    type: "file"
+                                },
+                                ...(features?.includes("auth")
+                                    ? [{ name: "auth-controller.ts", type: "file" } as const]
+                                    : [])
+                            ]
+                        },
+                        {
+                            name: "middlewares",
+                            type: "directory",
+                            children: [
+                                ...(framework === "express"
+                                    ? [{ name: "error-middleware.ts", type: "file" } as const]
+                                    : [])
                             ]
                         },
                         {
@@ -78,15 +94,62 @@ export const generateProjectStructure = ({
                             type: "directory",
                             children: [
                                 {
-                                    name: "env.config.ts",
+                                    name: "env.ts",
                                     type: "file"
-                                }
+                                },
+                                ...(framework === "express"
+                                    ? [{ name: "logger.ts", type: "file" } as const]
+                                    : []),
+                                ...(orm === "mongoose"
+                                    ? [{ name: "db.ts", type: "file" } as const]
+                                    : [])
                             ]
                         },
                         {
                             name: "views",
                             type: "directory",
-                            children: [{ name: "home.ejs", type: "file" }]
+                            children: [{ name: "index.ejs", type: "file" }]
+                        },
+                        {
+                            name: "services",
+                            type: "directory",
+                            children: [
+                                {
+                                    name: "user-service.ts",
+                                    type: "file"
+                                },
+                                ...(features?.includes("auth")
+                                    ? [{ name: "auth-service.ts", type: "file" } as const]
+                                    : [])
+                            ]
+                        },
+                        {
+                            name: "types",
+                            type: "directory",
+                            children: [
+                                {
+                                    name: "enums",
+                                    type: "directory",
+                                    children: [
+                                        ...(features.includes("auth") && orm !== "prisma"
+                                            ? [
+                                                  { name: "token-enum.ts", type: "file" } as const,
+                                                  { name: "role-enum.ts", type: "file" } as const
+                                              ]
+                                            : [])
+                                    ]
+                                },
+                                {
+                                    name: "interfaces",
+                                    type: "directory",
+                                    children: []
+                                }
+                            ]
+                        },
+                        {
+                            name: "utils",
+                            type: "directory",
+                            children: []
                         }
                     ]
                 }
@@ -103,12 +166,14 @@ export const generateProjectStructure = ({
             name: "prisma",
             type: "directory",
             children: [
-                { name: "index.ts", type: "file" },
+                { name: "prisma-client.ts", type: "file" },
                 { name: "schema.prisma", type: "file" },
                 { name: "seed.ts", type: "file" }
             ]
         });
-    } else if (orm === "drizzle") {
+    }
+
+    if (orm === "drizzle") {
         mainDir.children.push(
             { name: "drizzle.config.ts", type: "file" },
             {
@@ -123,9 +188,12 @@ export const generateProjectStructure = ({
                         type: "directory",
                         children: [
                             {
-                                name: "user.schema.ts",
+                                name: "user-schema.ts",
                                 type: "file"
-                            }
+                            },
+                            ...(features?.includes("auth")
+                                ? [{ name: "token-schema.ts", type: "file" } as const]
+                                : [])
                         ]
                     }
                 ]
@@ -133,15 +201,31 @@ export const generateProjectStructure = ({
         );
     }
 
+    if (orm === "mongoose") {
+        (mainDir.children.find((c) => c.name === "src")?.children ?? []).push({
+            name: "models",
+            type: "directory",
+            children: [
+                {
+                    name: "user-model.ts",
+                    type: "file"
+                },
+                {
+                    name: "seed.ts",
+                    type: "file"
+                },
+                ...(features?.includes("auth") ? [{ name: "token-model.ts", type: "file" }] : [])
+            ]
+        } as FileType);
+    }
+
     // Sort the children of the root directory and any subdirectories
     const sortDirectory = (dir: FileType) => {
         if (dir.children) {
-            // Sort files and directories
             dir.children.sort(sortFileStructure);
-            // Recursively sort any subdirectories
             dir.children.forEach((child) => {
                 if (child.type === "directory") {
-                    sortDirectory(child); // Recursively sort subdirectories
+                    sortDirectory(child);
                 }
             });
         }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
@@ -6,7 +6,7 @@ import { Switch } from "./ui/switch";
 import ProjectStructure from "./project-structure";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Copy, Check, Terminal, PartyPopper, ChevronDown } from "lucide-react";
-import { frameworks, orms, databases } from "@/constants/constants";
+import { frameworks, orms, databases, features } from "@/constants/constants";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,6 +16,7 @@ import {
 import NPM from "./icons/npm";
 import Yarn from "./icons/yarn";
 import Pnpm from "./icons/pnpm";
+import { Checkbox } from "./ui/checkbox";
 
 const packageManagers = [
     {
@@ -38,17 +39,19 @@ const packageManagers = [
 export default function SiteBody() {
     const [copied, setCopied] = useState(false);
     const [shortFlag, setShortFlags] = useState(false);
+    const [projectName, setProjectName] = useState("");
     const [selectedOrm, setSelectedOrm] = useState<string>("");
     const [selectedDatabase, setSelectedDatabase] = useState<string>("");
+    const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
     const [selectedFramework, setSelectedFramework] = useState<string>("");
-    const [projectName, setProjectName] = useState("node-blueprint-starter");
     const [selectedPackageManager, setSelectedPackageManager] = useState("npm");
 
-    const getCommand = () => {
-        // Update command with package manager
-        let command = `${selectedPackageManager} create node-blueprint ${
-            shortFlag ? "-n" : "--name"
-        } ${projectName}`;
+    const command = React.useMemo(() => {
+        let command = `${selectedPackageManager} create node-blueprint`;
+
+        if (projectName) {
+            command += ` ${shortFlag ? "-n" : "--name"} ${projectName}`;
+        }
 
         if (selectedFramework) {
             command += ` ${shortFlag ? "-f" : "--framework"} ${selectedFramework}`;
@@ -62,11 +65,25 @@ export default function SiteBody() {
             command += ` ${shortFlag ? "-o" : "--orm"} ${selectedOrm}`;
         }
 
+        if (selectedFeatures.length) {
+            selectedFeatures.forEach((feat) => {
+                command += ` ${shortFlag ? "-f" : "--features"} ${feat}`;
+            });
+        }
+
         return command;
-    };
+    }, [
+        projectName,
+        selectedDatabase,
+        selectedFeatures,
+        selectedFramework,
+        selectedOrm,
+        selectedPackageManager,
+        shortFlag
+    ]);
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(getCommand());
+        navigator.clipboard.writeText(command);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -139,7 +156,7 @@ export default function SiteBody() {
                     </button>
                 </div>
                 <div className="text-green-400 font-mono overflow-x-auto p-2 px-0 text-sm flex justify-between items-center">
-                    {getCommand()}
+                    {command}
                 </div>
             </div>
 
@@ -159,15 +176,15 @@ export default function SiteBody() {
                 </div>
                 <input
                     value={projectName}
-                    placeholder="node-blueprint-starter"
+                    placeholder="project-name"
                     onChange={(e) => setProjectName(e.target.value)}
                     className="w-full border mb-8 px-4 py-2 rounded-md"
                 />
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="grid md:grid-cols-4 gap-4 mb-12">
                 <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Framework</h3>
+                    <h3 className="text-lg font-semibold">Framework *</h3>
                     <RadioGroup
                         className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="framework"
@@ -212,18 +229,13 @@ export default function SiteBody() {
                 </div>
 
                 <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Database</h3>
+                    <h3 className="text-lg font-semibold">Database *</h3>
                     <RadioGroup
                         className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="database"
                         value={selectedDatabase}
                         onValueChange={(value: string) => {
-                            if (value === "mongodb" && selectedOrm === "drizzle") {
-                                setSelectedOrm("");
-                            } else if (
-                                (value === "mysql" || value === "postgres") &&
-                                selectedOrm === "mongoose"
-                            ) {
+                            if (selectedOrm) {
                                 setSelectedOrm("");
                             }
                             setSelectedDatabase(value);
@@ -243,9 +255,8 @@ export default function SiteBody() {
                                         id={option.flag}
                                         value={option.flag}
                                         className="after:absolute after:inset-0"
-                                        disabled={option.status !== "available"}
                                     />
-                                    <Label htmlFor={option.flag} className="ml-2">
+                                    <Label htmlFor={option.flag} className={cn("ml-2")}>
                                         {option.label}
                                     </Label>
                                     {option.status === "coming-soon" && (
@@ -267,7 +278,7 @@ export default function SiteBody() {
                 </div>
 
                 <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">ORM</h3>
+                    <h3 className="text-lg font-semibold">ORM *</h3>
                     <RadioGroup
                         className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="orm"
@@ -291,7 +302,8 @@ export default function SiteBody() {
                                         disabled={
                                             option.status !== "available" ||
                                             (selectedDatabase === "mongodb" &&
-                                                option.flag === "drizzle") ||
+                                                (option.flag === "drizzle" ||
+                                                    option.flag === "prisma")) ||
                                             ((selectedDatabase === "mysql" ||
                                                 selectedDatabase === "postgres") &&
                                                 option.flag === "mongoose")
@@ -303,7 +315,8 @@ export default function SiteBody() {
                                             "text-muted-foreground opacity-50":
                                                 option.status !== "available" ||
                                                 (selectedDatabase === "mongodb" &&
-                                                    option.flag === "drizzle") ||
+                                                    (option.flag === "drizzle" ||
+                                                        option.flag === "prisma")) ||
                                                 ((selectedDatabase === "mysql" ||
                                                     selectedDatabase === "postgres") &&
                                                     option.flag === "mongoose")
@@ -328,13 +341,76 @@ export default function SiteBody() {
                         ))}
                     </RadioGroup>
                 </div>
+
+                <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">
+                        Features <sup className="text-gray-500">(optional)</sup>
+                    </h3>
+                    <div className="gap-0 -space-y-px rounded-md shadow-xs">
+                        {features.map((option, index) => (
+                            <div
+                                key={index}
+                                className={cn(
+                                    "border border-input relative outline-none",
+                                    "first:rounded-t-md last:rounded-b-md ",
+                                    "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
+                                )}
+                            >
+                                <div className={cn("h-12 px-3 flex gap-2 items-center")}>
+                                    <Checkbox
+                                        id={option.flag}
+                                        value={option.flag}
+                                        className="after:absolute after:inset-0"
+                                        disabled={option.status !== "available"}
+                                        onCheckedChange={() => {
+                                            if (selectedFeatures.includes(option.flag)) {
+                                                setSelectedFeatures(
+                                                    selectedFeatures.filter(
+                                                        (feature) => feature !== option.flag
+                                                    )
+                                                );
+                                            } else {
+                                                setSelectedFeatures([
+                                                    ...selectedFeatures,
+                                                    option.flag
+                                                ]);
+                                            }
+                                        }}
+                                    />
+                                    <Label
+                                        htmlFor={option.flag}
+                                        className={cn("ml-2", {
+                                            "text-muted-foreground opacity-50":
+                                                option.status !== "available"
+                                        })}
+                                    >
+                                        {option.label}
+                                    </Label>
+                                    {option.status === "coming-soon" && (
+                                        <div className="ml-auto text-muted-foreground text-xs">
+                                            <Badge
+                                                className={cn("border border-gray-200", {
+                                                    "text-gray-600": option.status === "coming-soon"
+                                                })}
+                                                variant="outline"
+                                            >
+                                                {option.status}
+                                            </Badge>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             {/* Project Structure Preview */}
             <div>
                 <h3 className="text-lg font-semibold">Project Structure Preview</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                    This is what your project will look like after running the command.
+                    This is what your project will look like after running the command. Don't worry,
+                    you can always restructure your project to your liking.
                 </p>
 
                 <div className="border border-border rounded-md overflow-hidden bg-white shadow-sm">
@@ -342,7 +418,12 @@ export default function SiteBody() {
                         Project Structure
                     </div>
                     <div className="p-4 overflow-y-auto">
-                        <ProjectStructure name={projectName} orm={selectedOrm} />
+                        <ProjectStructure
+                            name={projectName}
+                            framework={selectedFramework}
+                            orm={selectedOrm}
+                            features={selectedFeatures}
+                        />
                     </div>
                 </div>
             </div>

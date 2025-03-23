@@ -21,3 +21,13 @@ export const orms: CommandOption[] = [
     { id: "prisma", label: "Prisma", flag: "prisma", status: "available" },
     { id: "mongoose", label: "Mongoose", flag: "mongoose", status: "available" }
 ];
+
+export const features: CommandOption[] = [
+    { id: "auth", label: "Basic jwt authentication", flag: "auth", status: "available" },
+    {
+        id: "docker",
+        label: "Docker setup",
+        flag: "docker",
+        status: "coming-soon"
+    }
+];
