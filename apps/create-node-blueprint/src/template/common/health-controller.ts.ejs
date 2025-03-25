@@ -1,0 +1,54 @@
+<%_ if (orm === 'drizzle') { _%>
+import { sql } from 'drizzle-orm' 
+import db from "../../drizzle/index.js";
+<%_ } _%>
+<%_ if (orm === 'prisma') { _%>
+import prisma from "../../prisma/prisma-client.js";
+<%_ } _%>
+<%_ if (orm === 'mongoose') { _%>
+import mongoose from "mongoose";
+<%_ } _%>
+import type { NextFunction, Request, Response } from "express";
+
+// app health route
+export const appHealthCheck = (req: Request, res: Response) => {
+    res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        message: 'Application is running'
+    });
+};
+
+
+// db health route
+export const dbHealthCheck = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        <%_ if (orm === 'drizzle') { _%>
+        // Attempt to perform a simple query to check database connection
+        await db.execute(sql`SELECT 1`)
+        <%_ } _%>
+        <%_ if (orm === 'prisma') { _%>    
+        // Attempt to perform a simple query to check database connection
+        await prisma.$queryRaw`SELECT 1`;  
+        <%_ } _%>
+        <%_ if (orm === 'mongoose') { _%>
+        // Check mongoose connection state
+        await mongoose.connection.db.admin().ping();
+        <%_ } _%>
+
+        // Successful database connection
+        res.status(200).json({
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            message: 'Database is healthy and responsive'
+        });
+    } catch (error: any) {
+        res.status(503).json({
+            status: 'unhealthy',
+            timestamp: new Date().toISOString(),
+            message: 'Database connection failed',
+            error: error instanceof Error ? error.message : 'Unknown database connection error'
+        });
+    }
+};

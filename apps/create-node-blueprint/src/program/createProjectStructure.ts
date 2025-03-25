@@ -3,8 +3,16 @@ import { ProjectConfig } from "../types/types.js";
 import { ensureDirExists, createFileWithContent } from "../utils/utils.js";
 import { ITemplateConfig, TemplaterKey, TemplaterMap } from "../services/templater.js";
 
+interface ExtraConfig {
+    root: string;
+    pkgManager: string;
+    pkgLock: string;
+}
+
+const nodeVersion = process.versions.node.split(".")[0];
+
 // main function to create the project files and folders and populates the files with the correct content
-export const createProjectStructure = async (config: ProjectConfig, { root }: { root: string }): Promise<void> => {
+export const createProjectStructure = async (config: ProjectConfig, { root, pkgManager, pkgLock }: ExtraConfig): Promise<void> => {
     try {
         // ensure folders
         await ensureDirExists(path.resolve(root, "src"));
@@ -29,6 +37,21 @@ export const createProjectStructure = async (config: ProjectConfig, { root }: { 
         await createFileAndInjectContent(root, "", "tsconfig.json", "base", "tsconfig", config);
         await createFileAndInjectContent(root, "src/config", "env.ts", "base", "envTs", config);
         await createFileAndInjectContent(root, "src/views", "index.ejs", "base", "indexEjs", config);
+        if (config.features.includes("docker")) {
+            await createFileAndInjectContent(root, "", "Dockerfile", "base", "dockerFile", {
+                pkgManager,
+                nodeVersion,
+                pkgLock
+            });
+            await createFileAndInjectContent(root, "", "docker-compose.yml", "base", "dockerComposeYml", {
+                ...config,
+                nodeVersion,
+                pgVersion: "16",
+                mysqlVersion: "8",
+                mongoVersion: "7"
+            });
+            await createFileAndInjectContent(root, "", ".dockerignore", "base", "dockerIgnore", config);
+        }
 
         // create files common for all frameworks
         await createFileAndInjectContent(root, "src", "app.ts", "common", "appTs", config);
@@ -36,6 +59,8 @@ export const createProjectStructure = async (config: ProjectConfig, { root }: { 
         await createFileAndInjectContent(root, "src", "router.ts", "common", "routerTs", config);
         await createFileAndInjectContent(root, "src/routes", "user-routes.ts", "common", "userRoutesTs", config);
         await createFileAndInjectContent(root, "src/controllers", "user-controller.ts", "common", "userControllerTs", config);
+        await createFileAndInjectContent(root, "src/routes", "health-routes.ts", "common", "healthRoutesTs", config);
+        await createFileAndInjectContent(root, "src/controllers", "health-controller.ts", "common", "healthControllerTs", config);
         if (config.features.includes("auth")) {
             await createFileAndInjectContent(root, "src/routes", "auth-routes.ts", "common", "authRoutesTs", config);
             await createFileAndInjectContent(root, "src/validations", "user-validations.ts", "common", "userValidationsTs", config);
@@ -105,7 +130,7 @@ const createFileAndInjectContent = async (
     fileToCreate: string,
     type: TemplaterKey,
     fileMethodKey: keyof ITemplateConfig["templater"],
-    config: ProjectConfig
+    config: ProjectConfig | Record<string, any>
 ): Promise<void> => {
     try {
         // Retrieve the correct templater function

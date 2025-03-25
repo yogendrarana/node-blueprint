@@ -2,7 +2,7 @@ import { ProjectConfig } from "../types/types.js";
 import { readTemplateFile } from "../utils/utils.js";
 
 export type TemplaterKey = "base" | "common" | "express" | "drizzle" | "prisma" | "mongoose";
-export type TemplaterFunctionType = (options: ProjectConfig) => Promise<string>;
+export type TemplaterFunctionType = (options: ProjectConfig | Record<string, unknown>) => Promise<string>;
 
 export interface ITemplateConfig {
     name: string;
@@ -19,7 +19,10 @@ export const TemplaterMap: Record<TemplaterKey, ITemplateConfig> = {
             tsconfig: (options) => readTemplateFile("base/tsconfig.json.ejs", options),
             readme: (options) => readTemplateFile("base/README.md.ejs", options),
             indexEjs: (options) => readTemplateFile("base/index.ejs", options),
-            envTs: (options) => readTemplateFile("base/env.ts.ejs", options)
+            envTs: (options) => readTemplateFile("base/env.ts.ejs", options),
+            dockerFile: (options) => readTemplateFile("base/docker-file.ejs", options),
+            dockerIgnore: (options) => readTemplateFile("base/.dockerignore.ejs", options),
+            dockerComposeYml: (options) => readTemplateFile("base/docker-compose.yml.ejs", options)
         }
     },
 
@@ -37,7 +40,11 @@ export const TemplaterMap: Record<TemplaterKey, ITemplateConfig> = {
             userValidationsTs: (options) => readTemplateFile("common/user-validations.ts.ejs", options),
             authServicesTs: (options) => readTemplateFile("common/auth-services.ts.ejs", options),
             roleEnumTs: (options) => readTemplateFile("common/role-enum.ts.ejs", options),
-            tokenEnumTs: (options) => readTemplateFile("common/token-enum.ts.ejs", options)
+            tokenEnumTs: (options) => readTemplateFile("common/token-enum.ts.ejs", options),
+            dockerFile: (options) => readTemplateFile("common/docker-file.ejs", options),
+            dockerComposeYml: (options) => readTemplateFile("common/docker-compose.yml.ejs", options),
+            healthRoutesTs: (option) => readTemplateFile("common/health-routes.ts.ejs", option),
+            healthControllerTs: (options) => readTemplateFile("common/health-controller.ts.ejs", options)
         }
     },
 

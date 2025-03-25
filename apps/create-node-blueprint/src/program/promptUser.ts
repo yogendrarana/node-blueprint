@@ -58,7 +58,10 @@ export async function promptUser(): Promise<ProjectConfig> {
         // auth
         const features = await checkbox({
             message: "Select additional features",
-            choices: [{ name: "Include basic jwt authentication", value: "auth" }]
+            choices: [
+                { name: "Include basic jwt authentication", value: "auth" },
+                { name: "Include Docker setup", value: "docker" }
+            ]
         });
 
         return { projectName, framework, database, orm, features };

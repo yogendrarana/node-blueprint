@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import { promisify } from "node:util";
 import { exec } from "node:child_process";
 import { ProjectConfig } from "../types/types.js";
-import { packageManagerCommands } from "../utils/utils.js";
+import { packageManagerConfig } from "../utils/utils.js";
 
 const execAsync = promisify(exec);
 
@@ -33,7 +33,7 @@ export async function createPackageJson(config: ProjectConfig, { root, pkgManage
 }
 
 async function installDependencies(root: string, config: ProjectConfig, pkgManager: string) {
-    const pkgManagerCommands = packageManagerCommands(pkgManager || "npm");
+    const pkgManagerCommands = packageManagerConfig(pkgManager || "npm").commands;
 
     const dependencies = [
         "cookie-parser",
