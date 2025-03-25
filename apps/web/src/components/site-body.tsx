@@ -1,22 +1,18 @@
 import React, { useState } from "react";
+
+import NPM from "./icons/npm";
+import Yarn from "./icons/yarn";
+import Pnpm from "./icons/pnpm";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
+import { Checkbox } from "./ui/checkbox";
 import ProjectStructure from "./project-structure";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Copy, Check, Terminal, PartyPopper, ChevronDown } from "lucide-react";
 import { frameworks, orms, databases, features } from "@/constants/constants";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import NPM from "./icons/npm";
-import Yarn from "./icons/yarn";
-import Pnpm from "./icons/pnpm";
-import { Checkbox } from "./ui/checkbox";
+import { Copy, Check, Terminal, PartyPopper, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const packageManagers = [
     {
@@ -72,15 +68,7 @@ export default function SiteBody() {
         }
 
         return command;
-    }, [
-        projectName,
-        selectedDatabase,
-        selectedFeatures,
-        selectedFramework,
-        selectedOrm,
-        selectedPackageManager,
-        shortFlag
-    ]);
+    }, [projectName, selectedDatabase, selectedFeatures, selectedFramework, selectedOrm, selectedPackageManager, shortFlag]);
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(command);
@@ -91,19 +79,13 @@ export default function SiteBody() {
     return (
         <main className="py-12 md:py-20">
             <div className="mb-20 flex flex-col gap-6 items-center text-center">
-                <Badge
-                    variant="outline"
-                    className="py-1 px-4 flex gap-3 text-sm bg-slate-100 text-slate-800 hover:bg-slate-100 rounded-full"
-                >
+                <Badge variant="outline" className="py-1 px-4 flex gap-3 text-sm bg-slate-100 text-slate-800 hover:bg-slate-100 rounded-full">
                     <PartyPopper className="h-3 w-3" />
                     simple. fast. modern.
                 </Badge>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
-                    Set up your Node.js project in seconds
-                </h1>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Set up your Node.js project in seconds</h1>
                 <p className="text-sm sm:text-lg text-slate-600 max-w-3xl">
-                    Node Blueprint helps you scaffold Node.js applications with your preferred
-                    framework, database, and ORM in just one command.
+                    Node Blueprint helps you scaffold Node.js applications with your preferred framework, database, and ORM in just one command.
                 </p>
             </div>
 
@@ -121,11 +103,7 @@ export default function SiteBody() {
                             className="ml-auto mr-2 flex items-center cursor-pointer gap-1 px-2 py-1 text-sm text-white bg-gray-800 rounded hover:bg-gray-700 ring-0"
                         >
                             <button className="flex items-center gap-2">
-                                {
-                                    packageManagers.find(
-                                        (manager) => manager.value === selectedPackageManager
-                                    )?.icon
-                                }
+                                {packageManagers.find((manager) => manager.value === selectedPackageManager)?.icon}
                                 {selectedPackageManager}
                                 <ChevronDown size={14} />
                             </button>
@@ -139,9 +117,7 @@ export default function SiteBody() {
                                 >
                                     {manager.icon}
                                     {manager.name}
-                                    {selectedPackageManager === manager.value && (
-                                        <Check className="h-4 w-4" />
-                                    )}
+                                    {selectedPackageManager === manager.value && <Check className="h-4 w-4" />}
                                 </DropdownMenuItem>
                             ))}
                         </DropdownMenuContent>
@@ -155,9 +131,7 @@ export default function SiteBody() {
                         {copied ? <Check size={12} /> : <Copy size={12} />}
                     </button>
                 </div>
-                <div className="text-green-400 font-mono overflow-x-auto p-2 px-0 text-sm flex justify-between items-center">
-                    {command}
-                </div>
+                <div className="text-green-400 font-mono overflow-x-auto p-2 px-0 text-sm flex justify-between items-center">{command}</div>
             </div>
 
             {/* input name */}
@@ -165,12 +139,7 @@ export default function SiteBody() {
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Project Name</h3>
                     <div className="flex items-center space-x-2">
-                        <Switch
-                            id="switch-flag-length"
-                            checked={shortFlag}
-                            className="cursor-pointer"
-                            onCheckedChange={setShortFlags}
-                        />
+                        <Switch id="switch-flag-length" checked={shortFlag} className="cursor-pointer" onCheckedChange={setShortFlags} />
                         <Label htmlFor="switch-flag-length">Use shorts cli flags</Label>
                     </div>
                 </div>
@@ -251,11 +220,7 @@ export default function SiteBody() {
                                 )}
                             >
                                 <div className={cn("h-12 px-3 flex gap-2 items-center")}>
-                                    <RadioGroupItem
-                                        id={option.flag}
-                                        value={option.flag}
-                                        className="after:absolute after:inset-0"
-                                    />
+                                    <RadioGroupItem id={option.flag} value={option.flag} className="after:absolute after:inset-0" />
                                     <Label htmlFor={option.flag} className={cn("ml-2")}>
                                         {option.label}
                                     </Label>
@@ -301,12 +266,8 @@ export default function SiteBody() {
                                         className="after:absolute after:inset-0"
                                         disabled={
                                             option.status !== "available" ||
-                                            (selectedDatabase === "mongodb" &&
-                                                (option.flag === "drizzle" ||
-                                                    option.flag === "prisma")) ||
-                                            ((selectedDatabase === "mysql" ||
-                                                selectedDatabase === "postgres") &&
-                                                option.flag === "mongoose")
+                                            (selectedDatabase === "mongodb" && (option.flag === "drizzle" || option.flag === "prisma")) ||
+                                            ((selectedDatabase === "mysql" || selectedDatabase === "postgres") && option.flag === "mongoose")
                                         }
                                     />
                                     <Label
@@ -314,12 +275,8 @@ export default function SiteBody() {
                                         className={cn("ml-2", {
                                             "text-muted-foreground opacity-50":
                                                 option.status !== "available" ||
-                                                (selectedDatabase === "mongodb" &&
-                                                    (option.flag === "drizzle" ||
-                                                        option.flag === "prisma")) ||
-                                                ((selectedDatabase === "mysql" ||
-                                                    selectedDatabase === "postgres") &&
-                                                    option.flag === "mongoose")
+                                                (selectedDatabase === "mongodb" && (option.flag === "drizzle" || option.flag === "prisma")) ||
+                                                ((selectedDatabase === "mysql" || selectedDatabase === "postgres") && option.flag === "mongoose")
                                         })}
                                     >
                                         {option.label}
@@ -364,24 +321,16 @@ export default function SiteBody() {
                                         disabled={option.status !== "available"}
                                         onCheckedChange={() => {
                                             if (selectedFeatures.includes(option.flag)) {
-                                                setSelectedFeatures(
-                                                    selectedFeatures.filter(
-                                                        (feature) => feature !== option.flag
-                                                    )
-                                                );
+                                                setSelectedFeatures(selectedFeatures.filter((feature) => feature !== option.flag));
                                             } else {
-                                                setSelectedFeatures([
-                                                    ...selectedFeatures,
-                                                    option.flag
-                                                ]);
+                                                setSelectedFeatures([...selectedFeatures, option.flag]);
                                             }
                                         }}
                                     />
                                     <Label
                                         htmlFor={option.flag}
                                         className={cn("ml-2", {
-                                            "text-muted-foreground opacity-50":
-                                                option.status !== "available"
+                                            "text-muted-foreground opacity-50": option.status !== "available"
                                         })}
                                     >
                                         {option.label}
@@ -409,21 +358,14 @@ export default function SiteBody() {
             <div>
                 <h3 className="text-lg font-semibold">Project Structure Preview</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                    This is what your project will look like after running the command. Don't worry,
-                    you can always restructure your project to your liking.
+                    This is what your project will look like after running the command. Don't worry, you can always restructure your project to your
+                    liking.
                 </p>
 
                 <div className="border border-border rounded-md overflow-hidden bg-white shadow-sm">
-                    <div className="border-b bg-gray-50 px-4 py-3 flex items-center">
-                        Project Structure
-                    </div>
+                    <div className="border-b bg-gray-50 px-4 py-3 flex items-center">Project Structure</div>
                     <div className="p-4 overflow-y-auto">
-                        <ProjectStructure
-                            name={projectName}
-                            framework={selectedFramework}
-                            orm={selectedOrm}
-                            features={selectedFeatures}
-                        />
+                        <ProjectStructure name={projectName} framework={selectedFramework} orm={selectedOrm} features={selectedFeatures} />
                     </div>
                 </div>
             </div>
