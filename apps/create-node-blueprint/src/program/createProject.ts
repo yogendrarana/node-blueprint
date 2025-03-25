@@ -30,7 +30,7 @@ export async function createProject(config: ProjectConfig): Promise<void> {
         // Then handle package.json creation and dependencies
         console.log("\n");
         spinner.text = "Installing dependencies...";
-        // await createPackageJson(config, { root, pkgManager: pkgInfo?.name || "npm" });
+        await createPackageJson(config, { root, pkgManager: pkgInfo?.name || "npm" });
 
         // Show success message
         spinner.succeed("Project setup completed!");
