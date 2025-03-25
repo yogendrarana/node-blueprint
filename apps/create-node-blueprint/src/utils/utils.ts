@@ -7,7 +7,11 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // get package manager from user agent
-export const packgeManageFromUserAgent = (userAgent: string | undefined) => {
+interface PackageManager {
+    name: string;
+    version: string;
+}
+export const packgeManageFromUserAgent = (userAgent: string | undefined): PackageManager | undefined => {
     if (!userAgent) {
         return undefined;
     }
@@ -22,13 +26,18 @@ export const packgeManageFromUserAgent = (userAgent: string | undefined) => {
     };
 };
 
-export const packageManagerCommands = (pkgManager: string) => {
+export const packageManagerConfig = (pkgManager: string) => {
     return {
-        install: `${pkgManager} install`,
-        dev: `${pkgManager}${pkgManager === "npm" ? " run" : ""} dev`,
-        add: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add" : "install"}`,
-        addDev: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add -D" : "install -D"}`,
-        exec: pkgManager === "npm" ? "npx" : pkgManager
+        commands: {
+            install: `${pkgManager} install`,
+            dev: `${pkgManager}${pkgManager === "npm" ? " run" : ""} dev`,
+            add: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add" : "install"}`,
+            addDev: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add -D" : "install -D"}`,
+            exec: pkgManager === "npm" ? "npx" : pkgManager
+        },
+        files: {
+            packageLockJson: pkgManager === "npm" ? "package-lock.json" : pkgManager === "pnpm" ? "pnpm-lock.ymlu" : "yarn.lock"
+        }
     };
 };
 
