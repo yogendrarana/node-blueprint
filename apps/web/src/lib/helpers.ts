@@ -31,12 +31,7 @@ const sortFileStructure = (a: FileType, b: FileType): number => {
     return 0;
 };
 
-export const generateProjectStructure = ({
-    name,
-    framework,
-    orm,
-    features
-}: ProjectConfig): FileType[] => {
+export const generateProjectStructure = ({ name, framework, orm, features }: ProjectConfig): FileType[] => {
     const baseStructure: FileType[] = [
         {
             name: name,
@@ -47,6 +42,13 @@ export const generateProjectStructure = ({
                 { name: ".gitignore", type: "file" },
                 { name: "tsconfig.json", type: "file" },
                 { name: "README.md", type: "file" },
+                ...(features.includes("docker")
+                    ? [
+                          { name: "Dockerfile", type: "file" } as const,
+                          { name: ".dockerignore", type: "file" } as const,
+                          { name: "docker-compose.yml", type: "file" } as const
+                      ]
+                    : []),
                 {
                     name: "src",
                     type: "directory",
@@ -62,9 +64,11 @@ export const generateProjectStructure = ({
                                     name: "user-routes.ts",
                                     type: "file"
                                 },
-                                ...(features?.includes("auth")
-                                    ? [{ name: "auth-routes.ts", type: "file" } as const]
-                                    : [])
+                                {
+                                    name: "health-routes.ts",
+                                    type: "file"
+                                },
+                                ...(features?.includes("auth") ? [{ name: "auth-routes.ts", type: "file" } as const] : [])
                             ]
                         },
                         {
@@ -75,19 +79,17 @@ export const generateProjectStructure = ({
                                     name: "user-controller.ts",
                                     type: "file"
                                 },
-                                ...(features?.includes("auth")
-                                    ? [{ name: "auth-controller.ts", type: "file" } as const]
-                                    : [])
+                                {
+                                    name: "health-controller.ts",
+                                    type: "file"
+                                },
+                                ...(features?.includes("auth") ? [{ name: "auth-controller.ts", type: "file" } as const] : [])
                             ]
                         },
                         {
                             name: "middlewares",
                             type: "directory",
-                            children: [
-                                ...(framework === "express"
-                                    ? [{ name: "error-middleware.ts", type: "file" } as const]
-                                    : [])
-                            ]
+                            children: [...(framework === "express" ? [{ name: "error-middleware.ts", type: "file" } as const] : [])]
                         },
                         {
                             name: "config",
@@ -97,12 +99,8 @@ export const generateProjectStructure = ({
                                     name: "env.ts",
                                     type: "file"
                                 },
-                                ...(framework === "express"
-                                    ? [{ name: "logger.ts", type: "file" } as const]
-                                    : []),
-                                ...(orm === "mongoose"
-                                    ? [{ name: "db.ts", type: "file" } as const]
-                                    : [])
+                                ...(framework === "express" ? [{ name: "logger.ts", type: "file" } as const] : []),
+                                ...(orm === "mongoose" ? [{ name: "db.ts", type: "file" } as const] : [])
                             ]
                         },
                         {
@@ -118,9 +116,7 @@ export const generateProjectStructure = ({
                                     name: "user-service.ts",
                                     type: "file"
                                 },
-                                ...(features?.includes("auth")
-                                    ? [{ name: "auth-service.ts", type: "file" } as const]
-                                    : [])
+                                ...(features?.includes("auth") ? [{ name: "auth-service.ts", type: "file" } as const] : [])
                             ]
                         },
                         {
@@ -132,10 +128,7 @@ export const generateProjectStructure = ({
                                     type: "directory",
                                     children: [
                                         ...(features.includes("auth") && orm !== "prisma"
-                                            ? [
-                                                  { name: "token-enum.ts", type: "file" } as const,
-                                                  { name: "role-enum.ts", type: "file" } as const
-                                              ]
+                                            ? [{ name: "token-enum.ts", type: "file" } as const, { name: "role-enum.ts", type: "file" } as const]
                                             : [])
                                     ]
                                 },
@@ -191,9 +184,7 @@ export const generateProjectStructure = ({
                                 name: "user-schema.ts",
                                 type: "file"
                             },
-                            ...(features?.includes("auth")
-                                ? [{ name: "token-schema.ts", type: "file" } as const]
-                                : [])
+                            ...(features?.includes("auth") ? [{ name: "token-schema.ts", type: "file" } as const] : [])
                         ]
                     }
                 ]

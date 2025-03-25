@@ -28,6 +28,6 @@ export const features: CommandOption[] = [
         id: "docker",
         label: "Docker setup",
         flag: "docker",
-        status: "coming-soon"
+        status: "available"
     }
 ];
