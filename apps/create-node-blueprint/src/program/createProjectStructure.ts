@@ -61,12 +61,12 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
         await createFileAndInjectContent(root, "src/controllers", "user-controller.ts", "common", "userControllerTs", config);
         await createFileAndInjectContent(root, "src/routes", "health-routes.ts", "common", "healthRoutesTs", config);
         await createFileAndInjectContent(root, "src/controllers", "health-controller.ts", "common", "healthControllerTs", config);
+        await createFileAndInjectContent(root, "src/types/enums", "role-enum.ts", "common", "roleEnumTs", config);
         if (config.features.includes("auth")) {
             await createFileAndInjectContent(root, "src/routes", "auth-routes.ts", "common", "authRoutesTs", config);
             await createFileAndInjectContent(root, "src/validations", "user-validations.ts", "common", "userValidationsTs", config);
             await createFileAndInjectContent(root, "src/services", "auth-services.ts", "common", "authServicesTs", config);
             if (config.orm !== "prisma") {
-                await createFileAndInjectContent(root, "src/types/enums", "role-enum.ts", "common", "roleEnumTs", config);
                 await createFileAndInjectContent(root, "src/types/enums", "token-enum.ts", "common", "tokenEnumTs", config);
             }
         }
