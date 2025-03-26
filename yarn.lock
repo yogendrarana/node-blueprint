@@ -2256,7 +2256,7 @@ cookie@^1.0.1:
   integrity sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==
 
 "create-node-blueprint@file:/home/yogendrarana/Yogendra/www/projects/node-blueprint/apps/create-node-blueprint":
-  version "1.1.0"
+  version "1.1.1"
   resolved "file:apps/create-node-blueprint"
   dependencies:
     "@inquirer/prompts" "^7.3.1"
