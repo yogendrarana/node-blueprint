@@ -134,7 +134,9 @@ export default function SiteBody() {
                     </button>
                 </div>
                 <div className="text-green-400 font-mono overflow-x-auto p-2 px-0 text-sm flex flex-col justify-between gap-1">
-                    <div className="text-gray-400">{selectedPackageManager === "npm" ? "# For npm 7+, extra double-dash is needed:" : ""}</div>
+                    {(projectName || selectedFramework || selectedDatabase || selectedOrm) && (
+                        <div className="text-gray-400">{selectedPackageManager === "npm" ? "# For npm 7+, extra double-dash is needed:" : ""}</div>
+                    )}
                     <div>{command}</div>
                 </div>
             </div>
