@@ -43,7 +43,9 @@ export default function SiteBody() {
     const [selectedPackageManager, setSelectedPackageManager] = useState("npm");
 
     const command = React.useMemo(() => {
-        let command = `${selectedPackageManager} create node-blueprint ${selectedPackageManager === "npm" ? "--" : ""}`;
+        let command = `${selectedPackageManager} create node-blueprint ${
+            selectedPackageManager === "npm" && (projectName || selectedFramework || selectedDatabase || selectedOrm) ? "--" : ""
+        }`;
 
         if (projectName) {
             command += ` ${shortFlag ? "-n" : "--name"} ${projectName}`;
