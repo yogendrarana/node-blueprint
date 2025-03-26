@@ -16,6 +16,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 const packageManagers = [
     {
+        name: "npx",
+        value: "npx",
+        icon: <Terminal className="h-4 w-4" />
+    },
+    {
         name: "npm",
         value: "npm",
         icon: <NPM className="h-4 w-4" />
@@ -40,10 +45,10 @@ export default function SiteBody() {
     const [selectedDatabase, setSelectedDatabase] = useState<string>("");
     const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
     const [selectedFramework, setSelectedFramework] = useState<string>("");
-    const [selectedPackageManager, setSelectedPackageManager] = useState("npm");
+    const [selectedPackageManager, setSelectedPackageManager] = useState("npx");
 
     const command = React.useMemo(() => {
-        let command = `${selectedPackageManager} create node-blueprint ${
+        let command = `${selectedPackageManager} ${selectedPackageManager === "npx" ? "create-node-blueprint" : "create node-blueprint"} ${
             selectedPackageManager === "npm" && (projectName || selectedFramework || selectedDatabase || selectedOrm) ? "--" : ""
         }`;
 
