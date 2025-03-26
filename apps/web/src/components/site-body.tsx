@@ -63,7 +63,7 @@ export default function SiteBody() {
 
         if (selectedFeatures.length) {
             selectedFeatures.forEach((feat) => {
-                command += ` ${shortFlag ? "-f" : "--features"} ${feat}`;
+                command += ` --features ${feat}`;
             });
         }
 
