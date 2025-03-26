@@ -43,7 +43,7 @@ export default function SiteBody() {
     const [selectedPackageManager, setSelectedPackageManager] = useState("npm");
 
     const command = React.useMemo(() => {
-        let command = `${selectedPackageManager} create node-blueprint`;
+        let command = `${selectedPackageManager} create node-blueprint ${selectedPackageManager === "npm" ? "--" : ""}`;
 
         if (projectName) {
             command += ` ${shortFlag ? "-n" : "--name"} ${projectName}`;
@@ -131,7 +131,10 @@ export default function SiteBody() {
                         {copied ? <Check size={12} /> : <Copy size={12} />}
                     </button>
                 </div>
-                <div className="text-green-400 font-mono overflow-x-auto p-2 px-0 text-sm flex justify-between items-center">{command}</div>
+                <div className="text-green-400 font-mono overflow-x-auto p-2 px-0 text-sm flex flex-col justify-between gap-1">
+                    <div className="text-gray-400">{selectedPackageManager === "npm" ? "# For npm 7+, extra double-dash is needed:" : ""}</div>
+                    <div>{command}</div>
+                </div>
             </div>
 
             {/* input name */}
