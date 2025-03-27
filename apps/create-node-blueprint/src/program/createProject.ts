@@ -10,14 +10,17 @@ export async function createProject(config: ProjectConfig): Promise<void> {
     const cwd = process.cwd();
     const root = path.join(cwd, config.projectName);
 
-    const spinner = ora().start("\n");
+    console.log("\n");
+    const spinner = ora("\nCreating project...").start();
     const pkgInfo = packgeManageFromUserAgent(process.env.npm_config_user_agent);
 
     try {
         // Validate project directory
         if (await checkDirExists(root)) {
-            spinner.fail(`Directory "${config.projectName}" already exists.`);
-            process.exit(1);
+            spinner.stop();
+            console.log("\n");
+            spinner.fail(`Directory "${config.projectName}" already exists. Please choose a different project name.`);
+            process.exit(0);
         }
 
         const pmCommands = packageManagerConfig(pkgInfo?.name || "npm");
@@ -28,9 +31,9 @@ export async function createProject(config: ProjectConfig): Promise<void> {
         await createProjectStructure(config, { root, pkgManager: pkgInfo?.name || "npm", pkgLock: pmCommands.files.packageLockJson });
 
         // Then handle package.json creation and dependencies
-        console.log("\n");
         spinner.text = "Installing dependencies...";
         await createPackageJson(config, { root, pkgManager: pkgInfo?.name || "npm" });
+        spinner.stop();
 
         // Show success message
         spinner.succeed("Project setup completed!");
