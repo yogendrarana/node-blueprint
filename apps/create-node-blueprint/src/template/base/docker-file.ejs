@@ -1,6 +1,5 @@
 # -----------------------------------------------------------------------------
-# Stage 1: Dependencies
-# Purpose: Install all dependencies including dev dependencies
+# Stage 1: Dependencies (Install dependencies including dev dependencies)
 # -----------------------------------------------------------------------------
 FROM node:<%= nodeVersion || '18' %>-alpine AS deps
 WORKDIR /app
@@ -9,11 +8,8 @@ WORKDIR /app
 ENV NPM_CONFIG_LOGLEVEL=warn
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
-# Copy package files first to leverage Docker cache
 COPY package.json <%= pkgLock %> ./
 
-# Use npm ci instead of npm install for reproducible builds
-# Clean npm cache to reduce image size
 <%_ if (pkgManager === "npm") { _%>
 RUN npm ci && \
     npm cache clean --force
@@ -28,8 +24,20 @@ RUN pnpm install --frozen-lockfile && \
 <%_ } _%>
 
 # -----------------------------------------------------------------------------
-# Stage 2: Build
-# Purpose: Transpile, bundle and build the app (if needed)
+# Stage 2: Development (Run this stage for development)
+# -----------------------------------------------------------------------------
+FROM node:<%= nodeVersion || '18' %>-alpine AS dev
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+EXPOSE 8000
+
+CMD ["npx", "tsx", "watch", "src/server.ts"]
+
+# -----------------------------------------------------------------------------
+# Stage 3: Build (Transpile, bundle, and build the app)
 # -----------------------------------------------------------------------------
 FROM node:<%= nodeVersion || '18' %>-alpine AS builder
 WORKDIR /app
@@ -40,8 +48,6 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy application source
 COPY . .
 
-# Build the application (if needed), TypeScript compilation would happen here
-# Optionally: prune dev dependencies for production
 <%_ if (pkgManager === "npm") { _%>
 RUN npm run build && \
     npm prune --production
@@ -54,13 +60,11 @@ RUN pnpm build
 <%_ } _%>
 
 # -----------------------------------------------------------------------------
-# Stage 3: Runtime
-# Purpose: Final image with only production dependencies and build output
+# Stage 4: Runtime (Production-ready container)
 # -----------------------------------------------------------------------------
 FROM node:<%= nodeVersion || '18' %>-alpine AS runner
 WORKDIR /app
 
-# Set Node.js to run in production mode
 ENV NODE_ENV=production
 
 # Create a non-root user for security
@@ -75,7 +79,6 @@ COPY --from=builder --chown=nodeuser:nodejs /app/dist /app/dist
 COPY --from=builder --chown=nodeuser:nodejs /app/node_modules /app/node_modules
 COPY --from=builder --chown=nodeuser:nodejs /app/package.json /app/package.json
 
-# Application port
 EXPOSE 8000
 
 # Switch to non-root user for security
@@ -83,11 +86,11 @@ USER nodeuser
 
 # Add a health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8000/health/app || exit 1
 
 # Set tini as entrypoint to properly handle signals by installing it first
 # RUN apk add --no-cache tini
 # ENTRYPOINT ["/sbin/tini", "--"]
 
 # Start the application
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/src/server.js"]
