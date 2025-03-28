@@ -33,7 +33,8 @@ export const packageManagerConfig = (pkgManager: string) => {
             dev: `${pkgManager}${pkgManager === "npm" ? " run" : ""} dev`,
             add: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add" : "install"}`,
             addDev: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add -D" : "install -D"}`,
-            exec: pkgManager === "npm" ? "npx" : pkgManager
+            exec: pkgManager === "npm" ? "npx" : pkgManager,
+            build: `${pkgManager}${pkgManager === "npm" ? " run" : ""} build`,
         },
         files: {
             packageLockJson: pkgManager === "npm" ? "package-lock.json" : pkgManager === "pnpm" ? "pnpm-lock.ymlu" : "yarn.lock"

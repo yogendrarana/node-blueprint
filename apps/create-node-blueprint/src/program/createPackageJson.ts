@@ -24,7 +24,7 @@ export async function createPackageJson(config: ProjectConfig, { root, pkgManage
         await fs.writeFile(packageJsonPath, JSON.stringify(defaultPackageJson, null, 2));
 
         // Now proceed with modifications
-        await modifyPackageJson(root, config);
+        await modifyPackageJson(root, config, pkgManager);
         await installDependencies(root, config, pkgManager);
     } catch (error: any) {
         console.error(`Error message: ${error.message}\n`);
@@ -80,7 +80,7 @@ async function installDependencies(root: string, config: ProjectConfig, pkgManag
     }
 }
 
-async function modifyPackageJson(root: string, config: ProjectConfig) {
+async function modifyPackageJson(root: string, config: ProjectConfig, pkgManager: string) {
     const packageJsonPath = path.join(root, "package.json");
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, "utf-8"));
 
@@ -95,7 +95,7 @@ async function modifyPackageJson(root: string, config: ProjectConfig) {
             start: "node dist/server.js",
             dev: "tsx watch src/server.ts",
             ...(config.orm === "prisma" && getPrismaScripts()),
-            ...(config.orm === "drizzle" && getDrizzleScripts()),
+            ...(config.orm === "drizzle" && getDrizzleScripts(pkgManager)),
             ...(config.orm === "mongoose" && getMongooseScripts())
         }
     });
@@ -123,10 +123,12 @@ function getPrismaScripts() {
     };
 }
 
-function getDrizzleScripts() {
+function getDrizzleScripts(pkgManager: string) {
+    const pkgManagerCommands = packageManagerConfig(pkgManager || "npm").commands;
+
     return {
         "db:seed": "tsx drizzle/seed.ts",
-        "db:generate": "drizzle-kit generate",
+        "db:generate": `${pkgManagerCommands.build} && drizzle-kit generate`,
         "db:push": "drizzle-kit push",
         "db:migrate": "tsx drizzle/migrate.ts",
         "db:drop-migration": "drizzle-kit drop",
