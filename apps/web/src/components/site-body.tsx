@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { frameworks, orms, databases, features } from "@/constants/constants";
 import { Copy, Check, Terminal, PartyPopper, ChevronDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import posthog from "posthog-js";
 
 const packageManagers = [
     {
@@ -80,6 +81,7 @@ export default function SiteBody() {
     const copyToClipboard = () => {
         navigator.clipboard.writeText(command);
         setCopied(true);
+        posthog.capture("copy-command", { property: command });
         setTimeout(() => setCopied(false), 2000);
     };
 
