@@ -15,7 +15,6 @@ export default function ProjectStructure({ name, orm, framework, features }: Pro
 
     React.useEffect(() => {
         const s = generateProjectStructure({ name, framework, orm, features });
-        console.log(features);
         setStructure(s);
     }, [name, orm, features, framework]);
 
