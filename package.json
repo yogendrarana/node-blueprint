@@ -1,27 +1,27 @@
 {
-  "name": "node-blueprint",
-  "private": true,
-  "version": "1.0.0",
-  "author": "Yogendra Rana <www.yogendrarana.com.np>",
-  "workspaces": [
-    "apps/*"
-  ],
-  "scripts": {
-    "dev:web": "yarn workspace @node-blueprint/web dev",
-    "dev:cli": "yarn workspace create-node-blueprint dev",
-    "build:web": "yarn workspace @node-blueprint/web build",
-    "build:cli": "yarn workspace create-node-blueprint build",
-    "build:all": "yarn build:cli && yarn build:web"
-  },
-  "keywords": [
-    "node",
-    "express",
-    "fastify",
-    "typescript",
-    "mysql",
-    "mongodb",
-    "postgres",
-    "create-node-blueprint"
-  ],
-  "license": "ISC"
+    "name": "node-blueprint",
+    "private": true,
+    "version": "1.0.0",
+    "author": "Yogendra Rana <www.yogendrarana.com.np>",
+    "workspaces": [
+        "apps/*"
+    ],
+    "scripts": {
+        "dev:web": "yarn workspace @node-blueprint/web dev",
+        "dev:cli": "yarn workspace create-node-blueprint dev",
+        "build:web": "yarn workspace @node-blueprint/web build",
+        "build:cli": "yarn workspace create-node-blueprint build",
+        "build": "yarn build:cli && yarn build:web"
+    },
+    "keywords": [
+        "node",
+        "express",
+        "fastify",
+        "typescript",
+        "mysql",
+        "mongodb",
+        "postgres",
+        "create-node-blueprint"
+    ],
+    "license": "ISC"
 }
