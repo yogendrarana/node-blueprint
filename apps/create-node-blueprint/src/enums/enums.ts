@@ -1,5 +1,6 @@
 export enum FrameworkEnum {
-    express = "express"
+    express = "express",
+    fastify = "fastify",
 }
 
 export enum DatabaseEnum {
@@ -21,4 +22,20 @@ export enum AuthEnum {
 
 export enum CommandType {
     create = "create"
+}
+
+export enum FeatureEnum {
+    typescript = "typescript",
+    eslint = "eslint",
+    prettier = "prettier",
+    jest = "jest",
+    docker = "docker",
+    githubActions = "githubActions",
+    none = "none"
+}
+
+export enum PackageManagerEnum {
+    npm = "npm",
+    yarn = "yarn",
+    pnpm = "pnpm"
 }

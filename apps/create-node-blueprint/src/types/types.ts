@@ -6,6 +6,8 @@ export interface ProjectConfig {
     database: DatabaseEnum;
     orm: OrmEnum;
     features: Array<string>;
+    installDependencies: boolean;
+    initializeGit: boolean;
 }
 
 export type PackageManager = "npm" | "yarn" | "pnpm";

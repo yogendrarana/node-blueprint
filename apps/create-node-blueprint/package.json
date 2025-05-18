@@ -21,13 +21,17 @@
     "author": "Yogendra Rana <www.yogendrarana.com.np>",
     "license": "ISC",
     "dependencies": {
-        "@inquirer/prompts": "^7.3.1",
+        "@clack/prompts": "^0.10.1",
+        "consola": "^3.4.2",
         "ejs": "^3.1.10",
+        "execa": "^9.5.3",
         "fs-extra": "^11.3.0",
         "ora": "^8.2.0",
+        "picocolors": "^1.1.1",
         "yargs": "^17.7.2"
     },
     "devDependencies": {
+        "@types/consola": "^2.2.8",
         "@types/ejs": "^3.1.5",
         "@types/fs-extra": "^11.0.4",
         "@types/node": "^22.13.1",
