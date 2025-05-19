@@ -55,8 +55,6 @@ export async function createProject(options: ProjectConfig): Promise<void> {
             s.stop("Git initialized");
         }
 
-        const duration = Math.round((Date.now() - startTime) / 1000);
-
         // Show post-creation instructions
         showPostCreationInstructions({
             projectPath: root,

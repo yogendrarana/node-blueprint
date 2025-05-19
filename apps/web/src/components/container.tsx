@@ -8,7 +8,7 @@ interface ContainerProps {
 }
 
 const Container: React.FC<ContainerProps> = ({ children, as: Comp = "div", className = "" }) => {
-    const baseStyles = `w-full max-w-7xl mx-auto px-4 sm:px-10 md:px-12 lg:px-20 xl:px-24`;
+    const baseStyles = `w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 xl:px-10`;
     
     return <Comp className={cn(baseStyles, className)}>{children}</Comp>;
 };

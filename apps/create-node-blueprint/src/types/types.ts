@@ -1,4 +1,4 @@
-import { FrameworkEnum, DatabaseEnum, OrmEnum } from "../enums/enums.js";
+import { FrameworkEnum, DatabaseEnum, OrmEnum, AuthEnum } from "../enums/enums.js";
 
 export interface ProjectConfig {
     projectName: string;
@@ -8,6 +8,7 @@ export interface ProjectConfig {
     features: Array<string>;
     installDependencies: boolean;
     initializeGit: boolean;
+    auth?: AuthEnum
 }
 
 export type PackageManager = "npm" | "yarn" | "pnpm";
