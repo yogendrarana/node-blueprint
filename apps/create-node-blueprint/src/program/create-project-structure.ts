@@ -2,6 +2,7 @@ import path from "node:path";
 import { ProjectConfig } from "../types/types.js";
 import { ensureDirExists, createFileWithContent } from "../utils/utils.js";
 import { ITemplateConfig, TemplaterKey, TemplaterMap } from "../services/templater.js";
+import { AuthEnum } from "../enums/enums.js";
 
 interface ExtraConfig {
     root: string;
@@ -62,7 +63,7 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
         await createFileAndInjectContent(root, "src/routes", "health-routes.ts", "common", "healthRoutesTs", config);
         await createFileAndInjectContent(root, "src/controllers", "health-controller.ts", "common", "healthControllerTs", config);
         await createFileAndInjectContent(root, "src/types/enums", "role-enum.ts", "common", "roleEnumTs", config);
-        if (config.features.includes("auth")) {
+        if (config.auth === AuthEnum.jwtAuth) {
             await createFileAndInjectContent(root, "src/routes", "auth-routes.ts", "common", "authRoutesTs", config);
             await createFileAndInjectContent(root, "src/validations", "user-validations.ts", "common", "userValidationsTs", config);
             await createFileAndInjectContent(root, "src/services", "auth-services.ts", "common", "authServicesTs", config);
@@ -75,7 +76,7 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
         if (config.framework === "express") {
             await createFileAndInjectContent(root, "src/middlewares", "error-middleware.ts", "express", "errorMiddlewareTs", config);
             await createFileAndInjectContent(root, "src/config", "logger.ts", "express", "loggerTs", config);
-            if (config.features.includes("auth")) {
+            if (config.auth === AuthEnum.jwtAuth) {
                 await createFileAndInjectContent(root, "src/utils", "error-handler.ts", "express", "errorHandlerTs", config);
             }
         }
@@ -88,7 +89,7 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
             await createFileAndInjectContent(root, "drizzle", "seed.ts", "drizzle", "seedTs", config);
             await createFileAndInjectContent(root, "drizzle", "schema.ts", "drizzle", "schemaTs", config);
             await createFileAndInjectContent(root, "drizzle/schema", "user-schema.ts", "drizzle", "userSchemaTs", config);
-            if (config.features.includes("auth")) {
+            if (config.auth === AuthEnum.jwtAuth) {
                 await createFileAndInjectContent(root, "src/controllers", "auth-controller.ts", "drizzle", "authControllerTs", config);
                 await createFileAndInjectContent(root, "drizzle/schema", "token-schema.ts", "drizzle", "tokenSchemaTs", config);
             }
@@ -101,7 +102,7 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
             await createFileAndInjectContent(root, "prisma", "seed.ts", "prisma", "seedTs", config);
             await createFileAndInjectContent(root, "prisma", "schema.prisma", "prisma", "schemaPrisma", config);
 
-            if (config.features.includes("auth")) {
+            if (config.auth === AuthEnum.jwtAuth) {
                 await createFileAndInjectContent(root, "src/controllers", "auth-controller.ts", "prisma", "authControllerTs", config);
             }
         }
@@ -112,7 +113,7 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
             await createFileAndInjectContent(root, "src/models", "user-model.ts", "mongoose", "userModelTs", config);
             await createFileAndInjectContent(root, "src/config", "db.ts", "mongoose", "dbTs", config);
             await createFileAndInjectContent(root, "src/models", "seed.ts", "mongoose", "seedTs", config);
-            if (config.features.includes("auth")) {
+            if (config.auth === AuthEnum.jwtAuth) {
                 await createFileAndInjectContent(root, "src/models", "token-model.ts", "mongoose", "tokenModelTs", config);
                 await createFileAndInjectContent(root, "src/controllers", "auth-controller.ts", "mongoose", "authControllerTs", config);
             }

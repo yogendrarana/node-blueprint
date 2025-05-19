@@ -22,8 +22,12 @@ export const orms: CommandOption[] = [
     { id: "mongoose", label: "Mongoose", flag: "mongoose", status: "available" }
 ];
 
+export const auths: CommandOption[] = [
+    { id: "jwt-auth", label: "JWT Auth", flag: "jwt-auth", status: "available" },
+    { id: "better-auth", label: "Better Auth", flag: "better-auth", status: "coming-soon" }
+];
+
 export const features: CommandOption[] = [
-    { id: "auth", label: "Basic jwt authentication", flag: "auth", status: "available" },
     {
         id: "docker",
         label: "Docker setup",

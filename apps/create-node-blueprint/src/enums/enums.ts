@@ -16,8 +16,8 @@ export enum OrmEnum {
 }
 
 export enum AuthEnum {
-    yes = "yes",
-    no = "no"
+    jwtAuth = "jwt-auth",
+    none = "none"
 }
 
 export enum CommandType {

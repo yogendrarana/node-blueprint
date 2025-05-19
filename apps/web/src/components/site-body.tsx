@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
+import posthog from "posthog-js";
+import { Copy, Check, Terminal, PartyPopper, ChevronDown, RotateCcw } from "lucide-react";
 
 import NPM from "./icons/npm";
 import Yarn from "./icons/yarn";
@@ -7,13 +9,12 @@ import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
+import ComingSoon from "./coming-soon";
 import { Checkbox } from "./ui/checkbox";
 import ProjectStructure from "./project-structure";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { frameworks, orms, databases, features } from "@/constants/constants";
-import { Copy, Check, Terminal, PartyPopper, ChevronDown } from "lucide-react";
+import { frameworks, orms, databases, features, auths } from "@/constants/constants";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import posthog from "posthog-js";
 
 const packageManagers = [
     {
@@ -43,12 +44,13 @@ export default function SiteBody() {
     const [shortFlag, setShortFlags] = useState(false);
     const [projectName, setProjectName] = useState("");
     const [selectedOrm, setSelectedOrm] = useState<string>("");
+    const [selectedAuth, setSelectedAuth] = useState<string>("");
     const [selectedDatabase, setSelectedDatabase] = useState<string>("");
     const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
     const [selectedFramework, setSelectedFramework] = useState<string>("");
     const [selectedPackageManager, setSelectedPackageManager] = useState("npx");
 
-    const command = React.useMemo(() => {
+    const command = useMemo(() => {
         let command = `${selectedPackageManager} ${selectedPackageManager === "npx" ? "create-node-blueprint" : "create node-blueprint"} ${
             selectedPackageManager === "npm" && (projectName || selectedFramework || selectedDatabase || selectedOrm) ? "--" : ""
         }`;
@@ -69,6 +71,10 @@ export default function SiteBody() {
             command += ` ${shortFlag ? "-o" : "--orm"} ${selectedOrm}`;
         }
 
+        if (selectedAuth) {
+            command += ` ${shortFlag ? "-a" : "--auth"} ${selectedAuth}`;
+        }
+
         if (selectedFeatures.length) {
             selectedFeatures.forEach((feat) => {
                 command += ` --features ${feat}`;
@@ -76,13 +82,22 @@ export default function SiteBody() {
         }
 
         return command;
-    }, [projectName, selectedDatabase, selectedFeatures, selectedFramework, selectedOrm, selectedPackageManager, shortFlag]);
+    }, [projectName, selectedDatabase, selectedFeatures, selectedFramework, selectedOrm, selectedPackageManager, shortFlag, selectedAuth]);
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(command);
         setCopied(true);
         posthog.capture("copy-command", { property: command });
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const resetCommand = () => {
+        setProjectName("");
+        setSelectedFramework("");
+        setSelectedDatabase("");
+        setSelectedOrm("");
+        setSelectedAuth("");
+        setSelectedFeatures([]);
     };
 
     return (
@@ -152,9 +167,20 @@ export default function SiteBody() {
             <div className="space-y-2">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Project Name</h3>
-                    <div className="flex items-center space-x-2">
-                        <Switch id="switch-flag-length" checked={shortFlag} className="cursor-pointer" onCheckedChange={setShortFlags} />
-                        <Label htmlFor="switch-flag-length">Use shorts cli flags</Label>
+                    <div className="flex items-center space-x-4">
+                        <div className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md">
+                            <Switch id="switch-flag-length" checked={shortFlag} className="cursor-pointer" onCheckedChange={setShortFlags} />
+                            <Label htmlFor="switch-flag-length" className="cursor-pointer">
+                                Use short cli flags
+                            </Label>
+                        </div>
+                        <button
+                            onClick={resetCommand}
+                            className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm bg-accent rounded-md"
+                        >
+                            <RotateCcw size={14} />
+                            Reset
+                        </button>
                     </div>
                 </div>
                 <input
@@ -165,7 +191,8 @@ export default function SiteBody() {
                 />
             </div>
 
-            <div className="grid md:grid-cols-4 gap-4 mb-12">
+            {/* radio groups */}
+            <div className="grid md:grid-cols-5 gap-4 mb-12">
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Framework *</h3>
                     <RadioGroup
@@ -183,7 +210,7 @@ export default function SiteBody() {
                                     "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
                                 )}
                             >
-                                <div className={cn("h-12 px-3 flex gap-2 items-center")}>
+                                <div className={cn("h-12 px-3 flex gap-1 items-center")}>
                                     <RadioGroupItem
                                         id={option.flag}
                                         value={option.flag}
@@ -193,18 +220,7 @@ export default function SiteBody() {
                                     <Label htmlFor={option.flag} className="ml-2">
                                         {option.label}
                                     </Label>
-                                    {option.status === "coming-soon" && (
-                                        <div className="ml-auto text-muted-foreground text-xs">
-                                            <Badge
-                                                className={cn("border border-gray-200", {
-                                                    "text-gray-600": option.status === "coming-soon"
-                                                })}
-                                                variant="outline"
-                                            >
-                                                {option.status}
-                                            </Badge>
-                                        </div>
-                                    )}
+                                    {option.status === "coming-soon" && <ComingSoon />}
                                 </div>
                             </div>
                         ))}
@@ -221,7 +237,7 @@ export default function SiteBody() {
                             if (selectedOrm) {
                                 setSelectedOrm("");
                             }
-                            setSelectedDatabase(value);
+                            setSelectedDatabase(value === selectedDatabase ? "" : value);
                         }}
                     >
                         {databases.map((option, index) => (
@@ -233,23 +249,12 @@ export default function SiteBody() {
                                     "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
                                 )}
                             >
-                                <div className={cn("h-12 px-3 flex gap-2 items-center")}>
+                                <div className={cn("h-12 px-3 flex gap-1 items-center")}>
                                     <RadioGroupItem id={option.flag} value={option.flag} className="after:absolute after:inset-0" />
                                     <Label htmlFor={option.flag} className={cn("ml-2")}>
                                         {option.label}
                                     </Label>
-                                    {option.status === "coming-soon" && (
-                                        <div className="ml-auto text-muted-foreground text-xs">
-                                            <Badge
-                                                className={cn("border border-gray-200", {
-                                                    "text-gray-600": option.status === "coming-soon"
-                                                })}
-                                                variant="outline"
-                                            >
-                                                {option.status}
-                                            </Badge>
-                                        </div>
-                                    )}
+                                    {option.status === "coming-soon" && <ComingSoon />}
                                 </div>
                             </div>
                         ))}
@@ -262,7 +267,7 @@ export default function SiteBody() {
                         className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="orm"
                         value={selectedOrm}
-                        onValueChange={(value: string) => setSelectedOrm(value)}
+                        onValueChange={(value: string) => setSelectedOrm(value === selectedOrm ? "" : value)}
                     >
                         {orms.map((option, index) => (
                             <div
@@ -273,7 +278,7 @@ export default function SiteBody() {
                                     "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
                                 )}
                             >
-                                <div className={cn("h-12 px-3 flex gap-2 items-center")}>
+                                <div className={cn("h-12 px-3 flex gap-1 items-center")}>
                                     <RadioGroupItem
                                         id={option.flag}
                                         value={option.flag}
@@ -295,18 +300,49 @@ export default function SiteBody() {
                                     >
                                         {option.label}
                                     </Label>
-                                    {option.status === "coming-soon" && (
-                                        <div className="ml-auto text-muted-foreground text-xs">
-                                            <Badge
-                                                className={cn("border border-gray-200", {
-                                                    "text-gray-600": option.status === "coming-soon"
-                                                })}
-                                                variant="outline"
-                                            >
-                                                {option.status}
-                                            </Badge>
-                                        </div>
-                                    )}
+                                    {option.status === "coming-soon" && <ComingSoon />}
+                                </div>
+                            </div>
+                        ))}
+                    </RadioGroup>
+                </div>
+
+                <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Auth </h3>
+                    <RadioGroup
+                        className="gap-0 -space-y-px rounded-md shadow-xs"
+                        id="auth"
+                        value={selectedAuth}
+                        onValueChange={(value: string) => setSelectedAuth(value)}
+                    >
+                        {auths.map((option, index) => (
+                            <div
+                                key={index}
+                                className={cn(
+                                    "border border-input relative outline-none",
+                                    "first:rounded-t-md last:rounded-b-md ",
+                                    "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
+                                )}
+                            >
+                                <div className={cn("h-12 px-3 flex gap-1 items-center")}>
+                                    <RadioGroupItem
+                                        id={option.flag}
+                                        value={option.flag}
+                                        className="after:absolute after:inset-0"
+                                        disabled={option.status !== "available"}
+                                    />
+                                    <Label
+                                        htmlFor={option.flag}
+                                        className={cn("ml-2", {
+                                            "text-muted-foreground opacity-50":
+                                                option.status !== "available" ||
+                                                (selectedDatabase === "mongodb" && (option.flag === "drizzle" || option.flag === "prisma")) ||
+                                                ((selectedDatabase === "mysql" || selectedDatabase === "postgres") && option.flag === "mongoose")
+                                        })}
+                                    >
+                                        {option.label}
+                                    </Label>
+                                    {option.status === "coming-soon" && <ComingSoon />}
                                 </div>
                             </div>
                         ))}
@@ -327,12 +363,13 @@ export default function SiteBody() {
                                     "has-data-[state=checked]:border-ring has-data-[state=checked]:bg-accent has-data-[state=checked]:z-10"
                                 )}
                             >
-                                <div className={cn("h-12 px-3 flex gap-2 items-center")}>
+                                <div className={cn("h-12 px-3 flex gap-1 items-center")}>
                                     <Checkbox
                                         id={option.flag}
                                         value={option.flag}
                                         className="after:absolute after:inset-0"
                                         disabled={option.status !== "available"}
+                                        checked={selectedFeatures.includes(option.flag)}
                                         onCheckedChange={() => {
                                             if (selectedFeatures.includes(option.flag)) {
                                                 setSelectedFeatures(selectedFeatures.filter((feature) => feature !== option.flag));
@@ -349,18 +386,7 @@ export default function SiteBody() {
                                     >
                                         {option.label}
                                     </Label>
-                                    {option.status === "coming-soon" && (
-                                        <div className="ml-auto text-muted-foreground text-xs">
-                                            <Badge
-                                                className={cn("border border-gray-200", {
-                                                    "text-gray-600": option.status === "coming-soon"
-                                                })}
-                                                variant="outline"
-                                            >
-                                                {option.status}
-                                            </Badge>
-                                        </div>
-                                    )}
+                                    {option.status === "coming-soon" && <ComingSoon />}
                                 </div>
                             </div>
                         ))}

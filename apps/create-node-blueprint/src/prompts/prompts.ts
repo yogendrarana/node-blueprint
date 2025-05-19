@@ -6,6 +6,7 @@ import { ProjectConfig } from "../types/types.js";
 import { getProjectName } from "./get-project-name.js";
 import { getInitializeGit } from "./get-initialize-git.js";
 import { getInstallDependencies } from "./get-install-deps.js";
+import { getAuth } from "./get-auth.js";
 
 export async function prompt(): Promise<ProjectConfig> {
     try {
@@ -14,6 +15,7 @@ export async function prompt(): Promise<ProjectConfig> {
         const database = await getDatabase();
         const orm = await getOrm(database as any);
         const features = await getFeatures();
+        const auth = await getAuth();
         const initializeGit = await getInitializeGit();
         const installDependencies = await getInstallDependencies();
 
@@ -22,6 +24,7 @@ export async function prompt(): Promise<ProjectConfig> {
             framework: framework as any,
             database: database as any,
             orm: orm as any,
+            auth: auth as any,
             features: features as string[],
             installDependencies: installDependencies as boolean,
             initializeGit: initializeGit as boolean
