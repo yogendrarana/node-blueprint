@@ -1,6 +1,7 @@
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
+import TerminalIcon from "./icons/terminal";
 
 export default function SiteHeader() {
     const [stars, setStars] = useState(0);
@@ -8,16 +9,11 @@ export default function SiteHeader() {
     useEffect(() => {
         const fetchStars = async () => {
             try {
-                const response = await fetch(
-                    "https://api.github.com/repos/yogendrarana/node-blueprint"
-                );
+                const response = await fetch("https://api.github.com/repos/yogendrarana/node-blueprint");
 
                 if (response.ok) {
                     const data = await response.json();
-                    const starsCount =
-                        data.stargazers_count >= 1000
-                            ? `${(data.stargazers_count / 1000).toFixed(2)}k`
-                            : data.stargazers_count;
+                    const starsCount = data.stargazers_count >= 1000 ? `${(data.stargazers_count / 1000).toFixed(2)}k` : data.stargazers_count;
                     setStars(starsCount);
                 }
             } catch (error) {
@@ -31,7 +27,7 @@ export default function SiteHeader() {
     return (
         <div className="flex justify-between items-center">
             <a href="/" className="text-lg font-semibold flex items-center gap-2">
-                Node Blueprint
+                <TerminalIcon className="h-5 w-5" /> Node Blueprint
             </a>
 
             <motion.a
