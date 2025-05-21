@@ -174,10 +174,7 @@ export default function SiteBody() {
                                 Use short cli flags
                             </Label>
                         </div>
-                        <button
-                            onClick={resetCommand}
-                            className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm bg-accent rounded-md"
-                        >
+                        <button onClick={resetCommand} className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm bg-accent rounded-md">
                             <RotateCcw size={14} />
                             Reset
                         </button>
@@ -308,7 +305,10 @@ export default function SiteBody() {
                 </div>
 
                 <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Auth </h3>
+                    <h3 className="text-lg font-semibold flex items-center">
+                        Auth
+                        <span className="ml-2 text-xs text-gray-500">(optional)</span>
+                    </h3>
                     <RadioGroup
                         className="gap-0 -space-y-px rounded-md shadow-xs"
                         id="auth"
@@ -350,8 +350,8 @@ export default function SiteBody() {
                 </div>
 
                 <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">
-                        Features <sup className="text-gray-500">(optional)</sup>
+                    <h3 className="text-lg font-semibold flex items-center">
+                        Features <span className="ml-2 text-xs text-gray-500">(optional)</span>
                     </h3>
                     <div className="gap-0 -space-y-px rounded-md shadow-xs">
                         {features.map((option, index) => (

@@ -6,11 +6,11 @@ import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env.js";
 import db from "../../drizzle/index.js";
 import ErrorHandler from "../utils/error-handler.js";
-import { TokenEnum } from "../types/enums/token-enum.js";
+import { TokenEnum } from "../enums/token-enum.js";
 import { userSchema } from "../../drizzle/schema/user-schema.js";
 import { generateAuthTokens } from "../services/auth-services.js";
 import { tokenSchema } from "../../drizzle/schema/token-schema.js";
-import { loginUserSchema, registerUserSchema } from "../validations/user-validations.js";
+import { loginUserSchema, registerUserSchema } from "../validations/auth-validations.js";
 
 // register user controller
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {

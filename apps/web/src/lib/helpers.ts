@@ -31,7 +31,7 @@ const sortFileStructure = (a: FileType, b: FileType): number => {
     return 0;
 };
 
-export const generateProjectStructure = ({ name, framework, orm, features }: ProjectConfig): FileType[] => {
+export const generateProjectStructure = ({ name, framework, orm, features, auth }: ProjectConfig): FileType[] => {
     const baseStructure: FileType[] = [
         {
             name: name,
@@ -124,20 +124,25 @@ export const generateProjectStructure = ({ name, framework, orm, features }: Pro
                             type: "directory",
                             children: [
                                 {
-                                    name: "enums",
-                                    type: "directory",
-                                    children: [
-                                        ...(features.includes("auth") && orm !== "prisma"
-                                            ? [{ name: "token-enum.ts", type: "file" } as const, { name: "role-enum.ts", type: "file" } as const]
-                                            : [])
-                                    ]
-                                },
-                                {
                                     name: "interfaces",
                                     type: "directory",
                                     children: []
                                 }
                             ]
+                        },
+                        {
+                            name: "enums",
+                            type: "directory",
+                            children: [
+                                ...(auth === "jwt-auth" && orm !== "prisma"
+                                    ? [{ name: "token-enum.ts", type: "file" } as const, { name: "role-enum.ts", type: "file" } as const]
+                                    : [])
+                            ]
+                        },
+                        {
+                            name: "validations",
+                            type: "directory",
+                            children: [...(auth === "jwt-auth" ? [{ name: "auth-validations.ts", type: "file" } as const] : [])]
                         },
                         {
                             name: "utils",
