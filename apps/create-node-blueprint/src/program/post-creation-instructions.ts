@@ -44,7 +44,7 @@ export function showPostCreationInstructions(options: PostCreationInstructionsOp
             pc.bold("Database commands:"),
             ...dbCommands.map(cmd => pc.gray(`- ${cmd}`)),
             "",
-            pc.gray("Like Node Blueprint? Please consider giving us a star on GitHub:"),
+            pc.gray("Thank you for using node-blueprint. If you find node-blueprint useful, please give it a star on GitHub!"),
             pc.gray("https://github.com/yogendrarana/node-blueprint")
         ].join("\n")
     });

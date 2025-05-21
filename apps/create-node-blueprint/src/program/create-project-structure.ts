@@ -2,7 +2,7 @@ import path from "node:path";
 import { ProjectConfig } from "../types/types.js";
 import { ensureDirExists, createFileWithContent } from "../utils/utils.js";
 import { ITemplateConfig, TemplaterKey, TemplaterMap } from "../services/templater.js";
-import { AuthEnum } from "../enums/enums.js";
+import { AuthEnum, FrameworkEnum, OrmEnum } from "../enums/enums.js";
 
 interface ExtraConfig {
     root: string;
@@ -18,14 +18,14 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
         // ensure folders
         await ensureDirExists(path.resolve(root, "src"));
         await ensureDirExists(path.resolve(root, "scripts"));
-        await ensureDirExists(path.resolve(root, "src", "types"));
         await ensureDirExists(path.resolve(root, "src", "views"));
         await ensureDirExists(path.resolve(root, "src", "utils"));
         await ensureDirExists(path.resolve(root, "src", "routes"));
         await ensureDirExists(path.resolve(root, "src", "config"));
         await ensureDirExists(path.resolve(root, "src", "services"));
         await ensureDirExists(path.resolve(root, "src", "constants"));
-        await ensureDirExists(path.resolve(root, "src", "types/enums"));
+        await ensureDirExists(path.resolve(root, "src", "enums"));
+        await ensureDirExists(path.resolve(root, "src", "types"));
         await ensureDirExists(path.resolve(root, "src", "types/interfaces"));
         await ensureDirExists(path.resolve(root, "src", "validations"));
         await ensureDirExists(path.resolve(root, "src", "middlewares"));
@@ -62,18 +62,15 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
         await createFileAndInjectContent(root, "src/controllers", "user-controller.ts", "common", "userControllerTs", config);
         await createFileAndInjectContent(root, "src/routes", "health-routes.ts", "common", "healthRoutesTs", config);
         await createFileAndInjectContent(root, "src/controllers", "health-controller.ts", "common", "healthControllerTs", config);
-        await createFileAndInjectContent(root, "src/types/enums", "role-enum.ts", "common", "roleEnumTs", config);
+        await createFileAndInjectContent(root, "src/enums", "role-enum.ts", "common", "roleEnumTs", config);
         if (config.auth === AuthEnum.jwtAuth) {
             await createFileAndInjectContent(root, "src/routes", "auth-routes.ts", "common", "authRoutesTs", config);
-            await createFileAndInjectContent(root, "src/validations", "user-validations.ts", "common", "userValidationsTs", config);
+            await createFileAndInjectContent(root, "src/validations", "auth-validations.ts", "common", "authValidationsTs", config);
             await createFileAndInjectContent(root, "src/services", "auth-services.ts", "common", "authServicesTs", config);
-            if (config.orm !== "prisma") {
-                await createFileAndInjectContent(root, "src/types/enums", "token-enum.ts", "common", "tokenEnumTs", config);
-            }
         }
 
         // express framework specific files
-        if (config.framework === "express") {
+        if (config.framework === FrameworkEnum.express) {
             await createFileAndInjectContent(root, "src/middlewares", "error-middleware.ts", "express", "errorMiddlewareTs", config);
             await createFileAndInjectContent(root, "src/config", "logger.ts", "express", "loggerTs", config);
             if (config.auth === AuthEnum.jwtAuth) {
@@ -82,21 +79,23 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
         }
 
         // drizzle orm specific files and folders
-        if (config.orm === "drizzle") {
+        if (config.orm === OrmEnum.drizzle) {
             await ensureDirExists(path.resolve(root, "drizzle", "schema"));
             await createFileAndInjectContent(root, "", "drizzle.config.ts", "drizzle", "drizzleConfig", config);
             await createFileAndInjectContent(root, "drizzle", "index.ts", "drizzle", "indexTs", config);
             await createFileAndInjectContent(root, "drizzle", "seed.ts", "drizzle", "seedTs", config);
             await createFileAndInjectContent(root, "drizzle", "schema.ts", "drizzle", "schemaTs", config);
             await createFileAndInjectContent(root, "drizzle/schema", "user-schema.ts", "drizzle", "userSchemaTs", config);
+            await createFileAndInjectContent(root, "drizzle/schema", "token-schema.ts", "drizzle", "tokenSchemaTs", config);
             if (config.auth === AuthEnum.jwtAuth) {
                 await createFileAndInjectContent(root, "src/controllers", "auth-controller.ts", "drizzle", "authControllerTs", config);
                 await createFileAndInjectContent(root, "drizzle/schema", "token-schema.ts", "drizzle", "tokenSchemaTs", config);
+                await createFileAndInjectContent(root, "src/enums", "token-enum.ts", "common", "tokenEnumTs", config);
             }
         }
 
         // prisma orm specific files and folders
-        if (config.orm === "prisma") {
+        if (config.orm === OrmEnum.prisma) {
             await ensureDirExists(path.resolve(root, "prisma"));
             await createFileAndInjectContent(root, "prisma", "prisma-client.ts", "prisma", "prismaClientTs", config);
             await createFileAndInjectContent(root, "prisma", "seed.ts", "prisma", "seedTs", config);
@@ -108,7 +107,7 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
         }
 
         // mongoose orm specific files and folders
-        if (config.orm === "mongoose") {
+        if (config.orm === OrmEnum.mongoose) {
             await ensureDirExists(path.resolve(root, "src", "models"));
             await createFileAndInjectContent(root, "src/models", "user-model.ts", "mongoose", "userModelTs", config);
             await createFileAndInjectContent(root, "src/config", "db.ts", "mongoose", "dbTs", config);
@@ -116,6 +115,7 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
             if (config.auth === AuthEnum.jwtAuth) {
                 await createFileAndInjectContent(root, "src/models", "token-model.ts", "mongoose", "tokenModelTs", config);
                 await createFileAndInjectContent(root, "src/controllers", "auth-controller.ts", "mongoose", "authControllerTs", config);
+                await createFileAndInjectContent(root, "src/enums", "token-enum.ts", "common", "tokenEnumTs", config);
             }
         }
     } catch (err: any) {

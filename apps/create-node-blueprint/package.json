@@ -42,6 +42,18 @@
     },
     "keywords": [
         "cli",
-        "create-node-blueprint"
+        "create-node-blueprint",
+        "nodejs",
+        "express",
+        "typescript",
+        "postgres",
+        "mysql",
+        "mongodb",
+        "drizzle",
+        "prisma",
+        "mongoose",
+        "jwt-auth",
+        "better-auth",
+        "docker"
     ]
 }

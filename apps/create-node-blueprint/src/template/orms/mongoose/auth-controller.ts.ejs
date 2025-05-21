@@ -5,10 +5,10 @@ import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env.js";
 import User from "../models/user-model.js";
 import Token from "../models/token-model.js";
-import { TokenEnum } from "../types/enums/token-enum.js";
+import { TokenEnum } from "../enums/token-enum.js";
 import ErrorHandler from "../utils/error-handler.js";
 import { generateAuthTokens } from "../services/auth-services.js";
-import { loginUserSchema, registerUserSchema } from "../validations/user-validations.js";
+import { loginUserSchema, registerUserSchema } from "../validations/auth-validations.js";
 
 // register user controller
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
