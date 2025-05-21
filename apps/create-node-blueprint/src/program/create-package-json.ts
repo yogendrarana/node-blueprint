@@ -73,8 +73,8 @@ function getDependencies(config: ProjectConfig): { dependencies: Record<string, 
         devDependencies["@types/mongoose"] = DEV_DEPENDENCIES["@types/mongoose"];
     }
 
-    // Add auth dependencies if selected
-    if (config.features.includes("auth")) {
+    // Add jwt-auth dependencies if selected
+    if (config.auth === "jwt-auth") {
         dependencies["jsonwebtoken"] = DEPENDENCIES["jsonwebtoken"];
         dependencies["bcrypt"] = DEPENDENCIES["bcrypt"];
         devDependencies["@types/bcrypt"] = DEV_DEPENDENCIES["@types/bcrypt"];

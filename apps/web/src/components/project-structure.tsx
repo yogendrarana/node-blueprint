@@ -7,6 +7,7 @@ export interface ProjectConfig {
     orm: string;
     framework: string;
     features: string[];
+    auth?: string;
 }
 
 export default function ProjectStructure({ name, orm, framework, features }: ProjectConfig) {

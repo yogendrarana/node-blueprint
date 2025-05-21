@@ -22,14 +22,14 @@ model User {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    <%_ if (features.includes("auth")) { _%>
+    <%_ if (auth === "jwt-auth") { _%>
 
     tokens Token[]
     <%_ } _%>
 }
 
 
-<%_ if (features.includes("auth")) { _%>
+<%_ if (auth === "jwt-auth") { _%>
 enum TokenEnum {
     refresh_token
     reset_password_token
@@ -64,13 +64,13 @@ model User {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    <%_ if (features.includes("auth")) { _%>
+    <%_ if (auth === "jwt-auth") { _%>
 
     tokens Token[]
     <%_ } _%>
 }
 
-<%_ if (features.includes("auth")) { _%>
+<%_ if (auth === "jwt-auth") { _%>
 enum TokenEnum {
     refresh_token
     reset_password_token

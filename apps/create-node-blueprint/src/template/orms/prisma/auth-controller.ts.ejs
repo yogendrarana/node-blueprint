@@ -7,7 +7,7 @@ import { env } from "../config/env.js";
 import prisma from "../../prisma/prisma-client.js";
 import ErrorHandler from "../utils/error-handler.js";
 import { generateAuthTokens } from "../services/auth-services.js";
-import { loginUserSchema, registerUserSchema } from "../validations/user-validations.js";
+import { loginUserSchema, registerUserSchema } from "../validations/auth-validations.js";
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
     try {

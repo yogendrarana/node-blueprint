@@ -2,10 +2,10 @@
 import { type InferSelectModel, type InferInsertModel, relations } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid, varchar, pgEnum } from "drizzle-orm/pg-core";
 
-<%_ if (features.includes("auth")) { _%>
+<%_ if (auth === "jwt-auth") { _%>
 import { tokenSchema } from "./token-schema.js";
 <%_ } _%>
-import { RoleEnum } from "../../src/types/enums/role-enum.js";
+import { RoleEnum } from "../../src/enums/role-enum.js";
 
 // create role enum type
 const roleEnum = pgEnum("role", Object.values(RoleEnum) as [string, ...string[]]);
@@ -23,7 +23,7 @@ export const userSchema = pgTable("user",
     }
 );
 
-<%_ if (features.includes("auth")) { _%>
+<%_ if (auth === "jwt-auth") { _%>
 // relations
 export const userRelations = relations(userSchema, ({ many }) => ({
     tokens: many(tokenSchema)
@@ -38,13 +38,13 @@ export type InsertableUser = InferInsertModel<typeof userSchema>;
 import { type InferSelectModel, type InferInsertModel, relations } from "drizzle-orm";
 import { mysqlTable, text, timestamp, varchar, mysqlEnum, int } from "drizzle-orm/mysql-core";
 
-<%_ if (features.includes("auth")) { _%>
+<%_ if (auth === "jwt-auth") { _%>
 import { tokenSchema } from "./token-schema.js";
 <%_ } _%>
-import { RoleEnum } from "../../src/types/enums/role-enum.js";
+import { RoleEnum } from "../../src/enums/role-enum.js";
 
 // create role enum type
-const roleEnum = mysqlEnum(Object.values(RoleEnum) as [string, ...string[]]);
+const roleEnum = mysqlEnum("role", Object.values(RoleEnum) as [string, ...string[]]);
 
 // schema definition
 export const userSchema = mysqlTable("user", {
@@ -57,7 +57,7 @@ export const userSchema = mysqlTable("user", {
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 });
 
-<%_ if (features.includes("auth")) { _%>
+<%_ if (auth === "jwt-auth") { _%>
 // relations
 export const userRelations = relations(userSchema, ({ many }) => ({
     tokens: many(tokenSchema)
