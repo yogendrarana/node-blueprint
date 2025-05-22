@@ -1,0 +1,92 @@
+name: Publish CLI to npm
+
+on:
+    push:
+        tags:
+            - "v*"
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: apps/create-node-blueprint
+
+        steps:
+            - name: Checkout repo with full history
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20.x
+                  registry-url: "https://registry.npmjs.org/"
+                  cache: "yarn"
+
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
+
+            - name: Build package
+              run: yarn workspace create-node-blueprint build
+
+            - name: Get version from tag
+              id: version
+              run: |
+                  VERSION="${GITHUB_REF#refs/tags/v}"
+                  echo "version=${VERSION}" >> $GITHUB_OUTPUT
+                  echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
+
+            - name: Generate changelog
+              id: changelog
+              run: |
+                  # Handle first release case
+                  if ! git describe --tags --abbrev=0 HEAD^ 2>/dev/null; then
+                    echo "body<<EOF" >> $GITHUB_OUTPUT
+                    echo "## Initial Release v${{ steps.version.outputs.tag}}" >> $GITHUB_OUTPUT
+                    echo "EOF" >> $GITHUB_OUTPUT
+                    exit 0
+                  fi
+
+                  LAST_TAG=$(git describe --tags --abbrev=0 HEAD^)
+                  echo "Last tag: $LAST_TAG"
+
+                  # Format commits with author info and proper Markdown
+                  NOTES=$(git log $LAST_TAG..HEAD \
+                    --pretty=format:'* %s - [%h](https://github.com/${{ github.repository }}/commit/%H) by @%an' \
+                    --no-merges)
+
+                  if [ -z "$NOTES" ]; then
+                    NOTES="* No significant changes"
+                  fi
+
+                  echo "body<<EOF" >> $GITHUB_OUTPUT
+                  echo "## Changes since $LAST_TAG" >> $GITHUB_OUTPUT
+                  echo "$NOTES" >> $GITHUB_OUTPUT
+                  echo "" >> $GITHUB_OUTPUT
+                  echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$LAST_TAG...v${{ steps.version.outputs.version}}" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
+
+            - name: Dry-run publish (safety check)
+              run: yarn workspace create-node-blueprint npm publish --access public --dry-run
+              continue-on-error: false
+
+            - name: Publish to npm
+              run: yarn workspace create-node-blueprint npm publish --access public --no-git-checks
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - name: Create github release
+              uses: softprops/action-gh-release@v1
+              with:
+                  tag_name: ${{ steps.version.outputs.tag }}
+                  name: ${{ steps.version.outputs.tag }}
+                  body: ${{ steps.changelog.outputs.body }}
+                  files: |
+                      apps/create-node-blueprint/dist/**
+                      apps/create-node-blueprint/package.json
+                  draft: false
+                  prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
