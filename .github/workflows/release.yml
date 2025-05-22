@@ -8,10 +8,6 @@ on:
 jobs:
     publish:
         runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: apps/create-node-blueprint
-
         steps:
             - name: Checkout repo with full history
               uses: actions/checkout@v4
@@ -22,7 +18,7 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: 20.x
-                  registry-url: "https://registry.npmjs.org/"
+                  registry-url: "https://registry.npmjs.org"
                   cache: "yarn"
 
             - name: Install dependencies
@@ -69,11 +65,14 @@ jobs:
                   echo "EOF" >> $GITHUB_OUTPUT
 
             - name: Dry-run publish (safety check)
-              run: yarn workspace create-node-blueprint npm publish --access public --dry-run
+              working-directory: apps/create-node-blueprint
+              run: npm publish --dry-run --access public --no-git-checks --ignore-scripts
               continue-on-error: false
 
             - name: Publish to npm
-              run: yarn workspace create-node-blueprint npm publish --access public --no-git-checks
+              working-directory: apps/create-node-blueprint
+              run: npm publish --access public --no-git-checks --tag latest
+              continue-on-error: false
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
