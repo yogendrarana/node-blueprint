@@ -3,7 +3,7 @@
 ## [1.3.0] - 2024-05-22
 - Replaced @inquirer/prompts with @clack/prompts
 - Added new prompt to choose authentication type: jwt-auth or none
-- Added github cations workflow to automate versioned npm publishing on tag push
+- Added github actions workflow to automate versioned npm publishing on tag push
 
 ## [1.2.2] - 2024-04-27
 - Fixed schema path for drizzle config
