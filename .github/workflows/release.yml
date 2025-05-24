@@ -5,6 +5,9 @@ on:
         tags:
             - "v*"
 
+permissions:
+  contents: write
+
 jobs:
     publish:
         runs-on: ubuntu-latest
@@ -72,7 +75,6 @@ jobs:
             - name: Publish to npm
               working-directory: apps/create-node-blueprint
               run: npm publish --access public --no-git-checks --tag latest
-              continue-on-error: false
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
