@@ -2,7 +2,7 @@ import pc from "picocolors";
 import { relative } from "path";
 import { consola } from "consola";
 
-import { DatabaseEnum, OrmEnum, PackageManagerEnum } from "../enums/enums.js";
+import { OrmEnum, PackageManagerEnum } from "../enums/enums.js";
 import { packageManagerConfig } from "../utils/utils.js";
 
 interface PostCreationInstructionsOptions {

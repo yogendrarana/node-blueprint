@@ -80,16 +80,16 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
 
         // drizzle orm specific files and folders
         if (config.orm === OrmEnum.drizzle) {
-            await ensureDirExists(path.resolve(root, "drizzle", "schema"));
+            await ensureDirExists(path.resolve(root, "src/db/schema"));
             await createFileAndInjectContent(root, "", "drizzle.config.ts", "drizzle", "drizzleConfig", config);
-            await createFileAndInjectContent(root, "drizzle", "index.ts", "drizzle", "indexTs", config);
-            await createFileAndInjectContent(root, "drizzle", "seed.ts", "drizzle", "seedTs", config);
-            await createFileAndInjectContent(root, "drizzle", "schema.ts", "drizzle", "schemaTs", config);
-            await createFileAndInjectContent(root, "drizzle/schema", "user-schema.ts", "drizzle", "userSchemaTs", config);
-            await createFileAndInjectContent(root, "drizzle/schema", "token-schema.ts", "drizzle", "tokenSchemaTs", config);
+            await createFileAndInjectContent(root, "src/db", "index.ts", "drizzle", "indexTs", config);
+            await createFileAndInjectContent(root, "src/db", "seed.ts", "drizzle", "seedTs", config);
+            await createFileAndInjectContent(root, "src/db", "schema.ts", "drizzle", "schemaTs", config);
+            await createFileAndInjectContent(root, "src/db/schema", "user-schema.ts", "drizzle", "userSchemaTs", config);
+            await createFileAndInjectContent(root, "src/db/schema", "token-schema.ts", "drizzle", "tokenSchemaTs", config);
             if (config.auth === AuthEnum.jwtAuth) {
                 await createFileAndInjectContent(root, "src/controllers", "auth-controller.ts", "drizzle", "authControllerTs", config);
-                await createFileAndInjectContent(root, "drizzle/schema", "token-schema.ts", "drizzle", "tokenSchemaTs", config);
+                await createFileAndInjectContent(root, "src/db/schema", "token-schema.ts", "drizzle", "tokenSchemaTs", config);
                 await createFileAndInjectContent(root, "src/enums", "token-enum.ts", "common", "tokenEnumTs", config);
             }
         }

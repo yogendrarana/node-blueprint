@@ -1,4 +1,4 @@
 export * from "./schema/user-schema.js";
-<%_ if (features === "jwt-auth") { _%>
+<%_ if (auth === "jwt-auth") { _%>
 export * from "./schema/token-schema.js";
 <%_ } _%>

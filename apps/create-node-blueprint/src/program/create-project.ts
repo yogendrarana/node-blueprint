@@ -7,14 +7,14 @@ import { initGit } from "./init-git.js";
 import { ProjectConfig } from "../types/types.js";
 import { PackageManagerEnum } from "../enums/enums.js";
 import { createPackageJson } from "./create-package-json.js";
-import { installDependencies } from "./install-dependencies.js";
+import { installPackages } from "./install-packages.js";
 import { createProjectStructure } from "./create-project-structure.js";
 import { showPostCreationInstructions } from "./post-creation-instructions.js";
 import { checkDirExists, packageManagerConfig, packgeManageFromUserAgent } from "../utils/utils.js";
 
 export async function createProject(options: ProjectConfig): Promise<void> {
-    const { projectName, installDependencies: shouldInstallDeps, initializeGit, orm } = options;
-    
+    const { projectName, installDependencies, initializeGit, orm } = options;
+
     const cwd = process.cwd();
     const root = path.join(cwd, projectName);
 
@@ -45,9 +45,9 @@ export async function createProject(options: ProjectConfig): Promise<void> {
         s.stop("Package.json created");
 
         // Install dependencies if requested
-        if (shouldInstallDeps) {
+        if (installDependencies) {
             s.start("Installing dependencies...");
-            await installDependencies(root, (pkgInfo?.name || "npm") as PackageManagerEnum, s);
+            await installPackages(root, (pkgInfo?.name || "npm") as PackageManagerEnum, s);
             s.stop("Dependencies installed");
         }
 
@@ -62,8 +62,8 @@ export async function createProject(options: ProjectConfig): Promise<void> {
         showPostCreationInstructions({
             projectPath: root,
             packageManager: (pkgInfo?.name || "npm") as PackageManagerEnum,
-            installDependencies: shouldInstallDeps,
-            orm,
+            installDependencies,
+            orm
         });
 
         outro("Project setup completed! Happy coding!");

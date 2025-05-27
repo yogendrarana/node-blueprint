@@ -17,7 +17,7 @@ export async function prompt(): Promise<ProjectConfig> {
         const features = await getFeatures();
         const auth = await getAuth();
         const initializeGit = await getInitializeGit();
-        const installDependencies = await getInstallDependencies();
+        const installDeps = await getInstallDependencies();
 
         return {
             projectName: projectName as string,
@@ -26,7 +26,7 @@ export async function prompt(): Promise<ProjectConfig> {
             orm: orm as any,
             auth: auth as any,
             features: features as string[],
-            installDependencies: installDependencies as boolean,
+            installDependencies: installDeps as boolean,
             initializeGit: initializeGit as boolean
         };
     } catch (error: any) {
