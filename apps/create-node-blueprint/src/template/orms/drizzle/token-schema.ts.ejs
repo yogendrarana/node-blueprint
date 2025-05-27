@@ -5,7 +5,7 @@ import { type InferInsertModel, type InferSelectModel } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid, pgEnum } from "drizzle-orm/pg-core";
 
 import { userSchema } from "./user-schema.js";
-import { TokenEnum } from "../../src/enums/token-enum.js";
+import { TokenEnum } from "../../enums/token-enum.js";
 
 // create token enum type
 const tokenTypeEnum = pgEnum("token_type", Object.values(TokenEnum) as [string, ...string[]]);
@@ -38,7 +38,7 @@ import { type InferInsertModel, type InferSelectModel, relations } from "drizzle
 import { mysqlTable, text, timestamp, mysqlEnum, int } from "drizzle-orm/mysql-core";
 
 import { userSchema } from "./user-schema.js";
-import { TokenEnum } from "../../src/enums/token-enum.js";
+import { TokenEnum } from "../../enums/token-enum.js";
 
 // create token enum type
 const tokenTypeEnum = mysqlEnum("token_type", Object.values(TokenEnum) as [string, ...string[]]);

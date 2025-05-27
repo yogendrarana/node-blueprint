@@ -5,7 +5,7 @@ import { execAsync } from "../utils/exec-async.js";
 import { PackageManagerEnum } from "../enums/enums.js";
 import { packageManagerConfig } from "../utils/utils.js";
 
-export async function installDependencies(projectPath: string, packageManager: PackageManagerEnum, s: ReturnType<typeof spinner>): Promise<void> {
+export async function installPackages(projectPath: string, packageManager: PackageManagerEnum, s: ReturnType<typeof spinner>): Promise<void> {
     try {
         const installCommand = packageManagerConfig(packageManager || "npm").commands.install;
 

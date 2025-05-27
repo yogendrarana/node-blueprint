@@ -5,7 +5,7 @@ import { pgTable, text, timestamp, uuid, varchar, pgEnum } from "drizzle-orm/pg-
 <%_ if (auth === "jwt-auth") { _%>
 import { tokenSchema } from "./token-schema.js";
 <%_ } _%>
-import { RoleEnum } from "../../src/enums/role-enum.js";
+import { RoleEnum } from "../../enums/role-enum.js";
 
 // create role enum type
 const roleEnum = pgEnum("role", Object.values(RoleEnum) as [string, ...string[]]);
@@ -41,7 +41,7 @@ import { mysqlTable, text, timestamp, varchar, mysqlEnum, int } from "drizzle-or
 <%_ if (auth === "jwt-auth") { _%>
 import { tokenSchema } from "./token-schema.js";
 <%_ } _%>
-import { RoleEnum } from "../../src/enums/role-enum.js";
+import { RoleEnum } from "../../enums/role-enum.js";
 
 // create role enum type
 const roleEnum = mysqlEnum("role", Object.values(RoleEnum) as [string, ...string[]]);

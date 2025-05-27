@@ -4,12 +4,12 @@ import { eq } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 
 import { env } from "../config/env.js";
-import db from "../../drizzle/index.js";
+import db from "../db/index.js";
 import ErrorHandler from "../utils/error-handler.js";
 import { TokenEnum } from "../enums/token-enum.js";
-import { userSchema } from "../../drizzle/schema/user-schema.js";
+import { userSchema } from "../db/schema/user-schema.js";
 import { generateAuthTokens } from "../services/auth-services.js";
-import { tokenSchema } from "../../drizzle/schema/token-schema.js";
+import { tokenSchema } from "../db/schema/token-schema.js";
 import { loginUserSchema, registerUserSchema } from "../validations/auth-validations.js";
 
 // register user controller
