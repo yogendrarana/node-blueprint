@@ -11,6 +11,7 @@ import { installPackages } from "./install-packages.js";
 import { createProjectStructure } from "./create-project-structure.js";
 import { showPostCreationInstructions } from "./post-creation-instructions.js";
 import { checkDirExists, packageManagerConfig, packgeManageFromUserAgent } from "../utils/utils.js";
+import getOverwriteExistingDirectory from "../prompts/get-overwrite-existing-directory.js";
 
 export async function createProject(options: ProjectConfig): Promise<void> {
     const { projectName, installDependencies, initializeGit, orm } = options;
@@ -22,18 +23,28 @@ export async function createProject(options: ProjectConfig): Promise<void> {
     intro(`Creating "${pc.cyan(projectName)}"`);
     const pkgInfo = packgeManageFromUserAgent(process.env.npm_config_user_agent);
     const pkgManagerCommands = packageManagerConfig(pkgInfo?.name || "npm");
+    const s = spinner();
 
     try {
         // Validate project directory
         if (await checkDirExists(root)) {
-            log.error(`Directory "${projectName}" already exists. Please choose a different project name.`);
-            process.exit(0);
-
-            // TODO: Add a prompt to ask if the user wants to overwrite the existing directory
+            const overwrite = await getOverwriteExistingDirectory(projectName);
+            if (!overwrite) {
+                process.exit(0);
+            }
+            
+            try {
+                s.start("Removing existing directory...");
+                await fs.rm(root, { recursive: true, force: true });
+                s.stop("Existing directory removed");
+            } catch (error: any) {
+                s.stop(pc.red("Failed to remove existing directory"));
+                log.error(`Error: ${error.message}`);
+                process.exit(1);
+            }
         }
 
         // Create project structure
-        const s = spinner();
         s.start("Creating project files...");
         await fs.mkdir(root, { recursive: true });
         await createProjectStructure(options, { root, pkgManager: pkgInfo?.name || "npm", pkgLock: pkgManagerCommands.files.packageLockJson });
