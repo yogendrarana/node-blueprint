@@ -14,8 +14,8 @@ export async function prompt(): Promise<ProjectConfig> {
         const framework = await getFramework();
         const database = await getDatabase();
         const orm = await getOrm(database as any);
-        const features = await getFeatures();
         const auth = await getAuth();
+        const features = await getFeatures();
         const initializeGit = await getInitializeGit();
         const installDeps = await getInstallDependencies();
 
