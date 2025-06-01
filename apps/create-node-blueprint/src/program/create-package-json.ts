@@ -109,11 +109,6 @@ async function modifyPackageJson(root: string, config: ProjectConfig, pkgManager
 
     // Write modified package.json
     await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
-
-    // Special handling for ORMs
-    if (config.orm === "prisma") {
-        await execAsync("npx prisma generate", { cwd: root });
-    }
 }
 
 // Helper functions for ORM scripts
