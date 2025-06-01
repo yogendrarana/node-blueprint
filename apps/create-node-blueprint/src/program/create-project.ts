@@ -47,7 +47,7 @@ export async function createProject(options: ProjectConfig): Promise<void> {
         // Install dependencies if requested
         if (installDependencies) {
             s.start("Installing dependencies...");
-            await installPackages(root, (pkgInfo?.name || "npm") as PackageManagerEnum, s);
+            await installPackages(root, (pkgInfo?.name || "npm") as PackageManagerEnum, s, options);
             s.stop("Dependencies installed");
         }
 
