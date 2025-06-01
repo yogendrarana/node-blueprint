@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.0] - 2024-06-01
+- Added new prompt to overwrite the existing directory if same name folder already exists.
+- Fixed dependencies being installed despite chosing not to install.
+- Changed the folder structure for drizzle orm.
+
 ## [1.3.0] - 2024-05-22
 - Replaced @inquirer/prompts with @clack/prompts
 - Added new prompt to choose authentication type: jwt-auth or none
