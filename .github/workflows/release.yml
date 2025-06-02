@@ -79,14 +79,12 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Create github release
+              if: always()
               uses: softprops/action-gh-release@v1
               with:
                   tag_name: ${{ steps.version.outputs.tag }}
                   name: ${{ steps.version.outputs.tag }}
                   body: ${{ steps.changelog.outputs.body }}
-                  files: |
-                      apps/create-node-blueprint/dist/**
-                      apps/create-node-blueprint/package.json
                   draft: false
                   prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') }}
               env:
