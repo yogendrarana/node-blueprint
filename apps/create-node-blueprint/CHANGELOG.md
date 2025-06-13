@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.5.0] 2024-06-13
+- updated the versions of all the packages used
+
 ## [1.4.0] - 2024-06-01
 - Added new prompt to overwrite the existing directory if same name folder already exists.
 - Fixed dependencies being installed despite chosing not to install.
