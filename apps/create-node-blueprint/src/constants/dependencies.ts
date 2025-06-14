@@ -5,6 +5,7 @@ export const DEPENDENCIES = {
     "ejs": "^3.1.10",
     "zod": "^3.25.64",
     "cors": "^2.8.5",
+    "helmet": "^8.1.0",
 
     // Framework dependencies
     "express": "^5.1.0",
