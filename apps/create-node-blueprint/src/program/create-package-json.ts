@@ -47,9 +47,13 @@ function getDependencies(config: ProjectConfig): { dependencies: Record<string, 
 
     // Add framework specific dependencies
     if (config.framework === "express") {
-        dependencies["express"] = DEPENDENCIES["express"];
-        dependencies["winston"] = DEPENDENCIES["winston"];
-        dependencies["winston-daily-rotate-file"] = DEPENDENCIES["winston-daily-rotate-file"];
+        dependencies["express"] = DEPENDENCIES["express"],
+        dependencies["cors"] = DEPENDENCIES["cors"],
+        dependencies["helmet"] = DEPENDENCIES["helmet"],
+        dependencies["winston"] = DEPENDENCIES["winston"],
+        dependencies["winston-daily-rotate-file"] = DEPENDENCIES["winston-daily-rotate-file"],
+        
+        devDependencies["@types/cors"] = DEV_DEPENDENCIES["@types/cors"],
         devDependencies["@types/express"] = DEV_DEPENDENCIES["@types/express"];
     }
 

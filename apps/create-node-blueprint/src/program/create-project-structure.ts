@@ -71,7 +71,10 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
 
         // express framework specific files
         if (config.framework === FrameworkEnum.express) {
+            await createFileAndInjectContent(root, "src/config", "cors.ts", "express", "corsTs", config);
+            await createFileAndInjectContent(root, "src/middlewares", "cors-middleware.ts", "express", "corsMiddlewareTs", config);
             await createFileAndInjectContent(root, "src/middlewares", "error-middleware.ts", "express", "errorMiddlewareTs", config);
+            await createFileAndInjectContent(root, "src/middlewares", "helmet-middleware.ts", "express", "helmetMiddlewareTs", config);
             await createFileAndInjectContent(root, "src/config", "logger.ts", "express", "loggerTs", config);
             if (config.auth === AuthEnum.jwtAuth) {
                 await createFileAndInjectContent(root, "src/utils", "error-handler.ts", "express", "errorHandlerTs", config);
