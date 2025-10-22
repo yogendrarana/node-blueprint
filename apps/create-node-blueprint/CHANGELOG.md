@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.1] 2025-10-23
+- updated project structure
+- improved typescript code
+
 ## [1.6.0] 2025-06-14
 - added CORS and helmet support to generated templete
 

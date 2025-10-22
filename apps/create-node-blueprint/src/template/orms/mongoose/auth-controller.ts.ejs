@@ -5,8 +5,8 @@ import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env.js";
 import User from "../models/user-model.js";
 import Token from "../models/token-model.js";
+import HttpError from "../utils/http-error.js";
 import { TokenEnum } from "../enums/token-enum.js";
-import ErrorHandler from "../utils/error-handler.js";
 import { generateAuthTokens } from "../services/auth-services.js";
 import { loginUserSchema, registerUserSchema } from "../validations/auth-validations.js";
 
@@ -18,13 +18,13 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
         const validate = registerUserSchema.safeParse({ email, password });
         if (!validate.success) {
             const errorMessage = validate.error.errors[0]?.message || "Validation error";
-            throw new ErrorHandler(400, errorMessage);
+            throw new HttpError(400, errorMessage);
         }
 
         // check if user exists in database
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            throw new ErrorHandler(400, "The email is already registered. Please login.");
+            throw new HttpError(400, "The email is already registered. Please login.");
         }
 
         // encrypt password
@@ -37,7 +37,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
         });
 
         if (!user) {
-            throw new ErrorHandler(500, "User registration failed.");
+            throw new HttpError(500, "User registration failed.");
         }
 
         // generate tokens
@@ -78,19 +78,19 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         const validate = loginUserSchema.safeParse({ email, password });
         if (!validate.success) {
             const errorMessage = validate.error.errors[0]?.message || "Validation error";
-            throw new ErrorHandler(400, errorMessage);
+            throw new HttpError(400, errorMessage);
         }
 
         // Find user by email
         const user = await User.findOne({ email }).select("+password");
         if (!user) {
-            throw new ErrorHandler(400, "Invalid email or password.");
+            throw new HttpError(400, "Invalid email or password.");
         }
 
         // Compare password
         const isCorrectPassword = await bcrypt.compare(password, user.password);
         if (!isCorrectPassword) {
-            throw new ErrorHandler(400, "Invalid email or password.");
+            throw new HttpError(400, "Invalid email or password.");
         }
 
         const { accessToken, refreshToken } = generateAuthTokens({ userId: user._id });
@@ -128,13 +128,13 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
     try {
         const refreshToken = req.cookies.refreshToken;
         if (!refreshToken) {
-            throw new ErrorHandler(400, "Cannot logout.");
+            throw new HttpError(400, "Cannot logout.");
         }
 
         // Find token in database
         const foundRefreshToken = await Token.findOne({ value: refreshToken });
         if (!foundRefreshToken) {
-            throw new ErrorHandler(400, "Cannot logout.");
+            throw new HttpError(400, "Cannot logout.");
         }
 
         // delete refresh token from database
@@ -157,12 +157,12 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
     try {
         const refreshToken = req.cookies.refreshToken;
         if (!refreshToken) {
-            throw new ErrorHandler(403, "Refresh token not found in cookie.");
+            throw new HttpError(403, "Refresh token not found in cookie.");
         }
 
         jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET!, async (err: any, decoded: any) => {
             if (err) {
-                throw new ErrorHandler(
+                throw new HttpError(
                     401,
                     err.name === "TokenExpiredError"
                         ? "Refresh token expired. Login again!"
@@ -173,7 +173,7 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
             // get user associated with refresh token
             const user = await User.findById(decoded.userId);
             if (!user) {
-                throw new ErrorHandler(
+                throw new HttpError(
                     401,
                     "User associated with the refresh token does not exist!"
                 );
