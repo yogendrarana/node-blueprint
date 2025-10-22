@@ -5,7 +5,7 @@ import type { NextFunction, Request, Response } from "express";
 
 import { env } from "../config/env.js";
 import db from "../db/index.js";
-import ErrorHandler from "../utils/error-handler.js";
+import HttpError from "../utils/http-error.js";
 import { TokenEnum } from "../enums/token-enum.js";
 import { userSchema } from "../db/schema/user-schema.js";
 import { generateAuthTokens } from "../services/auth-services.js";
@@ -20,7 +20,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
         const validate = registerUserSchema.safeParse({ email, password });
         if (!validate.success) {
             const errorMessage = validate.error.errors[0]?.message || "Validation error";
-            throw new ErrorHandler(400, errorMessage);
+            throw new HttpError(400, errorMessage);
         }
 
         // check if user exists in database
@@ -30,7 +30,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
             .where(eq(userSchema.email, email))
             .limit(1);
         if (existingUser) {
-            throw new ErrorHandler(400, "The email is already registered. Please login.");
+            throw new HttpError(400, "The email is already registered. Please login.");
         }
 
         // encrypt password
@@ -45,7 +45,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
             })
             .returning();
         if (!user) {
-            throw new ErrorHandler(500, "User registration failed.");
+            throw new HttpError(500, "User registration failed.");
         }
         <%_ } _%>
         <%_ if (database === "mysql") { _%> 
@@ -57,11 +57,11 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
             })
         const lastInsertId = insertResult[0].insertId;
         if (!lastInsertId) {
-            throw new ErrorHandler(500, "User registration failed.");
+            throw new HttpError(500, "User registration failed.");
         }
         const [user] = await db.select().from(userSchema).where(eq(userSchema.id, lastInsertId)).limit(1);
         if (!user) {
-            throw new ErrorHandler(500, "User registration failed.");
+            throw new HttpError(500, "User registration failed.");
         }
         <%_ } _%>
 
@@ -103,13 +103,13 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         const validate = loginUserSchema.safeParse({ email, password });
         if (!validate.success) {
             const errorMessage = validate.error.errors[0]?.message || "Validation error";
-            throw new ErrorHandler(400, errorMessage);
+            throw new HttpError(400, errorMessage);
         }
 
         const [user] = await db.select().from(userSchema).where(eq(userSchema.email, email)).limit(1);
         const isCorrectPassword = await bcrypt.compare(password, user?.password || "");
         if (!user || !isCorrectPassword) {
-            throw new ErrorHandler(400, "Invalid email or password.");
+            throw new HttpError(400, "Invalid email or password.");
         }
 
         const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
@@ -150,7 +150,7 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
     try {
         const refreshToken = req.cookies.refreshToken;
         if (!refreshToken) {
-            throw new ErrorHandler(400, "Cannot logout.");
+            throw new HttpError(400, "Cannot logout.");
         }
 
         const foundRefreshToken = await db
@@ -160,7 +160,7 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
             .limit(1);
 
         if (!foundRefreshToken[0]) {
-            throw new ErrorHandler(400, "Cannot logout.");
+            throw new HttpError(400, "Cannot logout.");
         }
 
         // delete refresh token from database
@@ -182,12 +182,12 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
     try {
         const refreshToken = req.cookies.refreshToken;
         if (!refreshToken) {
-            throw new ErrorHandler(403, "Refresh token not found in cookie.");
+            throw new HttpError(403, "Refresh token not found in cookie.");
         }
 
         jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET!, async (err: any, decoded: any) => {
             if (err) {
-                throw new ErrorHandler(
+                throw new HttpError(
                     401,
                     err.name === "TokenExpiredError"
                         ? "Refresh token expired. Login again!"
@@ -198,7 +198,7 @@ export const refreshAccessToken = async (req: Request, res: Response, next: Next
             // get user associated with refresh token
             const [user] = await db.select().from(userSchema).where(eq(userSchema.id, decoded.userId)).limit(1);
             if (!user) {
-                throw new ErrorHandler(
+                throw new HttpError(
                     401,
                     "User associated with the refresh token does not exist!"
                 );

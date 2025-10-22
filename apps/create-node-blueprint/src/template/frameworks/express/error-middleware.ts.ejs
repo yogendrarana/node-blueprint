@@ -1,16 +1,24 @@
-import logger from "../config/logger.js";
 import type { NextFunction, Request, Response } from "express";
 
-const ErrorMiddleware = (err: any, _req: Request, res: Response, next: NextFunction) => {
-    err.status = err.status || 500;
-	err.message = err.message || "Internal Server Error";
+import logger from "../config/logger.js";
+import HttpError from "../utils/http-error.js";
 
-    logger.error(err.message);
+const errorMiddleware = (
+  err: unknown,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  const error = err instanceof HttpError
+    ? err
+    : new HttpError(500, "Internal Server Error");
 
-    res.status(err.status).json({
-        success: false,
-        message: err.message
-    });
-}
+  logger.error(error.message);
 
-export default ErrorMiddleware;
+  res.status(error.status).json({
+    success: false,
+    message: error.message,
+  });
+};
+
+export default errorMiddleware;

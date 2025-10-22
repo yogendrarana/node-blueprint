@@ -2,4 +2,6 @@ import cors from 'cors';
 import { type RequestHandler } from 'express';
 import { corsOptions } from '../config/cors.js';
 
-export const CorsMiddleware: RequestHandler = cors(corsOptions);
+const corsMiddleware: RequestHandler = cors(corsOptions);
+
+export default corsMiddleware;
