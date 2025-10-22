@@ -53,7 +53,7 @@ export const TemplaterMap: Record<TemplaterKey, ITemplateConfig> = {
         name: "express",
         templater: {
             loggerTs: (options) => readTemplateFile("frameworks/express/logger.ts.ejs", options),
-            errorHandlerTs: (options) => readTemplateFile("frameworks/express/error-handler.ts.ejs", options),
+            httpErrorTs: (options) => readTemplateFile("frameworks/express/http-error.ts.ejs", options),
             errorMiddlewareTs: (options) => readTemplateFile("frameworks/express/error-middleware.ts.ejs", options),
             corsTs: options => readTemplateFile("frameworks/express/cors.ts.ejs", options),
             corsMiddlewareTs: (options) => readTemplateFile("frameworks/express/cors-middleware.ts.ejs", options), 

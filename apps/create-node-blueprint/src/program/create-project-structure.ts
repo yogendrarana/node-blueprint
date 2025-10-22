@@ -77,7 +77,7 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
             await createFileAndInjectContent(root, "src/middlewares", "helmet-middleware.ts", "express", "helmetMiddlewareTs", config);
             await createFileAndInjectContent(root, "src/config", "logger.ts", "express", "loggerTs", config);
             if (config.auth === AuthEnum.jwtAuth) {
-                await createFileAndInjectContent(root, "src/utils", "error-handler.ts", "express", "errorHandlerTs", config);
+                await createFileAndInjectContent(root, "src/utils", "http-error.ts", "express", "httpErrorTs", config);
             }
         }
 
