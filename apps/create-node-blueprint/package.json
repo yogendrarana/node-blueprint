@@ -13,10 +13,13 @@
     "scripts": {
         "clean": "rm -rf dist",
         "copy": "cp -r src/template dist/src",
-        "build": "yarn run clean && tsc && yarn run copy",
+        "build": "bun run clean && tsc && bun run copy",
         "postbuild": "chmod +x dist/index.js",
         "dev": "tsx index.ts create",
-        "prepublishOnly": "yarn run build"
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage",
+        "prepublishOnly": "bun run build"
     },
     "author": "Yogendra Rana <www.yogendrarana.com.np>",
     "license": "ISC",
@@ -35,9 +38,11 @@
         "@types/fs-extra": "^11.0.4",
         "@types/node": "^22.13.1",
         "@types/yargs": "^17.0.33",
+        "@vitest/coverage-v8": "^2.1.8",
         "del": "^8.0.0",
         "tsx": "^4.19.2",
-        "typescript": "^5.7.3"
+        "typescript": "^5.7.3",
+        "vitest": "^2.1.8"
     },
     "keywords": [
         "cli",
