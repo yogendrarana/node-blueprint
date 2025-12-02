@@ -1,4 +1,188 @@
-Thank you for using node-blueprint.
+# <%= projectName %>
 
-If you find node-blueprint useful, please give it a star on GitHub!
-(Star node-blueprint)[https://github.com/yogendrarana/node-blueprint]
+A Node.js backend application built with **<%= framework %>**, **<%= orm.toUpperCase() %>**, and **<%= database %>**.
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- <%= database === 'mongodb' ? 'MongoDB' : database === 'postgres' ? 'PostgreSQL' : 'MySQL' %> database
+<% if (features.includes('docker')) { %>- Docker and Docker Compose (optional)<% } %>
+
+### Installation
+
+1. **Install dependencies:**
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+2. **Set up environment variables:**
+
+   Copy the `.env` file and configure your database connection:
+
+   ```bash
+   # Database configuration
+   <% if (database === 'postgres') { %>DATABASE_URL=postgresql://user:password@localhost:5432/<%= projectName %><% } else if (database === 'mysql') { %>DATABASE_URL=mysql://user:password@localhost:3306/<%= projectName %><% } else if (database === 'mongodb') { %>DATABASE_URL=mongodb://localhost:27017/<%= projectName %><% } %>
+   
+   # Server configuration
+   PORT=8000
+   NODE_ENV=development
+   <% if (auth === 'jwt-auth') { %>
+   # JWT configuration
+   JWT_SECRET=your-secret-key-here
+   JWT_EXPIRES_IN=7d
+   JWT_REFRESH_SECRET=your-refresh-secret-key-here
+   JWT_REFRESH_EXPIRES_IN=30d<% } %>
+   ```
+
+3. **Database setup:**
+<% if (orm === 'prisma') { %>
+   ```bash
+   # Generate Prisma client
+   npm run db:generate
+   
+   # Run migrations
+   npm run db:migrate
+   
+   # Seed database (optional)
+   npm run db:seed
+   ```
+<% } else if (orm === 'drizzle') { %>
+   ```bash
+   # Generate migrations
+   npm run db:generate
+   
+   # Push schema to database
+   npm run db:push
+   
+   # Seed database (optional)
+   npm run db:seed
+   ```
+<% } else if (orm === 'mongoose') { %>
+   ```bash
+   # Seed database (optional)
+   npm run db:seed
+   ```
+<% } %>
+
+4. **Start the development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+   The server will start on `http://localhost:8000`
+
+<% if (features.includes('docker')) { %>
+## 🐳 Docker Setup
+
+Run the application with Docker Compose:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+<% } %>
+
+## 📁 Project Structure
+
+```
+<%= projectName %>/
+├── src/
+│   ├── config/          # Configuration files
+│   ├── controllers/     # Route controllers
+<% if (orm === 'drizzle') { %>│   ├── db/              # Database schemas and migrations<% } else if (orm === 'mongoose') { %>│   ├── models/          # Mongoose models<% } %>
+│   ├── middlewares/     # Custom middlewares
+│   ├── routes/          # API routes
+│   ├── services/        # Business logic
+│   ├── utils/           # Utility functions
+│   ├── validations/     # Input validation schemas
+│   ├── app.ts           # Express app configuration
+│   └── server.ts        # Server entry point
+<% if (orm === 'prisma') { %>├── prisma/              # Prisma schema and migrations<% } %>
+├── .env                 # Environment variables
+├── tsconfig.json        # TypeScript configuration
+└── package.json
+```
+
+## 🛠️ Available Scripts
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm start` - Start production server
+<% if (orm === 'prisma') { %>- `npm run db:generate` - Generate Prisma client
+- `npm run db:migrate` - Run database migrations
+- `npm run db:push` - Push schema changes to database
+- `npm run db:studio` - Open Prisma Studio
+- `npm run db:seed` - Seed the database<% } else if (orm === 'drizzle') { %>- `npm run db:generate` - Generate Drizzle migrations
+- `npm run db:push` - Push schema to database
+- `npm run db:migrate` - Run migrations
+- `npm run db:studio` - Open Drizzle Studio
+- `npm run db:seed` - Seed the database<% } else if (orm === 'mongoose') { %>- `npm run db:seed` - Seed the database<% } %>
+
+## 🔐 API Endpoints
+
+### Health Check
+
+- `GET /api/health` - Check server health
+
+### User Routes
+
+- `GET /api/users` - Get all users
+<% if (auth === 'jwt-auth') { %>
+### Authentication
+
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/logout` - Logout user
+- `POST /api/auth/refresh` - Refresh access token
+<% } %>
+
+## 🧪 Testing
+
+```bash
+# Run tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+## 📝 Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port | `8000` |
+| `NODE_ENV` | Environment | `development` |
+| `DATABASE_URL` | Database connection string | - |
+<% if (auth === 'jwt-auth') { %>| `JWT_SECRET` | JWT secret key | - |
+| `JWT_EXPIRES_IN` | JWT expiration time | `7d` |
+| `JWT_REFRESH_SECRET` | JWT refresh secret | - |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh token expiration | `30d` |<% } %>
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the ISC License.
+
+---
+
+**Built with [node-blueprint](https://github.com/yogendrarana/node-blueprint)** ⚡
+
+If you find this useful, please give node-blueprint a star on GitHub!
