@@ -22,7 +22,7 @@ export default function SiteHeader() {
         };
 
         fetchStars();
-    }, [stars, setStars]);
+    }, []);
 
     return (
         <div className="flex justify-between items-center">
@@ -48,7 +48,7 @@ export default function SiteHeader() {
                         "dark:border-gray-800 dark:bg-black dark:text-white dark:shadow-gray-800 dark:hover:bg-gray-900"
                     )}
                 >
-                    GithHub {stars}
+                    GitHub {stars}
                 </button>
             </motion.a>
         </div>

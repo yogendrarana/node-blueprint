@@ -7,11 +7,11 @@
         "apps/*"
     ],
     "scripts": {
-        "dev:web": "yarn workspace @node-blueprint/web dev",
-        "dev:cli": "yarn workspace create-node-blueprint dev",
-        "build:web": "yarn workspace @node-blueprint/web build",
-        "build:cli": "yarn workspace create-node-blueprint build",
-        "build": "yarn build:cli && yarn build:web"
+        "dev:web": "bun --filter @node-blueprint/web dev",
+        "dev:cli": "bun --filter create-node-blueprint dev",
+        "build:web": "bun --filter @node-blueprint/web build",
+        "build:cli": "bun --filter create-node-blueprint build",
+        "build": "bun run build:cli && bun run build:web"
     },
     "keywords": [
         "node",
