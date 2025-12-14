@@ -21,23 +21,23 @@
     "author": "Yogendra Rana <www.yogendrarana.com.np>",
     "license": "ISC",
     "dependencies": {
-        "@clack/prompts": "^0.10.1",
+        "@clack/prompts": "^0.11.0",
         "consola": "^3.4.2",
         "ejs": "^3.1.10",
-        "fs-extra": "^11.3.0",
-        "ora": "^8.2.0",
+        "fs-extra": "^11.3.2",
+        "ora": "^9.0.0",
         "picocolors": "^1.1.1",
-        "yargs": "^17.7.2"
+        "yargs": "^18.0.0"
     },
     "devDependencies": {
         "@types/consola": "^2.2.8",
         "@types/ejs": "^3.1.5",
         "@types/fs-extra": "^11.0.4",
-        "@types/node": "^22.13.1",
-        "@types/yargs": "^17.0.33",
-        "del": "^8.0.0",
-        "tsx": "^4.19.2",
-        "typescript": "^5.7.3"
+        "@types/node": "^25.0.2",
+        "@types/yargs": "^17.0.35",
+        "del": "^8.0.1",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.3"
     },
     "keywords": [
         "cli",
