@@ -5,9 +5,9 @@ import cookieParser from "cookie-parser";
 import express, { type Request, type Response } from "express";
 
 import router from "./router.js";
-import ErrorMiddleware from "./middlewares/error-middleware.js";
-import { CorsMiddleware } from "./middlewares/cors-middleware.js";
-import { HelmetMiddleware } from "./middlewares/helmet-middleware.js";
+import errorMiddleware from "./middlewares/error-middleware.js";
+import corsMiddleware from "./middlewares/cors-middleware.js";
+import helmetMiddleware from "./middlewares/helmet-middleware.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -15,10 +15,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 // Security middleware
-app.use(HelmetMiddleware);
+app.use(helmetMiddleware);
 
 // CORS middleware
-app.use(CorsMiddleware);
+app.use(corsMiddleware);
 
 // basic express configuration
 app.set("view engine", "ejs");
@@ -30,10 +30,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// use ejs
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
 // routes
 app.get("/", (req: Request, res: Response) => {
     res.json({ message: "Hello from Node Blueprint Starter" });
@@ -41,7 +37,7 @@ app.get("/", (req: Request, res: Response) => {
 app.use(router);
 
 // error middleware
-app.use(ErrorMiddleware);
+app.use(errorMiddleware);
 
 // export express app
 export default app;

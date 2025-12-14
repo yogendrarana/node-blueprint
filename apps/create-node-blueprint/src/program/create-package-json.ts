@@ -2,7 +2,6 @@ import path from "node:path";
 import { promises as fs } from "fs";
 
 import { ProjectConfig } from "../types/types.js";
-import { execAsync } from "../utils/exec-async.js";
 import { packageManagerConfig } from "../utils/utils.js";
 import { DEPENDENCIES, DEV_DEPENDENCIES } from "../constants/dependencies.js";
 
