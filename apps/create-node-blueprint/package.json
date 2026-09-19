@@ -13,10 +13,10 @@
     "scripts": {
         "clean": "rm -rf dist",
         "copy": "cp -r src/template dist/src",
-        "build": "yarn run clean && tsc && yarn run copy",
+        "build": "bun run clean && tsc && bun run copy",
         "postbuild": "chmod +x dist/index.js",
         "dev": "tsx index.ts create",
-        "prepublishOnly": "yarn run build"
+        "prepublishOnly": "bun run build"
     },
     "author": "Yogendra Rana <www.yogendrarana.com.np>",
     "license": "ISC",

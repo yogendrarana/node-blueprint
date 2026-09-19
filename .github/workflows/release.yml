@@ -22,13 +22,15 @@ jobs:
               with:
                   node-version: 20.x
                   registry-url: "https://registry.npmjs.org"
-                  cache: "yarn"
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
 
             - name: Install dependencies
-              run: yarn install --frozen-lockfile
+              run: bun install --frozen-lockfile
 
             - name: Build package
-              run: yarn workspace create-node-blueprint build
+              run: bun --filter create-node-blueprint build
 
             - name: Get version from tag
               id: version

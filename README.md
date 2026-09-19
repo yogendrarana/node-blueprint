@@ -51,20 +51,20 @@ npm create node-blueprint --name app-name --framework express --database postgre
 ```bash
 git clone https://github.com/yogendrarana/node-blueprint.git
 cd node-blueprint
-npm install
+bun install
 ```
 
-2. **Build all packges**
+2. **Build all packages**
 ```bash
-npm run build:all
-yarn build:cli --watch      # For incremental development
+bun run build
+bun run build:cli               # Build CLI package
 ```
 
-1. **Link CLI globally**
+3. **Link CLI globally**
 ```bash
-cd apps/cli
+cd apps/create-node-blueprint
 npm link                    # Creates global symlink
-node-blueprint --version    # Verify local version
+create-node-blueprint --help    # Verify local version
 ```
 
 #### Monorepo Structure
@@ -79,11 +79,11 @@ node-blueprint --version    # Verify local version
 ```plaintext
 {
   "scripts": {
-    "dev:web": "yarn workspace @node-blueprint/web dev",
-    "dev:cli": "yarn workspace create-node-blueprint dev",
-    "build:web": "yarn workspace @node-blueprint/web build",
-    "build:cli": "yarn workspace create-node-blueprint build",
-    "build:all": "yarn build:cli && yarn build:web"
+    "dev:web": "bun --filter @node-blueprint/web dev",
+    "dev:cli": "bun --filter create-node-blueprint dev",
+    "build:web": "bun --filter @node-blueprint/web build",
+    "build:cli": "bun --filter create-node-blueprint build",
+    "build": "bun run build:cli && bun run build:web"
   }
 }
 ```
