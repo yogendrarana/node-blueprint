@@ -202,6 +202,7 @@ export const generateProjectStructure = ({ name, framework, orm, features = [], 
 				]
 			: []),
 		...(orm === "drizzle" ? [{ name: "drizzle.config.ts", type: "file" } as const] : []),
+		...(orm === "prisma" ? [{ name: "prisma.config.ts", type: "file" } as const] : []),
 		...(orm === "prisma"
 			? [
 					{
@@ -209,6 +210,16 @@ export const generateProjectStructure = ({ name, framework, orm, features = [], 
 						type: "directory",
 						children: [
 							{ name: "schema.prisma", type: "file" },
+							{
+								name: "models",
+								type: "directory",
+								children: [{ name: "user.prisma", type: "file" }, ...(hasJwt ? [{ name: "token.prisma", type: "file" }] : [])],
+							},
+							{
+								name: "enums",
+								type: "directory",
+								children: [{ name: "common.prisma", type: "file" }],
+							},
 							{ name: "seed.ts", type: "file" },
 						],
 					} as FileType,

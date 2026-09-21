@@ -20,10 +20,13 @@ export const DEPENDENCIES = {
 	// Database dependencies
 	pg: "^8.16.0",
 	mysql2: "^3.14.1",
+	mariadb: "^3.5.4",
 	mongoose: "^8.15.2",
 
 	// ORM dependencies
-	"@prisma/client": "^6.9.0",
+	"@prisma/client": "^7.10.0",
+	"@prisma/adapter-pg": "^7.10.0",
+	"@prisma/adapter-mariadb": "^7.10.0",
 	"drizzle-orm": "^0.44.2",
 
 	// Auth dependencies
@@ -50,6 +53,6 @@ export const DEV_DEPENDENCIES = {
 	"@biomejs/biome": "^2.4.15",
 
 	// ORM tools
-	prisma: "^6.9.0",
+	prisma: "^7.10.0",
 	"drizzle-kit": "^0.31.1",
 } as const;

@@ -3,131 +3,149 @@ import { eq } from "drizzle-orm";
 import db from "../../infrastructure/database/index.js";
 import { userSchema, type NewUser } from "../../infrastructure/database/schema/user.schema.js";
 
+export const findUsers = async () => {
+    return db
+        .select({
+            id: userSchema.id,
+            name: userSchema.name,
+            email: userSchema.email,
+            role: userSchema.role,
+            createdAt: userSchema.createdAt,
+            updatedAt: userSchema.updatedAt
+        })
+        .from(userSchema);
+};
+
+export const findUserById = async (id: string) => {
+    const [user] = await db
+        .select({
+            id: userSchema.id,
+            name: userSchema.name,
+            email: userSchema.email,
+            role: userSchema.role,
+            createdAt: userSchema.createdAt,
+            updatedAt: userSchema.updatedAt
+        })
+        .from(userSchema)
+        .where(eq(userSchema.id, <%_ if (database === 'mysql') { _%>Number(id)<%_ } else { _%>id<%_ } _%>));
+    return user || null;
+};
+
+export const findUserByEmail = async (email: string) => {
+    const [user] = await db
+        .select()
+        .from(userSchema)
+        .where(eq(userSchema.email, email));
+    return user || null;
+};
+
+export const createUser = async (data: NewUser) => {
+    <%_ if (database === "postgres") { _%>
+    const [newUser] = await db.insert(userSchema).values(data).returning();
+    return newUser;
+    <%_ } else { _%>
+    const [result] = await db.insert(userSchema).values(data);
+    return result;
+    <%_ } _%>
+};
+
+export const deleteUser = async (id: string) => {
+    return db
+        .delete(userSchema)
+        .where(eq(userSchema.id, <%_ if (database === 'mysql') { _%>Number(id)<%_ } else { _%>id<%_ } _%>));
+};
+
 export const userRepo = {
-    async findUsers() {
-        return db
-            .select({
-                id: userSchema.id,
-                name: userSchema.name,
-                email: userSchema.email,
-                role: userSchema.role,
-                createdAt: userSchema.createdAt,
-                updatedAt: userSchema.updatedAt
-            })
-            .from(userSchema);
-    },
-
-    async findUserById(id: string) {
-        const [user] = await db
-            .select({
-                id: userSchema.id,
-                name: userSchema.name,
-                email: userSchema.email,
-                role: userSchema.role,
-                createdAt: userSchema.createdAt,
-                updatedAt: userSchema.updatedAt
-            })
-            .from(userSchema)
-            .where(eq(userSchema.id, <%_ if (database === 'mysql') { _%>Number(id)<%_ } else { _%>id<%_ } _%>));
-        return user || null;
-    },
-
-    async findUserByEmail(email: string) {
-        const [user] = await db
-            .select()
-            .from(userSchema)
-            .where(eq(userSchema.email, email));
-        return user || null;
-    },
-
-    async createUser(data: NewUser) {
-        <%_ if (database === 'postgres') { _%>
-        const [newUser] = await db.insert(userSchema).values(data).returning();
-        return newUser;
-        <%_ } else { _%>
-        const [result] = await db.insert(userSchema).values(data);
-        return result;
-        <%_ } _%>
-    },
-
-    async deleteUser(id: string) {
-        return db
-            .delete(userSchema)
-            .where(eq(userSchema.id, <%_ if (database === 'mysql') { _%>Number(id)<%_ } else { _%>id<%_ } _%>));
-    }
+    findUsers,
+    findUserById,
+    findUserByEmail,
+    createUser,
+    deleteUser
 };
 <%_ } _%>
 <%_ if (orm === 'prisma') { _%>
 import prisma from "../../infrastructure/database/index.js";
 import type { Prisma } from "@prisma/client";
 
+export const findUsers = async () => {
+    return prisma.user.findMany({
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true
+        }
+    });
+};
+
+export const findUserById = async (id: string) => {
+    return prisma.user.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true
+        }
+    });
+};
+
+export const findUserByEmail = async (email: string) => {
+    return prisma.user.findUnique({
+        where: { email }
+    });
+};
+
+export const createUser = async (data: Prisma.UserCreateInput) => {
+    return prisma.user.create({ data });
+};
+
+export const deleteUser = async (id: string) => {
+    return prisma.user.delete({
+        where: { id }
+    });
+};
+
 export const userRepo = {
-    async findUsers() {
-        return prisma.user.findMany({
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true
-            }
-        });
-    },
-
-    async findUserById(id: string) {
-        return prisma.user.findUnique({
-            where: { id: <%_ if (database === 'mysql') { _%>Number(id)<%_ } else { _%>id<%_ } _%> },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true
-            }
-        });
-    },
-
-    async findUserByEmail(email: string) {
-        return prisma.user.findUnique({
-            where: { email }
-        });
-    },
-
-    async createUser(data: Prisma.UserCreateInput) {
-        return prisma.user.create({ data });
-    },
-
-    async deleteUser(id: string) {
-        return prisma.user.delete({
-            where: { id: <%_ if (database === 'mysql') { _%>Number(id)<%_ } else { _%>id<%_ } _%> }
-        });
-    }
+    findUsers,
+    findUserById,
+    findUserByEmail,
+    createUser,
+    deleteUser
 };
 <%_ } _%>
 <%_ if (orm === 'mongoose') { _%>
 import User, { type IUser } from "../../infrastructure/database/models/user.model.js";
 
+export const findUsers = async () => {
+    return User.find().select("-password").lean();
+};
+
+export const findUserById = async (id: string) => {
+    return User.findById(id).select("-password").lean();
+};
+
+export const findUserByEmail = async (email: string) => {
+    return User.findOne({ email });
+};
+
+export const createUser = async (data: Partial<IUser>) => {
+    return User.create(data);
+};
+
+export const deleteUser = async (id: string) => {
+    return User.findByIdAndDelete(id);
+};
+
 export const userRepo = {
-    async findUsers() {
-        return User.find().select("-password").lean();
-    },
-
-    async findUserById(id: string) {
-        return User.findById(id).select("-password").lean();
-    },
-
-    async findUserByEmail(email: string) {
-        return User.findOne({ email });
-    },
-
-    async createUser(data: Partial<IUser>) {
-        return User.create(data);
-    },
-
-    async deleteUser(id: string) {
-        return User.findByIdAndDelete(id);
-    }
+    findUsers,
+    findUserById,
+    findUserByEmail,
+    createUser,
+    deleteUser
 };
 <%_ } _%>

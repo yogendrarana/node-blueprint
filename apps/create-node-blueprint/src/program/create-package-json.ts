@@ -73,12 +73,21 @@ function getDependencies(config: ProjectConfig): {
 		dependencies["pg"] = DEPENDENCIES["pg"];
 		devDependencies["@types/pg"] = DEV_DEPENDENCIES["@types/pg"];
 	} else if (config.database === "mysql") {
-		dependencies["mysql2"] = DEPENDENCIES["mysql2"];
+		if (config.orm === "prisma") {
+			dependencies["mariadb"] = DEPENDENCIES["mariadb"];
+		} else {
+			dependencies["mysql2"] = DEPENDENCIES["mysql2"];
+		}
 	}
 
 	// Add ORM specific dependencies
 	if (config.orm === "prisma") {
 		dependencies["@prisma/client"] = DEPENDENCIES["@prisma/client"];
+		if (config.database === "postgres") {
+			dependencies["@prisma/adapter-pg"] = DEPENDENCIES["@prisma/adapter-pg"];
+		} else if (config.database === "mysql") {
+			dependencies["@prisma/adapter-mariadb"] = DEPENDENCIES["@prisma/adapter-mariadb"];
+		}
 		devDependencies["prisma"] = DEV_DEPENDENCIES["prisma"];
 	} else if (config.orm === "drizzle") {
 		dependencies["drizzle-orm"] = DEPENDENCIES["drizzle-orm"];

@@ -1,0 +1,15 @@
+<%_ if (auth === "jwt") { _%>
+model Token {
+    id        String    @id @default(uuid())
+    value     String
+    type      TokenEnum
+    userId    String    @map("user_id")
+    user      User      @relation(fields: [userId], references: [id])
+
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+
+    @@index([userId])
+    @@map("tokens")
+}
+<%_ } _%>

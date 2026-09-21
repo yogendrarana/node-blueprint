@@ -149,8 +149,16 @@ export const createProjectStructure = async (
 
 		if (config.orm === OrmEnum.prisma) {
 			await ensureDirExists(path.resolve(root, "prisma"));
+			await ensureDirExists(path.resolve(root, "prisma", "models"));
+			await ensureDirExists(path.resolve(root, "prisma", "enums"));
+			await createFileAndInjectContent(root, "", "prisma.config.ts", "infrastructure", "prismaConfig", config);
 			await createFileAndInjectContent(root, "src/infrastructure/database", "index.ts", "infrastructure", "prismaClient", config);
 			await createFileAndInjectContent(root, "prisma", "schema.prisma", "infrastructure", "prismaSchema", config);
+			await createFileAndInjectContent(root, "prisma/enums", "common.prisma", "infrastructure", "prismaCommonEnum", config);
+			await createFileAndInjectContent(root, "prisma/models", "user.prisma", "infrastructure", "prismaUserModel", config);
+			if (config.auth === AuthEnum.jwt) {
+				await createFileAndInjectContent(root, "prisma/models", "token.prisma", "infrastructure", "prismaTokenModel", config);
+			}
 			await createFileAndInjectContent(root, "prisma", "seed.ts", "infrastructure", "prismaSeed", config);
 		}
 

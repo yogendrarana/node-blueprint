@@ -1,0 +1,12 @@
+enum RoleEnum {
+    admin
+    user
+}
+<%_ if (auth === "jwt") { _%>
+
+enum TokenEnum {
+    refresh_token
+    reset_password_token
+    verify_email_token
+}
+<%_ } _%>

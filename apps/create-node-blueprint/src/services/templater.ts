@@ -72,8 +72,12 @@ export const TemplaterMap: Record<TemplaterKey, ITemplateConfig> = {
 			drizzleSeed: (options) => readTemplateFile("infrastructure/database/drizzle/seed.ts.ejs", options),
 			drizzleConfig: (options) => readTemplateFile("infrastructure/database/drizzle/drizzle.config.ts.ejs", options),
 			// Prisma
+			prismaConfig: (options) => readTemplateFile("infrastructure/database/prisma/prisma.config.ts.ejs", options),
 			prismaClient: (options) => readTemplateFile("infrastructure/database/prisma/client.ts.ejs", options),
 			prismaSchema: (options) => readTemplateFile("infrastructure/database/prisma/schema.prisma.ejs", options),
+			prismaCommonEnum: (options) => readTemplateFile("infrastructure/database/prisma/enums/common.prisma.ejs", options),
+			prismaUserModel: (options) => readTemplateFile("infrastructure/database/prisma/models/user.prisma.ejs", options),
+			prismaTokenModel: (options) => readTemplateFile("infrastructure/database/prisma/models/token.prisma.ejs", options),
 			prismaSeed: (options) => readTemplateFile("infrastructure/database/prisma/seed.ts.ejs", options),
 			// Mongoose
 			mongooseConnection: (options) => readTemplateFile("infrastructure/database/mongoose/connection.ts.ejs", options),

@@ -1,8 +1,20 @@
 import { PrismaClient } from "@prisma/client";
+<%_ if (database === 'postgres') { _%>
+import { PrismaPg } from "@prisma/adapter-pg";
+<%_ } else if (database === 'mysql') { _%>
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+<%_ } _%>
+import { env } from "../../app/config/env.js";
 
 const globalForPrisma = global as unknown as { prisma?: PrismaClient };
 
-const prisma = globalForPrisma.prisma ?? new PrismaClient();
+<%_ if (database === 'postgres') { _%>
+const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
+<%_ } else if (database === 'mysql') { _%>
+const adapter = new PrismaMariaDb(env.DATABASE_URL);
+<%_ } _%>
+
+const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
