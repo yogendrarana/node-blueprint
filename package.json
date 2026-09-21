@@ -1,30 +1,32 @@
 {
-    "name": "node-blueprint",
-    "private": true,
-    "version": "1.0.0",
-    "author": "Yogendra Rana <www.yogendrarana.com.np>",
-    "workspaces": [
-        "apps/*"
-    ],
-    "scripts": {
-        "dev:web": "bun run --cwd apps/web dev",
-        "dev:cli": "bun run --cwd apps/create-node-blueprint dev",
-        "build:web": "bun run --cwd apps/web build",
-        "build:cli": "bun run --cwd apps/create-node-blueprint build",
-        "build": "bun run build:cli && bun run build:web"
-    },
-    "keywords": [
-        "node",
-        "express",
-        "fastify",
-        "typescript",
-        "mysql",
-        "mongodb",
-        "postgres",
-        "create-node-blueprint"
-    ],
-    "license": "ISC",
-    "devDependencies": {
-        "@biomejs/biome": "2.5.14"
-    }
+	"name": "node-blueprint",
+	"private": true,
+	"version": "1.0.0",
+	"author": "Yogendra Rana <www.yogendrarana.com.np>",
+	"workspaces": [
+		"apps/*"
+	],
+	"scripts": {
+		"dev:web": "bun run --cwd apps/web dev",
+		"dev:cli": "bun run --cwd apps/create-node-blueprint dev",
+		"build:web": "bun run --cwd apps/web build",
+		"build:cli": "bun run --cwd apps/create-node-blueprint build",
+		"build": "bun run build:cli && bun run build:web",
+		"format": "biome format --write .",
+		"check": "biome check --write ."
+	},
+	"keywords": [
+		"node",
+		"express",
+		"fastify",
+		"typescript",
+		"mysql",
+		"mongodb",
+		"postgres",
+		"create-node-blueprint"
+	],
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "2.5.14"
+	}
 }

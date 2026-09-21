@@ -1,58 +1,58 @@
 {
-    "name": "create-node-blueprint",
-    "version": "1.6.1",
-    "type": "module",
-    "description": "A cli tool to generate nodejs project",
-    "main": "dist/index.js",
-    "bin": {
-        "create-node-blueprint": "dist/index.js"
-    },
-    "files": [
-        "dist"
-    ],
-    "scripts": {
-        "clean": "rm -rf dist",
-        "copy": "cp -r src/template dist/src",
-        "build": "bun run clean && tsc && bun run copy",
-        "postbuild": "chmod +x dist/index.js",
-        "dev": "tsx index.ts",
-        "prepublishOnly": "bun run build"
-    },
-    "author": "Yogendra Rana <www.yogendrarana.com.np>",
-    "license": "ISC",
-    "dependencies": {
-        "@clack/prompts": "^0.11.0",
-        "consola": "^3.4.2",
-        "ejs": "^3.1.10",
-        "fs-extra": "^11.3.2",
-        "ora": "^9.0.0",
-        "picocolors": "^1.1.1",
-        "yargs": "^18.0.0"
-    },
-    "devDependencies": {
-        "@types/consola": "^2.2.8",
-        "@types/ejs": "^3.1.5",
-        "@types/fs-extra": "^11.0.4",
-        "@types/node": "^25.0.2",
-        "@types/yargs": "^17.0.35",
-        "del": "^8.0.1",
-        "tsx": "^4.21.0",
-        "typescript": "^5.9.3"
-    },
-    "keywords": [
-        "cli",
-        "create-node-blueprint",
-        "nodejs",
-        "express",
-        "typescript",
-        "postgres",
-        "mysql",
-        "mongodb",
-        "drizzle",
-        "prisma",
-        "mongoose",
-        "jwt-auth",
-        "better-auth",
-        "docker"
-    ]
+	"name": "create-node-blueprint",
+	"version": "1.6.1",
+	"type": "module",
+	"description": "A cli tool to generate nodejs project",
+	"main": "dist/index.js",
+	"bin": {
+		"create-node-blueprint": "dist/index.js"
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"clean": "rm -rf dist",
+		"copy": "cp -r src/template dist/src",
+		"build": "bun run clean && tsc && bun run copy",
+		"postbuild": "chmod +x dist/index.js",
+		"dev": "tsx index.ts",
+		"prepublishOnly": "bun run build"
+	},
+	"author": "Yogendra Rana <www.yogendrarana.com.np>",
+	"license": "ISC",
+	"dependencies": {
+		"@clack/prompts": "^0.11.0",
+		"consola": "^3.4.2",
+		"ejs": "^3.1.10",
+		"fs-extra": "^11.3.2",
+		"ora": "^9.0.0",
+		"picocolors": "^1.1.1",
+		"yargs": "^18.0.0"
+	},
+	"devDependencies": {
+		"@types/consola": "^2.2.8",
+		"@types/ejs": "^3.1.5",
+		"@types/fs-extra": "^11.0.4",
+		"@types/node": "^25.0.2",
+		"@types/yargs": "^17.0.35",
+		"del": "^8.0.1",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	},
+	"keywords": [
+		"cli",
+		"create-node-blueprint",
+		"nodejs",
+		"express",
+		"typescript",
+		"postgres",
+		"mysql",
+		"mongodb",
+		"drizzle",
+		"prisma",
+		"mongoose",
+		"jwt-auth",
+		"better-auth",
+		"docker"
+	]
 }
