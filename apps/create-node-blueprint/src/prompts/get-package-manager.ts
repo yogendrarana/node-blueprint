@@ -5,13 +5,14 @@ export async function getPackageManager() {
     const answer = await select({
         message: "Which package manager would you like to use?",
         options: [
+            { label: "bun", value: PackageManagerEnum.bun },
             { label: "npm", value: PackageManagerEnum.npm },
             { label: "pnpm", value: PackageManagerEnum.pnpm },
             { label: "yarn", value: PackageManagerEnum.yarn },
         ],
-        initialValue: PackageManagerEnum.npm
+        initialValue: PackageManagerEnum.bun
     });
     
     if (isCancel(answer)) process.exit(0);
     return answer;
-} 
+}

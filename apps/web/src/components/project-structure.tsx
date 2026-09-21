@@ -10,14 +10,14 @@ export interface ProjectConfig {
     auth?: string;
 }
 
-export default function ProjectStructure({ name, orm, framework, features }: ProjectConfig) {
+export default function ProjectStructure({ name, orm, framework, features, auth }: ProjectConfig) {
     const [structure, setStructure] = React.useState<FileType[]>([]);
     const [expandedFolders, setExpandedFolders] = React.useState<Set<string>>(new Set());
 
     React.useEffect(() => {
-        const s = generateProjectStructure({ name, framework, orm, features });
+        const s = generateProjectStructure({ name, framework, orm, features, auth });
         setStructure(s);
-    }, [name, orm, features, framework]);
+    }, [name, orm, features, framework, auth]);
 
     // toggle folder open/close
     const toggleFolder = (path: string) => {

@@ -1,0 +1,701 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+<%_ if (framework === 'express') { _%>
+import type { NextFunction, Request, Response } from "express";
+<%_ } else if (framework === 'fastify') { _%>
+import type { FastifyRequest, FastifyReply } from "fastify";
+<%_ } _%>
+
+import { env } from "../../app/config/env.js";
+<%_ if (orm === 'drizzle') { _%>
+import { eq } from "drizzle-orm";
+import db from "../../infrastructure/database/index.js";
+import { userSchema } from "../../infrastructure/database/schema/user.schema.js";
+import { tokenSchema } from "../../infrastructure/database/schema/token.schema.js";
+import { TokenTypes } from "../../shared/constants/tokens.js";
+<%_ } _%>
+<%_ if (orm === 'prisma') { _%>
+import { TokenEnum } from '@prisma/client';
+import prisma from "../../infrastructure/database/index.js";
+<%_ } _%>
+<%_ if (orm === 'mongoose') { _%>
+import User from "../../infrastructure/database/models/user.model.js";
+import Token from "../../infrastructure/database/models/token.model.js";
+import { TokenTypes } from "../../shared/constants/tokens.js";
+<%_ } _%>
+import AppError from "../../shared/errors/app-error.js";
+import { generateAuthTokens } from "./auth.service.js";
+import { loginUserSchema, registerUserSchema } from "./auth.schema.js";
+
+<%_ if (framework === 'express') { _%>
+// register user controller
+export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const validate = registerUserSchema.safeParse({ email, password });
+        if (!validate.success) {
+            const errorMessage = validate.error.errors[0]?.message || "Validation error";
+            throw new AppError(400, errorMessage);
+        }
+
+        <%_ if (orm === 'drizzle') { _%>
+        const [existingUser] = await db
+            .select()
+            .from(userSchema)
+            .where(eq(userSchema.email, email))
+            .limit(1);
+        if (existingUser) {
+            throw new AppError(400, "The email is already registered. Please login.");
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        <%_ if (database === "postgres") { _%>
+        const [user] = await db
+            .insert(userSchema)
+            .values({ email, password: hashedPassword })
+            .returning();
+        if (!user) {
+            throw new AppError(500, "User registration failed.");
+        }
+        <%_ } _%>
+        <%_ if (database === "mysql") { _%>
+        const insertResult = await db
+            .insert(userSchema)
+            .values({ email, password: hashedPassword });
+        const lastInsertId = insertResult[0].insertId;
+        if (!lastInsertId) {
+            throw new AppError(500, "User registration failed.");
+        }
+        const [user] = await db.select().from(userSchema).where(eq(userSchema.id, lastInsertId)).limit(1);
+        if (!user) {
+            throw new AppError(500, "User registration failed.");
+        }
+        <%_ } _%>
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+        await db.insert(tokenSchema).values({
+            type: TokenTypes.REFRESH_TOKEN,
+            value: refreshToken,
+            userId: user.id
+        });
+        <%_ } _%>
+
+        <%_ if (orm === 'prisma') { _%>
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+            throw new AppError(400, "The email is already registered. Please login.");
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await prisma.user.create({
+            data: { email, password: hashedPassword }
+        });
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+        await prisma.token.create({
+            data: { type: TokenEnum.refresh_token, value: refreshToken, userId: user.id }
+        });
+        <%_ } _%>
+
+        <%_ if (orm === 'mongoose') { _%>
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            throw new AppError(400, "The email is already registered. Please login.");
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await User.create({ email, password: hashedPassword });
+        if (!user) {
+            throw new AppError(500, "User registration failed.");
+        }
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user._id });
+
+        await Token.create({
+            type: TokenTypes.REFRESH_TOKEN,
+            value: refreshToken,
+            userId: user._id
+        });
+        <%_ } _%>
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Registered successfully.",
+            data: { accessToken, user }
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// login user controller
+export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        const validate = loginUserSchema.safeParse({ email, password });
+        if (!validate.success) {
+            const errorMessage = validate.error.errors[0]?.message || "Validation error";
+            throw new AppError(400, errorMessage);
+        }
+
+        <%_ if (orm === 'drizzle') { _%>
+        const [user] = await db.select().from(userSchema).where(eq(userSchema.email, email)).limit(1);
+        const isCorrectPassword = await bcrypt.compare(password, user?.password || "");
+        if (!user || !isCorrectPassword) {
+            throw new AppError(400, "Invalid email or password.");
+        }
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+        await db.insert(tokenSchema).values({
+            type: TokenTypes.REFRESH_TOKEN,
+            value: refreshToken,
+            userId: user.id
+        });
+
+        const { password: userPassword, createdAt, updatedAt, ...rest } = user;
+        <%_ } _%>
+
+        <%_ if (orm === 'prisma') { _%>
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            throw new AppError(400, "Invalid email or password.");
+        }
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+        await prisma.token.create({
+            data: { type: TokenEnum.refresh_token, value: refreshToken, userId: user.id }
+        });
+
+        const { password: _, ...rest } = user;
+        <%_ } _%>
+
+        <%_ if (orm === 'mongoose') { _%>
+        const user = await User.findOne({ email }).select("+password");
+        if (!user) {
+            throw new AppError(400, "Invalid email or password.");
+        }
+
+        const isCorrectPassword = await bcrypt.compare(password, user.password || "");
+        if (!isCorrectPassword) {
+            throw new AppError(400, "Invalid email or password.");
+        }
+
+        const { accessToken, refreshToken } = generateAuthTokens({ userId: user._id });
+
+        await Token.create({
+            type: TokenTypes.REFRESH_TOKEN,
+            value: refreshToken,
+            userId: user._id
+        });
+
+        const rest = user.toJSON();
+        <%_ } _%>
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Logged in successfully.",
+            data: { accessToken, user: rest }
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// logout user controller
+export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new AppError(400, "Cannot logout.");
+        }
+
+        <%_ if (orm === 'drizzle') { _%>
+        const foundRefreshToken = await db
+            .select()
+            .from(tokenSchema)
+            .where(eq(tokenSchema.value, refreshToken))
+            .limit(1);
+
+        if (!foundRefreshToken[0]) {
+            throw new AppError(400, "Cannot logout.");
+        }
+
+        await db.delete(tokenSchema).where(eq(tokenSchema.value, refreshToken));
+        <%_ } _%>
+
+        <%_ if (orm === 'prisma') { _%>
+        const foundToken = await prisma.token.findFirst({ where: { value: refreshToken } });
+        if (!foundToken) {
+            throw new AppError(400, "Cannot logout.");
+        }
+
+        await prisma.token.delete({ where: { id: foundToken.id } });
+        <%_ } _%>
+
+        <%_ if (orm === 'mongoose') { _%>
+        const foundRefreshToken = await Token.findOne({ value: refreshToken });
+        if (!foundRefreshToken) {
+            throw new AppError(400, "Cannot logout.");
+        }
+
+        await Token.deleteOne({ value: refreshToken });
+        <%_ } _%>
+
+        res.clearCookie("refreshToken");
+
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully."
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+
+// refresh and issue new tokens
+export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new AppError(403, "Refresh token not found in cookie.");
+        }
+
+        jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET!, async (err: any, decoded: any) => {
+            if (err) {
+                return next(
+                    new AppError(
+                        401,
+                        err.name === "TokenExpiredError"
+                            ? "Refresh token expired. Login again!"
+                            : "Unauthorized!"
+                    )
+                );
+            }
+
+            try {
+                <%_ if (orm === 'drizzle') { _%>
+                const [user] = await db.select().from(userSchema).where(eq(userSchema.id, decoded.userId)).limit(1);
+                if (!user) {
+                    throw new AppError(401, "User associated with the refresh token does not exist!");
+                }
+
+                const [existingToken] = await db.select().from(tokenSchema).where(eq(tokenSchema.value, refreshToken)).limit(1);
+                if (existingToken) {
+                    await db.delete(tokenSchema).where(eq(tokenSchema.value, refreshToken));
+                }
+
+                const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateAuthTokens({ userId: user.id });
+
+                await db.insert(tokenSchema).values({
+                    type: TokenTypes.REFRESH_TOKEN,
+                    value: newRefreshToken,
+                    userId: user.id
+                });
+                <%_ } _%>
+
+                <%_ if (orm === 'prisma') { _%>
+                const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+                if (!user) {
+                    throw new AppError(401, "User associated with the refresh token does not exist!");
+                }
+
+                const existingToken = await prisma.token.findFirst({ where: { value: refreshToken } });
+                if (existingToken) {
+                    await prisma.token.delete({ where: { id: existingToken.id } });
+                }
+
+                const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateAuthTokens({ userId: user.id });
+
+                await prisma.token.create({
+                    data: { type: TokenEnum.refresh_token, value: newRefreshToken, userId: user.id }
+                });
+                <%_ } _%>
+
+                <%_ if (orm === 'mongoose') { _%>
+                const user = await User.findById(decoded.userId);
+                if (!user) {
+                    throw new AppError(401, "User associated with the refresh token does not exist!");
+                }
+
+                await Token.deleteOne({ value: refreshToken });
+
+                const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+                    generateAuthTokens({ userId: user._id });
+
+                await Token.create({
+                    type: TokenTypes.REFRESH_TOKEN,
+                    value: newRefreshToken,
+                    userId: user._id
+                });
+                <%_ } _%>
+
+                res.cookie("refreshToken", newRefreshToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "none",
+                    maxAge: 30 * 24 * 60 * 60 * 1000
+                });
+
+                res.status(200).json({
+                    success: true,
+                    message: "Access token generated successfully!",
+                    data: {
+                        accessToken: newAccessToken,
+                        user
+                    }
+                });
+            } catch (innerErr: any) {
+                next(innerErr);
+            }
+        });
+    } catch (err: any) {
+        next(err);
+    }
+};
+<%_ } else if (framework === 'fastify') { _%>
+// Fastify auth controllers
+export const registerUser = async (request: FastifyRequest, reply: FastifyReply) => {
+    const { email, password } = (request.body as any) || {};
+
+    const validate = registerUserSchema.safeParse({ email, password });
+    if (!validate.success) {
+        const errorMessage = validate.error.errors[0]?.message || "Validation error";
+        throw new AppError(400, errorMessage);
+    }
+
+    <%_ if (orm === 'drizzle') { _%>
+    const [existingUser] = await db
+        .select()
+        .from(userSchema)
+        .where(eq(userSchema.email, email))
+        .limit(1);
+    if (existingUser) {
+        throw new AppError(400, "The email is already registered. Please login.");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    <%_ if (database === "postgres") { _%>
+    const [user] = await db
+        .insert(userSchema)
+        .values({ email, password: hashedPassword })
+        .returning();
+    if (!user) {
+        throw new AppError(500, "User registration failed.");
+    }
+    <%_ } _%>
+    <%_ if (database === "mysql") { _%>
+    const insertResult = await db
+        .insert(userSchema)
+        .values({ email, password: hashedPassword });
+    const lastInsertId = insertResult[0].insertId;
+    if (!lastInsertId) {
+        throw new AppError(500, "User registration failed.");
+    }
+    const [user] = await db.select().from(userSchema).where(eq(userSchema.id, lastInsertId)).limit(1);
+    if (!user) {
+        throw new AppError(500, "User registration failed.");
+    }
+    <%_ } _%>
+
+    const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+    await db.insert(tokenSchema).values({
+        type: TokenTypes.REFRESH_TOKEN,
+        value: refreshToken,
+        userId: user.id
+    });
+    <%_ } _%>
+
+    <%_ if (orm === 'prisma') { _%>
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+        throw new AppError(400, "The email is already registered. Please login.");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+        data: { email, password: hashedPassword }
+    });
+
+    const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+    await prisma.token.create({
+        data: { type: TokenEnum.refresh_token, value: refreshToken, userId: user.id }
+    });
+    <%_ } _%>
+
+    <%_ if (orm === 'mongoose') { _%>
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        throw new AppError(400, "The email is already registered. Please login.");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ email, password: hashedPassword });
+    if (!user) {
+        throw new AppError(500, "User registration failed.");
+    }
+
+    const { accessToken, refreshToken } = generateAuthTokens({ userId: user._id });
+
+    await Token.create({
+        type: TokenTypes.REFRESH_TOKEN,
+        value: refreshToken,
+        userId: user._id
+    });
+    <%_ } _%>
+
+    reply.setCookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        path: "/"
+    });
+
+    return reply.status(201).send({
+        success: true,
+        message: "Registered successfully.",
+        data: { accessToken, user }
+    });
+};
+
+export const loginUser = async (request: FastifyRequest, reply: FastifyReply) => {
+    const { email, password } = (request.body as any) || {};
+
+    const validate = loginUserSchema.safeParse({ email, password });
+    if (!validate.success) {
+        const errorMessage = validate.error.errors[0]?.message || "Validation error";
+        throw new AppError(400, errorMessage);
+    }
+
+    <%_ if (orm === 'drizzle') { _%>
+    const [user] = await db.select().from(userSchema).where(eq(userSchema.email, email)).limit(1);
+    const isCorrectPassword = await bcrypt.compare(password, user?.password || "");
+    if (!user || !isCorrectPassword) {
+        throw new AppError(400, "Invalid email or password.");
+    }
+
+    const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+    await db.insert(tokenSchema).values({
+        type: TokenTypes.REFRESH_TOKEN,
+        value: refreshToken,
+        userId: user.id
+    });
+
+    const { password: userPassword, createdAt, updatedAt, ...rest } = user;
+    <%_ } _%>
+
+    <%_ if (orm === 'prisma') { _%>
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+        throw new AppError(400, "Invalid email or password.");
+    }
+
+    const { accessToken, refreshToken } = generateAuthTokens({ userId: user.id });
+
+    await prisma.token.create({
+        data: { type: TokenEnum.refresh_token, value: refreshToken, userId: user.id }
+    });
+
+    const { password: _, ...rest } = user;
+    <%_ } _%>
+
+    <%_ if (orm === 'mongoose') { _%>
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+        throw new AppError(400, "Invalid email or password.");
+    }
+
+    const isCorrectPassword = await bcrypt.compare(password, user.password || "");
+    if (!isCorrectPassword) {
+        throw new AppError(400, "Invalid email or password.");
+    }
+
+    const { accessToken, refreshToken } = generateAuthTokens({ userId: user._id });
+
+    await Token.create({
+        type: TokenTypes.REFRESH_TOKEN,
+        value: refreshToken,
+        userId: user._id
+    });
+
+    const rest = user.toJSON();
+    <%_ } _%>
+
+    reply.setCookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        path: "/"
+    });
+
+    return reply.status(200).send({
+        success: true,
+        message: "Logged in successfully.",
+        data: { accessToken, user: rest }
+    });
+};
+
+export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) => {
+    const refreshToken = request.cookies.refreshToken;
+    if (!refreshToken) {
+        throw new AppError(400, "Cannot logout.");
+    }
+
+    <%_ if (orm === 'drizzle') { _%>
+    const foundRefreshToken = await db
+        .select()
+        .from(tokenSchema)
+        .where(eq(tokenSchema.value, refreshToken))
+        .limit(1);
+
+    if (!foundRefreshToken[0]) {
+        throw new AppError(400, "Cannot logout.");
+    }
+
+    await db.delete(tokenSchema).where(eq(tokenSchema.value, refreshToken));
+    <%_ } _%>
+
+    <%_ if (orm === 'prisma') { _%>
+    const foundToken = await prisma.token.findFirst({ where: { value: refreshToken } });
+    if (!foundToken) {
+        throw new AppError(400, "Cannot logout.");
+    }
+
+    await prisma.token.delete({ where: { id: foundToken.id } });
+    <%_ } _%>
+
+    <%_ if (orm === 'mongoose') { _%>
+    const foundRefreshToken = await Token.findOne({ value: refreshToken });
+    if (!foundRefreshToken) {
+        throw new AppError(400, "Cannot logout.");
+    }
+
+    await Token.deleteOne({ value: refreshToken });
+    <%_ } _%>
+
+    reply.clearCookie("refreshToken", { path: "/" });
+
+    return reply.status(200).send({
+        success: true,
+        message: "Logged out successfully."
+    });
+};
+
+export const refreshAccessToken = async (request: FastifyRequest, reply: FastifyReply) => {
+    const refreshToken = request.cookies.refreshToken;
+    if (!refreshToken) {
+        throw new AppError(403, "Refresh token not found in cookie.");
+    }
+
+    let decoded: any;
+    try {
+        decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET!);
+    } catch (err: any) {
+        throw new AppError(
+            401,
+            err.name === "TokenExpiredError"
+                ? "Refresh token expired. Login again!"
+                : "Unauthorized!"
+        );
+    }
+
+    <%_ if (orm === 'drizzle') { _%>
+    const [user] = await db.select().from(userSchema).where(eq(userSchema.id, decoded.userId)).limit(1);
+    if (!user) {
+        throw new AppError(401, "User associated with the refresh token does not exist!");
+    }
+
+    const [existingToken] = await db.select().from(tokenSchema).where(eq(tokenSchema.value, refreshToken)).limit(1);
+    if (existingToken) {
+        await db.delete(tokenSchema).where(eq(tokenSchema.value, refreshToken));
+    }
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateAuthTokens({ userId: user.id });
+
+    await db.insert(tokenSchema).values({
+        type: TokenTypes.REFRESH_TOKEN,
+        value: newRefreshToken,
+        userId: user.id
+    });
+    <%_ } _%>
+
+    <%_ if (orm === 'prisma') { _%>
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    if (!user) {
+        throw new AppError(401, "User associated with the refresh token does not exist!");
+    }
+
+    const existingToken = await prisma.token.findFirst({ where: { value: refreshToken } });
+    if (existingToken) {
+        await prisma.token.delete({ where: { id: existingToken.id } });
+    }
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateAuthTokens({ userId: user.id });
+
+    await prisma.token.create({
+        data: { type: TokenEnum.refresh_token, value: newRefreshToken, userId: user.id }
+    });
+    <%_ } _%>
+
+    <%_ if (orm === 'mongoose') { _%>
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+        throw new AppError(401, "User associated with the refresh token does not exist!");
+    }
+
+    await Token.deleteOne({ value: refreshToken });
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+        generateAuthTokens({ userId: user._id });
+
+    await Token.create({
+        type: TokenTypes.REFRESH_TOKEN,
+        value: newRefreshToken,
+        userId: user._id
+    });
+    <%_ } _%>
+
+    reply.setCookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        path: "/"
+    });
+
+    return reply.status(200).send({
+        success: true,
+        message: "Access token generated successfully!",
+        data: {
+            accessToken: newAccessToken,
+            user
+        }
+    });
+};
+<%_ } _%>

@@ -16,7 +16,7 @@ export enum OrmEnum {
 }
 
 export enum AuthEnum {
-    jwtAuth = "jwt-auth",
+    jwt = "jwt",
     none = "none"
 }
 
@@ -37,5 +37,6 @@ export enum FeatureEnum {
 export enum PackageManagerEnum {
     npm = "npm",
     yarn = "yarn",
-    pnpm = "pnpm"
+    pnpm = "pnpm",
+    bun = "bun"
 }

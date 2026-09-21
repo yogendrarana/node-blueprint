@@ -1,0 +1,19 @@
+<%_ if (framework === 'express') { _%>
+import express from "express";
+const router = express.Router();
+
+import * as userController from "./user.controller.js";
+
+router.route("/").get(userController.getUsers);
+router.route("/:id").get(userController.getUserById);
+
+export default router;
+<%_ } else if (framework === 'fastify') { _%>
+import type { FastifyInstance } from "fastify";
+import * as userController from "./user.controller.js";
+
+export async function userRoutes(app: FastifyInstance) {
+    app.get("/", userController.getUsers);
+    app.get("/:id", userController.getUserById);
+}
+<%_ } _%>

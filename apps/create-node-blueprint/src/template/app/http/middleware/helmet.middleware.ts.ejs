@@ -1,0 +1,7 @@
+<%_ if (framework === 'express') { _%>
+import helmet from 'helmet';
+import type { RequestHandler } from 'express';
+
+export const helmetMiddleware: RequestHandler = helmet();
+<%_ } _%>
+<%_ /* Fastify: Helmet is registered as a plugin in app.ts — no separate middleware file needed */ _%>

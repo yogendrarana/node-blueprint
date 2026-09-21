@@ -1,0 +1,36 @@
+import mongoose, { Document, Schema, Types } from "mongoose";
+import { TokenTypes, type TokenType } from "../../../shared/constants/tokens.js";
+
+export interface IToken extends Document {
+    type: TokenType;
+    value: string;
+    userId: Types.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const tokenSchema = new Schema<IToken>(
+    {
+        type: {
+            type: String,
+            enum: Object.values(TokenTypes),
+            required: true
+        },
+        value: {
+            type: String,
+            required: true
+        },
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        }
+    },
+    {
+        timestamps: true
+    }
+);
+
+const Token = mongoose.model<IToken>("Token", tokenSchema);
+
+export default Token;

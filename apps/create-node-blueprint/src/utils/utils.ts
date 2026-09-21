@@ -31,13 +31,14 @@ export const packageManagerConfig = (pkgManager: string) => {
         commands: {
             install: `${pkgManager} install`,
             dev: `${pkgManager}${pkgManager === "npm" ? " run" : ""} dev`,
-            add: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add" : "install"}`,
-            addDev: `${pkgManager} ${pkgManager === "yarn" || pkgManager === "pnpm" ? "add -D" : "install -D"}`,
-            exec: pkgManager === "npm" ? "npx" : pkgManager,
+            add: `${pkgManager} ${pkgManager === "npm" ? "install" : "add"}`,
+            addDev: `${pkgManager} ${pkgManager === "npm" ? "install -D" : "add -D"}`,
+            exec: pkgManager === "npm" ? "npx" : pkgManager === "bun" ? "bunx" : pkgManager,
             build: `${pkgManager}${pkgManager === "npm" ? " run" : ""} build`,
+            run: `${pkgManager}${pkgManager === "npm" ? " run" : ""}`
         },
         files: {
-            packageLockJson: pkgManager === "npm" ? "package-lock.json" : pkgManager === "pnpm" ? "pnpm-lock.ymlu" : "yarn.lock"
+            packageLockJson: pkgManager === "npm" ? "package-lock.json" : pkgManager === "pnpm" ? "pnpm-lock.yaml" : pkgManager === "bun" ? "bun.lockb" : "yarn.lock"
         }
     };
 };

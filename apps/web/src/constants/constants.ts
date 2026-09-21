@@ -7,7 +7,7 @@ export interface CommandOption {
 
 export const frameworks: CommandOption[] = [
     { id: "express", label: "Express", flag: "express", status: "available" },
-    { id: "fastify", label: "Fastify", flag: "fastify", status: "coming-soon" }
+    { id: "fastify", label: "Fastify", flag: "fastify", status: "available" }
 ];
 
 export const databases: CommandOption[] = [
@@ -23,7 +23,7 @@ export const orms: CommandOption[] = [
 ];
 
 export const auths: CommandOption[] = [
-    { id: "jwt-auth", label: "JWT Auth", flag: "jwt-auth", status: "available" },
+    { id: "jwt", label: "JWT Auth", flag: "jwt", status: "available" },
     { id: "better-auth", label: "Better Auth", flag: "better-auth", status: "coming-soon" }
 ];
 

@@ -1,0 +1,21 @@
+// Pagination utility helper
+export interface PaginationParams {
+    page?: number;
+    limit?: number;
+}
+
+export interface PaginatedResult<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
+
+export const getPagination = (page = 1, limit = 10) => {
+    const take = Math.max(1, limit);
+    const skip = (Math.max(1, page) - 1) * take;
+    return { take, skip, page, limit: take };
+};

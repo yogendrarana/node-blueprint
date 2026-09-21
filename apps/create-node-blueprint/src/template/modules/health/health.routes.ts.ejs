@@ -1,0 +1,21 @@
+<%_ if (framework === 'express') { _%>
+import express from "express";
+const router = express.Router();
+
+import * as healthController from "./health.controller.js";
+
+router.route("/").get(healthController.appHealthCheck);
+router.route("/app").get(healthController.appHealthCheck);
+router.route("/db").get(healthController.dbHealthCheck);
+
+export default router;
+<%_ } else if (framework === 'fastify') { _%>
+import type { FastifyInstance } from "fastify";
+import * as healthController from "./health.controller.js";
+
+export async function healthRoutes(app: FastifyInstance) {
+    app.get("/", healthController.appHealthCheck);
+    app.get("/app", healthController.appHealthCheck);
+    app.get("/db", healthController.dbHealthCheck);
+}
+<%_ } _%>

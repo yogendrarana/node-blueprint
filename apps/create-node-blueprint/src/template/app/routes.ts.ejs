@@ -1,0 +1,43 @@
+<%_ if (framework === 'express') { _%>
+import { Router } from "express";
+import healthRouter from "../modules/health/health.routes.js";
+import userRouter from "../modules/users/user.routes.js";
+<%_ if (auth === "jwt") { _%>
+import authRouter from "../modules/auth/auth.routes.js";
+<%_ } _%>
+
+const router: Router = Router();
+
+// v1 routes
+const v1Routes: Router = Router();
+v1Routes.use("/health", healthRouter);
+v1Routes.use("/users", userRouter);
+<%_ if (auth === "jwt") { _%>
+v1Routes.use("/auth", authRouter);
+<%_ } _%>
+
+// attach v1 routes
+router.use("/api/v1", v1Routes);
+
+export default router;
+<%_ } else if (framework === 'fastify') { _%>
+import type { FastifyInstance } from "fastify";
+import { healthRoutes } from "../modules/health/health.routes.js";
+import { userRoutes } from "../modules/users/user.routes.js";
+<%_ if (auth === "jwt") { _%>
+import { authRoutes } from "../modules/auth/auth.routes.js";
+<%_ } _%>
+
+export async function registerRoutes(app: FastifyInstance) {
+    await app.register(
+        async (v1: FastifyInstance) => {
+            await v1.register(healthRoutes, { prefix: "/health" });
+            await v1.register(userRoutes, { prefix: "/users" });
+            <%_ if (auth === "jwt") { _%>
+            await v1.register(authRoutes, { prefix: "/auth" });
+            <%_ } _%>
+        },
+        { prefix: "/api/v1" }
+    );
+}
+<%_ } _%>
