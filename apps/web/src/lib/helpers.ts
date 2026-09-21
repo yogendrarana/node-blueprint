@@ -221,9 +221,21 @@ export const generateProjectStructure = ({ name, framework, orm, features = [], 
             name: "tests",
             type: "directory",
             children: [
-                { name: "unit", type: "directory", children: [] },
-                { name: "integration", type: "directory", children: [] },
-                { name: "e2e", type: "directory", children: [] }
+                {
+                    name: "unit",
+                    type: "directory",
+                    children: [{ name: "index.ts", type: "file" }]
+                },
+                {
+                    name: "integration",
+                    type: "directory",
+                    children: [{ name: "index.ts", type: "file" }]
+                },
+                {
+                    name: "e2e",
+                    type: "directory",
+                    children: [{ name: "index.ts", type: "file" }]
+                }
             ]
         }
     ];

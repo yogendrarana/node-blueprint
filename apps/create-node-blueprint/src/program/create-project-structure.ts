@@ -153,10 +153,19 @@ export const createProjectStructure = async (config: ProjectConfig, { root, pkgM
             await createFileAndInjectContent(root, "src/shared/constants", "tokens.ts", "shared", "tokensConstant", config);
         }
 
-        // 6. Test gitkeeps
-        await createFileWithContent(path.resolve(root, "tests", "unit", ".gitkeep"), "");
-        await createFileWithContent(path.resolve(root, "tests", "integration", ".gitkeep"), "");
-        await createFileWithContent(path.resolve(root, "tests", "e2e", ".gitkeep"), "");
+        // 6. Test placeholders
+        await createFileWithContent(
+            path.resolve(root, "tests", "unit", "index.ts"),
+            "// Unit tests\n// Place unit tests for isolated functions, services, and modules here.\n"
+        );
+        await createFileWithContent(
+            path.resolve(root, "tests", "integration", "index.ts"),
+            "// Integration tests\n// Place integration tests for API routes, database queries, and middleware here.\n"
+        );
+        await createFileWithContent(
+            path.resolve(root, "tests", "e2e", "index.ts"),
+            "// End-to-end (E2E) tests\n// Place end-to-end scenario and full system workflow tests here.\n"
+        );
     } catch (err: any) {
         console.error("\nAn error occurred while creating project files:", err);
         process.exit(1);
