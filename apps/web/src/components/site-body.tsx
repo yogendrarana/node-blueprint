@@ -5,6 +5,7 @@ import { Copy, Check, Terminal, PartyPopper, ChevronDown, RotateCcw } from "luci
 import NPM from "./icons/npm";
 import Yarn from "./icons/yarn";
 import Pnpm from "./icons/pnpm";
+import Bun from "./icons/bun";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
@@ -36,6 +37,11 @@ const packageManagers = [
         name: "pnpm",
         value: "pnpm",
         icon: <Pnpm className="h-4 w-4" />
+    },
+    {
+        name: "bun",
+        value: "bun",
+        icon: <Bun className="h-4 w-4" />
     }
 ];
 
@@ -405,7 +411,7 @@ export default function SiteBody() {
                 <div className="border border-border rounded-md overflow-hidden bg-white shadow-sm">
                     <div className="border-b bg-gray-50 px-4 py-3 flex items-center">Project Structure</div>
                     <div className="p-4 overflow-y-auto">
-                        <ProjectStructure name={projectName} framework={selectedFramework} orm={selectedOrm} features={selectedFeatures} />
+                        <ProjectStructure name={projectName} framework={selectedFramework} orm={selectedOrm} features={selectedFeatures} auth={selectedAuth} />
                     </div>
                 </div>
             </div>

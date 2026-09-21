@@ -1,0 +1,44 @@
+<%_ if (framework === 'express') { _%>
+import type { NextFunction, Request, Response } from "express";
+import { userRepo } from "./user.repo.js";
+import AppError from "../../shared/errors/app-error.js";
+
+export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const users = await userRepo.findUsers();
+        res.status(200).json({ success: true, data: users });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const id = String(req.params.id);
+        const user = await userRepo.findUserById(id);
+        if (!user) {
+            throw new AppError(404, "User not found");
+        }
+        res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        next(error);
+    }
+};
+<%_ } else if (framework === 'fastify') { _%>
+import type { FastifyRequest, FastifyReply } from "fastify";
+import { userRepo } from "./user.repo.js";
+
+export const getUsers = async (request: FastifyRequest, reply: FastifyReply) => {
+    const users = await userRepo.findUsers();
+    return reply.status(200).send({ success: true, data: users });
+};
+
+export const getUserById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = request.params;
+    const user = await userRepo.findUserById(id);
+    if (!user) {
+        return reply.status(404).send({ success: false, message: "User not found" });
+    }
+    return reply.status(200).send({ success: true, data: user });
+};
+<%_ } _%>

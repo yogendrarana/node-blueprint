@@ -15,7 +15,7 @@
         "copy": "cp -r src/template dist/src",
         "build": "bun run clean && tsc && bun run copy",
         "postbuild": "chmod +x dist/index.js",
-        "dev": "tsx index.ts create",
+        "dev": "tsx index.ts",
         "prepublishOnly": "bun run build"
     },
     "author": "Yogendra Rana <www.yogendrarana.com.np>",

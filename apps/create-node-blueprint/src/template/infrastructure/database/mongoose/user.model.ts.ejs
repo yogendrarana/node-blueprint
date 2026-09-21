@@ -1,0 +1,39 @@
+import mongoose, { Document, Schema } from "mongoose";
+import { Roles, type Role } from "../../../shared/constants/roles.js";
+
+export interface IUser extends Document {
+    email: string;
+    password?: string;
+    role: Role;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const userSchema = new Schema<IUser>(
+    {
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true
+        },
+        password: {
+            type: String,
+            required: true,
+            select: false
+        },
+        role: {
+            type: String,
+            enum: Object.values(Roles),
+            default: Roles.USER
+        }
+    },
+    {
+        timestamps: true
+    }
+);
+
+const User = mongoose.model<IUser>("User", userSchema);
+
+export default User;

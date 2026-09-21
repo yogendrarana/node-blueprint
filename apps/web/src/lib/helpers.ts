@@ -31,191 +31,212 @@ const sortFileStructure = (a: FileType, b: FileType): number => {
     return 0;
 };
 
-export const generateProjectStructure = ({ name, framework, orm, features, auth }: ProjectConfig): FileType[] => {
-    const baseStructure: FileType[] = [
-        {
-            name: name,
-            type: "directory",
-            children: [
-                { name: "package.json", type: "file" },
-                { name: ".env", type: "file" },
-                { name: ".gitignore", type: "file" },
-                { name: "tsconfig.json", type: "file" },
-                { name: "README.md", type: "file" },
-                ...(features.includes("docker")
-                    ? [
-                          { name: "Dockerfile", type: "file" } as const,
-                          { name: ".dockerignore", type: "file" } as const,
-                          { name: "docker-compose.yml", type: "file" } as const
-                      ]
-                    : []),
-                {
-                    name: "src",
-                    type: "directory",
-                    children: [
-                        { name: "app.ts", type: "file" },
-                        { name: "routers.ts", type: "file" },
-                        { name: "server.ts", type: "file" },
-                        {
-                            name: "routes",
-                            type: "directory",
-                            children: [
-                                {
-                                    name: "user-routes.ts",
-                                    type: "file"
-                                },
-                                {
-                                    name: "health-routes.ts",
-                                    type: "file"
-                                },
-                                ...(features?.includes("auth") ? [{ name: "auth-routes.ts", type: "file" } as const] : [])
-                            ]
-                        },
-                        {
-                            name: "controllers",
-                            type: "directory",
-                            children: [
-                                {
-                                    name: "user-controller.ts",
-                                    type: "file"
-                                },
-                                {
-                                    name: "health-controller.ts",
-                                    type: "file"
-                                },
-                                ...(features?.includes("auth") ? [{ name: "auth-controller.ts", type: "file" } as const] : [])
-                            ]
-                        },
-                        {
-                            name: "middlewares",
-                            type: "directory",
-                            children: [...(framework === "express" ? [{ name: "error-middleware.ts", type: "file" } as const] : [])]
-                        },
-                        {
-                            name: "config",
-                            type: "directory",
-                            children: [
-                                {
-                                    name: "env.ts",
-                                    type: "file"
-                                },
-                                ...(framework === "express" ? [{ name: "logger.ts", type: "file" } as const] : []),
-                                ...(orm === "mongoose" ? [{ name: "db.ts", type: "file" } as const] : [])
-                            ]
-                        },
-                        {
-                            name: "views",
-                            type: "directory",
-                            children: [{ name: "index.ejs", type: "file" }]
-                        },
-                        {
-                            name: "services",
-                            type: "directory",
-                            children: [
-                                {
-                                    name: "user-service.ts",
-                                    type: "file"
-                                },
-                                ...(features?.includes("auth") ? [{ name: "auth-service.ts", type: "file" } as const] : [])
-                            ]
-                        },
-                        {
-                            name: "types",
-                            type: "directory",
-                            children: [
-                                {
-                                    name: "interfaces",
-                                    type: "directory",
-                                    children: []
-                                }
-                            ]
-                        },
-                        {
-                            name: "enums",
-                            type: "directory",
-                            children: [
-                                ...(auth === "jwt-auth" && orm !== "prisma"
-                                    ? [{ name: "token-enum.ts", type: "file" } as const, { name: "role-enum.ts", type: "file" } as const]
-                                    : [])
-                            ]
-                        },
-                        {
-                            name: "validations",
-                            type: "directory",
-                            children: [...(auth === "jwt-auth" ? [{ name: "auth-validations.ts", type: "file" } as const] : [])]
-                        },
-                        {
-                            name: "utils",
-                            type: "directory",
-                            children: []
-                        }
-                    ]
-                }
-            ]
-        }
+export const generateProjectStructure = ({ name, framework, orm, features = [], auth }: ProjectConfig): FileType[] => {
+    const projectName = name || "my-app";
+    const isExpress = framework === "express" || !framework;
+    const hasJwt = auth === "jwt" || auth === "jwt-auth";
+
+    // 1. App layer children
+    const configChildren: FileType[] = [
+        { name: "env.ts", type: "file" },
+        { name: "cors.ts", type: "file" },
+        ...(isExpress ? [{ name: "logger.ts", type: "file" } as const] : [])
     ];
 
-    const mainDir = baseStructure[0];
-    if (!mainDir.children) mainDir.children = [];
+    const httpChildren: FileType[] = [
+        { name: "server.ts", type: "file" },
+        { name: "app.ts", type: "file" },
+        ...(isExpress
+            ? [
+                  {
+                      name: "middleware",
+                      type: "directory",
+                      children: [
+                          { name: "cors.middleware.ts", type: "file" },
+                          { name: "error.middleware.ts", type: "file" },
+                          { name: "helmet.middleware.ts", type: "file" }
+                      ]
+                  } as FileType
+              ]
+            : [])
+    ];
 
-    // Add ORM-specific structure
-    if (orm === "prisma") {
-        mainDir.children.push({
-            name: "prisma",
+    const appChildren: FileType[] = [
+        { name: "config", type: "directory", children: configChildren },
+        { name: "http", type: "directory", children: httpChildren },
+        { name: "routes.ts", type: "file" }
+    ];
+
+    // 2. Modules layer children
+    const healthModule: FileType = {
+        name: "health",
+        type: "directory",
+        children: [
+            { name: "health.controller.ts", type: "file" },
+            { name: "health.routes.ts", type: "file" }
+        ]
+    };
+
+    const userModule: FileType = {
+        name: "users",
+        type: "directory",
+        children: [
+            { name: "user.controller.ts", type: "file" },
+            { name: "user.routes.ts", type: "file" },
+            { name: "user.repo.ts", type: "file" },
+            { name: "user.types.ts", type: "file" }
+        ]
+    };
+
+    const modulesChildren: FileType[] = [healthModule, userModule];
+
+    if (hasJwt) {
+        modulesChildren.push({
+            name: "auth",
             type: "directory",
             children: [
-                { name: "prisma-client.ts", type: "file" },
-                { name: "schema.prisma", type: "file" },
-                { name: "seed.ts", type: "file" }
+                { name: "auth.controller.ts", type: "file" },
+                { name: "auth.routes.ts", type: "file" },
+                { name: "auth.schema.ts", type: "file" },
+                { name: "auth.service.ts", type: "file" },
+                { name: "auth.types.ts", type: "file" }
             ]
         });
     }
 
+    // 3. Infrastructure layer children
+    const databaseChildren: FileType[] = [
+        { name: "index.ts", type: "file" }
+    ];
+
     if (orm === "drizzle") {
-        mainDir.children.push(
-            { name: "drizzle.config.ts", type: "file" },
+        databaseChildren.push(
+            { name: "schema.ts", type: "file" },
             {
-                name: "drizzle",
+                name: "schema",
                 type: "directory",
                 children: [
-                    { name: "index.ts", type: "file" },
-                    { name: "schema.ts", type: "file" },
-                    { name: "seed.ts", type: "file" },
-                    {
-                        name: "schemas",
-                        type: "directory",
-                        children: [
-                            {
-                                name: "user-schema.ts",
-                                type: "file"
-                            },
-                            ...(features?.includes("auth") ? [{ name: "token-schema.ts", type: "file" } as const] : [])
-                        ]
-                    }
+                    { name: "user.schema.ts", type: "file" },
+                    ...(hasJwt ? [{ name: "token.schema.ts", type: "file" } as const] : [])
                 ]
-            }
+            },
+            { name: "seed.ts", type: "file" }
+        );
+    } else if (orm === "mongoose") {
+        databaseChildren.push(
+            {
+                name: "models",
+                type: "directory",
+                children: [
+                    { name: "user.model.ts", type: "file" },
+                    ...(hasJwt ? [{ name: "token.model.ts", type: "file" } as const] : [])
+                ]
+            },
+            { name: "seed.ts", type: "file" }
         );
     }
 
-    if (orm === "mongoose") {
-        (mainDir.children.find((c) => c.name === "src")?.children ?? []).push({
-            name: "models",
+    const infrastructureChildren: FileType[] = [
+        { name: "database", type: "directory", children: databaseChildren },
+        { name: "cache", type: "directory", children: [{ name: "index.ts", type: "file" }] },
+        { name: "queue", type: "directory", children: [{ name: "index.ts", type: "file" }] },
+        { name: "storage", type: "directory", children: [{ name: "index.ts", type: "file" }] },
+        { name: "mail", type: "directory", children: [{ name: "index.ts", type: "file" }] },
+        { name: "payments", type: "directory", children: [{ name: "index.ts", type: "file" }] }
+    ];
+
+    // 4. Shared layer children
+    const sharedChildren: FileType[] = [
+        {
+            name: "errors",
             type: "directory",
             children: [
-                {
-                    name: "user-model.ts",
-                    type: "file"
-                },
-                {
-                    name: "seed.ts",
-                    type: "file"
-                },
-                ...(features?.includes("auth") ? [{ name: "token-model.ts", type: "file" }] : [])
+                { name: "app-error.ts", type: "file" },
+                { name: "error-codes.ts", type: "file" }
             ]
-        } as FileType);
-    }
+        },
+        {
+            name: "utils",
+            type: "directory",
+            children: [
+                { name: "pagination.ts", type: "file" },
+                { name: "dates.ts", type: "file" }
+            ]
+        },
+        {
+            name: "types",
+            type: "directory",
+            children: [{ name: "common.ts", type: "file" }]
+        },
+        {
+            name: "constants",
+            type: "directory",
+            children: [
+                { name: "index.ts", type: "file" },
+                { name: "roles.ts", type: "file" },
+                ...(hasJwt ? [{ name: "tokens.ts", type: "file" } as const] : [])
+            ]
+        }
+    ];
 
-    // Sort the children of the root directory and any subdirectories
+    // 5. Src children
+    const srcChildren: FileType[] = [
+        { name: "app", type: "directory", children: appChildren },
+        { name: "modules", type: "directory", children: modulesChildren },
+        { name: "infrastructure", type: "directory", children: infrastructureChildren },
+        { name: "shared", type: "directory", children: sharedChildren },
+        { name: "index.ts", type: "file" }
+    ];
+
+    // Root project children
+    const rootChildren: FileType[] = [
+        { name: ".env", type: "file" },
+        { name: ".gitignore", type: "file" },
+        { name: "biome.json", type: "file" },
+        { name: "package.json", type: "file" },
+        { name: "tsconfig.json", type: "file" },
+        { name: "README.md", type: "file" },
+        ...(features.includes("docker")
+            ? [
+                  { name: ".dockerignore", type: "file" } as const,
+                  { name: "Dockerfile", type: "file" } as const,
+                  { name: "docker-compose.yml", type: "file" } as const
+              ]
+            : []),
+        ...(orm === "drizzle" ? [{ name: "drizzle.config.ts", type: "file" } as const] : []),
+        ...(orm === "prisma"
+            ? [
+                  {
+                      name: "prisma",
+                      type: "directory",
+                      children: [
+                          { name: "schema.prisma", type: "file" },
+                          { name: "seed.ts", type: "file" }
+                      ]
+                  } as FileType
+              ]
+            : []),
+        { name: "src", type: "directory", children: srcChildren },
+        {
+            name: "tests",
+            type: "directory",
+            children: [
+                { name: "unit", type: "directory", children: [] },
+                { name: "integration", type: "directory", children: [] },
+                { name: "e2e", type: "directory", children: [] }
+            ]
+        }
+    ];
+
+    const baseStructure: FileType[] = [
+        {
+            name: projectName,
+            type: "directory",
+            children: rootChildren
+        }
+    ];
+
+    // Recursively sort directories
     const sortDirectory = (dir: FileType) => {
         if (dir.children) {
             dir.children.sort(sortFileStructure);
@@ -227,8 +248,7 @@ export const generateProjectStructure = ({ name, framework, orm, features, auth 
         }
     };
 
-    // Sort the main directory
-    sortDirectory(mainDir);
+    sortDirectory(baseStructure[0]);
 
     return baseStructure;
 };

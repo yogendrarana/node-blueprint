@@ -7,10 +7,10 @@
         "apps/*"
     ],
     "scripts": {
-        "dev:web": "bun --filter @node-blueprint/web dev",
-        "dev:cli": "bun --filter create-node-blueprint dev",
-        "build:web": "bun --filter @node-blueprint/web build",
-        "build:cli": "bun --filter create-node-blueprint build",
+        "dev:web": "bun run --cwd apps/web dev",
+        "dev:cli": "bun run --cwd apps/create-node-blueprint dev",
+        "build:web": "bun run --cwd apps/web build",
+        "build:cli": "bun run --cwd apps/create-node-blueprint build",
         "build": "bun run build:cli && bun run build:web"
     },
     "keywords": [

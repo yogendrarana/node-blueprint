@@ -2,9 +2,9 @@ import path from "node:path";
 import { promises as fs } from "fs";
 
 import { ProjectConfig } from "../types/types.js";
-import { execAsync } from "../utils/exec-async.js";
 import { packageManagerConfig } from "../utils/utils.js";
 import { DEPENDENCIES, DEV_DEPENDENCIES } from "../constants/dependencies.js";
+import { AuthEnum } from "../enums/enums.js";
 
 export async function createPackageJson(config: ProjectConfig, { root, pkgManager }: { root: string; pkgManager: string }): Promise<void> {
     try {
@@ -14,7 +14,7 @@ export async function createPackageJson(config: ProjectConfig, { root, pkgManage
             name: config.projectName,
             version: "1.0.0",
             description: "",
-            main: "dist/server.js",
+            main: "dist/index.js",
             scripts: {},
             keywords: [],
             author: "",
@@ -30,11 +30,9 @@ export async function createPackageJson(config: ProjectConfig, { root, pkgManage
     }
 }
 
-function getDependencies(config: ProjectConfig): { dependencies: Record<string, string>, devDependencies: Record<string, string> } {
+function getDependencies(config: ProjectConfig): { dependencies: Record<string, string>; devDependencies: Record<string, string> } {
     const dependencies: Record<string, string> = {
-        "cookie-parser": DEPENDENCIES["cookie-parser"],
         "dotenv": DEPENDENCIES["dotenv"],
-        "ejs": DEPENDENCIES["ejs"],
         "zod": DEPENDENCIES["zod"]
     };
 
@@ -42,19 +40,26 @@ function getDependencies(config: ProjectConfig): { dependencies: Record<string, 
         "@types/node": DEV_DEPENDENCIES["@types/node"],
         "typescript": DEV_DEPENDENCIES["typescript"],
         "tsx": DEV_DEPENDENCIES["tsx"],
-        "@types/cookie-parser": DEV_DEPENDENCIES["@types/cookie-parser"]
+        "@biomejs/biome": DEV_DEPENDENCIES["@biomejs/biome"]
     };
 
     // Add framework specific dependencies
     if (config.framework === "express") {
-        dependencies["express"] = DEPENDENCIES["express"],
-        dependencies["cors"] = DEPENDENCIES["cors"],
-        dependencies["helmet"] = DEPENDENCIES["helmet"],
-        dependencies["winston"] = DEPENDENCIES["winston"],
-        dependencies["winston-daily-rotate-file"] = DEPENDENCIES["winston-daily-rotate-file"],
-        
-        devDependencies["@types/cors"] = DEV_DEPENDENCIES["@types/cors"],
+        dependencies["express"] = DEPENDENCIES["express"];
+        dependencies["cookie-parser"] = DEPENDENCIES["cookie-parser"];
+        dependencies["cors"] = DEPENDENCIES["cors"];
+        dependencies["helmet"] = DEPENDENCIES["helmet"];
+        dependencies["winston"] = DEPENDENCIES["winston"];
+        dependencies["winston-daily-rotate-file"] = DEPENDENCIES["winston-daily-rotate-file"];
+
+        devDependencies["@types/cors"] = DEV_DEPENDENCIES["@types/cors"];
         devDependencies["@types/express"] = DEV_DEPENDENCIES["@types/express"];
+        devDependencies["@types/cookie-parser"] = DEV_DEPENDENCIES["@types/cookie-parser"];
+    } else if (config.framework === "fastify") {
+        dependencies["fastify"] = DEPENDENCIES["fastify"];
+        dependencies["@fastify/cors"] = DEPENDENCIES["@fastify/cors"];
+        dependencies["@fastify/helmet"] = DEPENDENCIES["@fastify/helmet"];
+        dependencies["@fastify/cookie"] = DEPENDENCIES["@fastify/cookie"];
     }
 
     // Add database specific dependencies
@@ -77,8 +82,8 @@ function getDependencies(config: ProjectConfig): { dependencies: Record<string, 
         devDependencies["@types/mongoose"] = DEV_DEPENDENCIES["@types/mongoose"];
     }
 
-    // Add jwt-auth dependencies if selected
-    if (config.auth === "jwt-auth") {
+    // Add auth dependencies if selected
+    if (config.auth === AuthEnum.jwt) {
         dependencies["jsonwebtoken"] = DEPENDENCIES["jsonwebtoken"];
         dependencies["bcrypt"] = DEPENDENCIES["bcrypt"];
         devDependencies["@types/bcrypt"] = DEV_DEPENDENCIES["@types/bcrypt"];
@@ -97,14 +102,17 @@ async function modifyPackageJson(root: string, config: ProjectConfig, pkgManager
     Object.assign(packageJson, {
         name: config.projectName,
         type: "module",
-        main: "dist/server.js",
+        main: "dist/index.js",
         dependencies,
         devDependencies,
         scripts: {
             ...packageJson.scripts,
             build: "npx tsc",
-            start: "node dist/server.js",
-            dev: "tsx watch src/server.ts",
+            start: "node dist/index.js",
+            dev: "tsx watch src/index.ts",
+            lint: "biome lint .",
+            format: "biome format --write .",
+            check: "biome check .",
             ...(config.orm === "prisma" && getPrismaScripts()),
             ...(config.orm === "drizzle" && getDrizzleScripts(pkgManager)),
             ...(config.orm === "mongoose" && getMongooseScripts())
@@ -130,13 +138,13 @@ function getPrismaScripts() {
 }
 
 function getDrizzleScripts(pkgManager: string) {
-    const pkgManagerCommands = packageManagerConfig(pkgManager || "npm").commands;
+    const pkgManagerCommands = packageManagerConfig(pkgManager || "bun").commands;
 
     return {
-        "db:seed": "tsx drizzle/seed.ts",
+        "db:seed": "tsx src/infrastructure/database/seed.ts",
         "db:generate": `${pkgManagerCommands.build} && drizzle-kit generate`,
         "db:push": "drizzle-kit push",
-        "db:migrate": "tsx drizzle/migrate.ts",
+        "db:migrate": "tsx src/infrastructure/database/migrate.ts",
         "db:drop-migration": "drizzle-kit drop",
         "db:introspect": "drizzle-kit introspect",
         "db:studio": "drizzle-kit studio --port 4000"
@@ -145,6 +153,6 @@ function getDrizzleScripts(pkgManager: string) {
 
 function getMongooseScripts() {
     return {
-        "db:seed": "tsx src/models/seed.ts"
+        "db:seed": "tsx src/infrastructure/database/seed.ts"
     };
 }

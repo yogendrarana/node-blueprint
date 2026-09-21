@@ -1,0 +1,10 @@
+export * from "./roles.js";
+<%_ if (auth === "jwt") { _%>
+export * from "./tokens.js";
+<%_ } _%>
+
+// Shared application constants
+export const APP_CONSTANTS = {
+    DEFAULT_PAGE_SIZE: 10,
+    MAX_PAGE_SIZE: 100
+} as const;

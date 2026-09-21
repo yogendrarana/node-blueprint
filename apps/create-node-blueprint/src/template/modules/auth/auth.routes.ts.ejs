@@ -1,0 +1,23 @@
+<%_ if (framework === 'express') { _%>
+import express from "express";
+const router = express.Router();
+
+import * as authController from "./auth.controller.js";
+
+router.route("/login").post(authController.loginUser);
+router.route("/register").post(authController.registerUser);
+router.route("/logout").post(authController.logoutUser);
+router.route("/refresh-token").post(authController.refreshAccessToken);
+
+export default router;
+<%_ } else if (framework === 'fastify') { _%>
+import type { FastifyInstance } from "fastify";
+import * as authController from "./auth.controller.js";
+
+export async function authRoutes(app: FastifyInstance) {
+    app.post("/login", authController.loginUser);
+    app.post("/register", authController.registerUser);
+    app.post("/logout", authController.logoutUser);
+    app.post("/refresh-token", authController.refreshAccessToken);
+}
+<%_ } _%>

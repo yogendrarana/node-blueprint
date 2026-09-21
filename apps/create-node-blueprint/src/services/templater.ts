@@ -1,7 +1,7 @@
 import { ProjectConfig } from "../types/types.js";
 import { readTemplateFile } from "../utils/utils.js";
 
-export type TemplaterKey = "base" | "common" | "express" | "drizzle" | "prisma" | "mongoose";
+export type TemplaterKey = "root" | "app" | "modules" | "infrastructure" | "shared";
 export type TemplaterFunctionType = (options: ProjectConfig | Record<string, unknown>) => Promise<string>;
 
 export interface ITemplateConfig {
@@ -10,87 +10,97 @@ export interface ITemplateConfig {
 }
 
 export const TemplaterMap: Record<TemplaterKey, ITemplateConfig> = {
-    // base templaters
-    base: {
-        name: "base",
+    // Root files
+    root: {
+        name: "root",
         templater: {
-            env: (options) => readTemplateFile("base/.env.ejs", options),
-            gitignore: (options) => readTemplateFile("base/.gitignore.ejs", options),
-            tsconfig: (options) => readTemplateFile("base/tsconfig.json.ejs", options),
-            readme: (options) => readTemplateFile("base/README.md.ejs", options),
-            indexEjs: (options) => readTemplateFile("base/index.ejs", options),
-            envTs: (options) => readTemplateFile("base/env.ts.ejs", options),
-            dockerFile: (options) => readTemplateFile("base/docker-file.ejs", options),
-            dockerIgnore: (options) => readTemplateFile("base/.dockerignore.ejs", options),
-            dockerComposeYml: (options) => readTemplateFile("base/docker-compose.yml.ejs", options)
+            index: (options) => readTemplateFile("root/index.ts.ejs", options),
+            env: (options) => readTemplateFile("root/env.ejs", options),
+            gitignore: (options) => readTemplateFile("root/gitignore.ejs", options),
+            tsconfig: (options) => readTemplateFile("root/tsconfig.json.ejs", options),
+            readme: (options) => readTemplateFile("root/readme.md.ejs", options),
+            dockerfile: (options) => readTemplateFile("root/dockerfile.ejs", options),
+            dockerComposeYml: (options) => readTemplateFile("root/docker-compose.yml.ejs", options),
+            dockerignore: (options) => readTemplateFile("root/dockerignore.ejs", options),
+            biome: (options) => readTemplateFile("root/biome.json.ejs", options)
         }
     },
 
-    // common templaters
-    common: {
-        name: "common",
+    // App layer
+    app: {
+        name: "app",
         templater: {
-            serverTs: (options) => readTemplateFile("common/server.ts.ejs", options),
-            appTs: (options) => readTemplateFile("common/app.ts.ejs", options),
-            routerTs: (options) => readTemplateFile("common/router.ts.ejs", options),
-            userRoutesTs: (options) => readTemplateFile("common/user-routes.ts.ejs", options),
-            userControllerTs: (options) => readTemplateFile("common/user-controller.ts.ejs", options),
-            authRoutesTs: (options) => readTemplateFile("common/auth-routes.ts.ejs", options),
-            authControllerTs: (options) => readTemplateFile("common/auth-controller.ts.ejs", options),
-            authValidationsTs: (options) => readTemplateFile("common/auth-validations.ts.ejs", options),
-            authServicesTs: (options) => readTemplateFile("common/auth-services.ts.ejs", options),
-            roleEnumTs: (options) => readTemplateFile("common/role-enum.ts.ejs", options),
-            tokenEnumTs: (options) => readTemplateFile("common/token-enum.ts.ejs", options),
-            dockerFile: (options) => readTemplateFile("common/docker-file.ejs", options),
-            dockerComposeYml: (options) => readTemplateFile("common/docker-compose.yml.ejs", options),
-            healthRoutesTs: (option) => readTemplateFile("common/health-routes.ts.ejs", option),
-            healthControllerTs: (options) => readTemplateFile("common/health-controller.ts.ejs", options)
+            envConfig: (options) => readTemplateFile("app/config/env.ts.ejs", options),
+            corsConfig: (options) => readTemplateFile("app/config/cors.ts.ejs", options),
+            loggerConfig: (options) => readTemplateFile("app/config/logger.ts.ejs", options),
+            server: (options) => readTemplateFile("app/http/server.ts.ejs", options),
+            app: (options) => readTemplateFile("app/http/app.ts.ejs", options),
+            corsMiddleware: (options) => readTemplateFile("app/http/middleware/cors.middleware.ts.ejs", options),
+            errorMiddleware: (options) => readTemplateFile("app/http/middleware/error.middleware.ts.ejs", options),
+            helmetMiddleware: (options) => readTemplateFile("app/http/middleware/helmet.middleware.ts.ejs", options),
+            routes: (options) => readTemplateFile("app/routes.ts.ejs", options)
         }
     },
 
-    // framework specific templaters
-    express: {
-        name: "express",
+    // Modules layer
+    modules: {
+        name: "modules",
         templater: {
-            loggerTs: (options) => readTemplateFile("frameworks/express/logger.ts.ejs", options),
-            errorHandlerTs: (options) => readTemplateFile("frameworks/express/error-handler.ts.ejs", options),
-            errorMiddlewareTs: (options) => readTemplateFile("frameworks/express/error-middleware.ts.ejs", options),
-            corsTs: options => readTemplateFile("frameworks/express/cors.ts.ejs", options),
-            corsMiddlewareTs: (options) => readTemplateFile("frameworks/express/cors-middleware.ts.ejs", options), 
-            helmetMiddlewareTs: (options) => readTemplateFile("frameworks/express/helmet-middleware.ts.ejs", options),
+            healthRoutes: (options) => readTemplateFile("modules/health/health.routes.ts.ejs", options),
+            healthController: (options) => readTemplateFile("modules/health/health.controller.ts.ejs", options),
+            userRoutes: (options) => readTemplateFile("modules/users/user.routes.ts.ejs", options),
+            userController: (options) => readTemplateFile("modules/users/user.controller.ts.ejs", options),
+            userRepo: (options) => readTemplateFile("modules/users/user.repo.ts.ejs", options),
+            userTypes: (options) => readTemplateFile("modules/users/user.types.ts.ejs", options),
+            authRoutes: (options) => readTemplateFile("modules/auth/auth.routes.ts.ejs", options),
+            authController: (options) => readTemplateFile("modules/auth/auth.controller.ts.ejs", options),
+            authService: (options) => readTemplateFile("modules/auth/auth.service.ts.ejs", options),
+            authSchema: (options) => readTemplateFile("modules/auth/auth.schema.ts.ejs", options),
+            authTypes: (options) => readTemplateFile("modules/auth/auth.types.ts.ejs", options)
         }
     },
 
-    // orm specific templaters
-    drizzle: {
-        name: "drizzle",
+    // Infrastructure layer
+    infrastructure: {
+        name: "infrastructure",
         templater: {
-            indexTs: (options) => readTemplateFile("orms/drizzle/index.ts.ejs", options),
-            schemaTs: (options) => readTemplateFile("orms/drizzle/schema.ts.ejs", options),
-            userSchemaTs: (options) => readTemplateFile("orms/drizzle/user-schema.ts.ejs", options),
-            tokenSchemaTs: (options) => readTemplateFile("orms/drizzle/token-schema.ts.ejs", options),
-            seedTs: (options) => readTemplateFile("orms/drizzle/seed.ts.ejs", options),
-            drizzleConfig: (options) => readTemplateFile("orms/drizzle/drizzle.config.ts.ejs", options),
-            authControllerTs: (options) => readTemplateFile("orms/drizzle/auth-controller.ts.ejs", options)
+            // Drizzle
+            drizzleIndex: (options) => readTemplateFile("infrastructure/database/drizzle/index.ts.ejs", options),
+            drizzleSchema: (options) => readTemplateFile("infrastructure/database/drizzle/schema.ts.ejs", options),
+            drizzleUserSchema: (options) => readTemplateFile("infrastructure/database/drizzle/user.schema.ts.ejs", options),
+            drizzleTokenSchema: (options) => readTemplateFile("infrastructure/database/drizzle/token.schema.ts.ejs", options),
+            drizzleSeed: (options) => readTemplateFile("infrastructure/database/drizzle/seed.ts.ejs", options),
+            drizzleConfig: (options) => readTemplateFile("infrastructure/database/drizzle/drizzle.config.ts.ejs", options),
+            // Prisma
+            prismaClient: (options) => readTemplateFile("infrastructure/database/prisma/client.ts.ejs", options),
+            prismaSchema: (options) => readTemplateFile("infrastructure/database/prisma/schema.prisma.ejs", options),
+            prismaSeed: (options) => readTemplateFile("infrastructure/database/prisma/seed.ts.ejs", options),
+            // Mongoose
+            mongooseConnection: (options) => readTemplateFile("infrastructure/database/mongoose/connection.ts.ejs", options),
+            mongooseUserModel: (options) => readTemplateFile("infrastructure/database/mongoose/user.model.ts.ejs", options),
+            mongooseTokenModel: (options) => readTemplateFile("infrastructure/database/mongoose/token.model.ts.ejs", options),
+            mongooseSeed: (options) => readTemplateFile("infrastructure/database/mongoose/seed.ts.ejs", options),
+            // Stubs
+            cacheIndex: (options) => readTemplateFile("infrastructure/cache/index.ts.ejs", options),
+            queueIndex: (options) => readTemplateFile("infrastructure/queue/index.ts.ejs", options),
+            storageIndex: (options) => readTemplateFile("infrastructure/storage/index.ts.ejs", options),
+            mailIndex: (options) => readTemplateFile("infrastructure/mail/index.ts.ejs", options),
+            paymentsIndex: (options) => readTemplateFile("infrastructure/payments/index.ts.ejs", options)
         }
     },
-    prisma: {
-        name: "prisma",
+
+    // Shared layer
+    shared: {
+        name: "shared",
         templater: {
-            prismaClientTs: (options) => readTemplateFile("orms/prisma/prisma-client.ts.ejs", options),
-            schemaPrisma: (options) => readTemplateFile("orms/prisma/schema.prisma.ejs", options),
-            seedTs: (options) => readTemplateFile("orms/prisma/seed.ts.ejs", options),
-            authControllerTs: (options) => readTemplateFile("orms/prisma/auth-controller.ts.ejs", options)
-        }
-    },
-    mongoose: {
-        name: "mongoose",
-        templater: {
-            userModelTs: (options) => readTemplateFile("orms/mongoose/user-model.ts.ejs", options),
-            tokenModelTs: (options) => readTemplateFile("orms/mongoose/token-model.ts.ejs", options),
-            dbTs: (options) => readTemplateFile("orms/mongoose/db.ts.ejs", options),
-            authControllerTs: (options) => readTemplateFile("orms/mongoose/auth-controller.ts.ejs", options),
-            seedTs: (options) => readTemplateFile("orms/mongoose/seed.ts.ejs", options)
+            appError: (options) => readTemplateFile("shared/errors/app-error.ts.ejs", options),
+            errorCodes: (options) => readTemplateFile("shared/errors/error-codes.ts.ejs", options),
+            pagination: (options) => readTemplateFile("shared/utils/pagination.ts.ejs", options),
+            dates: (options) => readTemplateFile("shared/utils/dates.ts.ejs", options),
+            commonTypes: (options) => readTemplateFile("shared/types/common.ts.ejs", options),
+            rolesConstant: (options) => readTemplateFile("shared/constants/roles.ts.ejs", options),
+            tokensConstant: (options) => readTemplateFile("shared/constants/tokens.ts.ejs", options),
+            constants: (options) => readTemplateFile("shared/constants/index.ts.ejs", options)
         }
     }
 };

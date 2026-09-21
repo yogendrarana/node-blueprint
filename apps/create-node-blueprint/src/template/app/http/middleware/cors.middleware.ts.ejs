@@ -1,0 +1,8 @@
+<%_ if (framework === 'express') { _%>
+import cors from 'cors';
+import { type RequestHandler } from 'express';
+import { corsOptions } from '../../config/cors.js';
+
+export const corsMiddleware: RequestHandler = cors(corsOptions);
+<%_ } _%>
+<%_ /* Fastify: CORS is registered as a plugin in app.ts — no separate middleware file needed */ _%>

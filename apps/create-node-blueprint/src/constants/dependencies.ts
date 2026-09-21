@@ -2,15 +2,20 @@ export const DEPENDENCIES = {
     // Core dependencies
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.5.0",
-    "ejs": "^3.1.10",
     "zod": "^3.25.64",
     "cors": "^2.8.5",
     "helmet": "^8.1.0",
 
-    // Framework dependencies
+    // Express framework dependencies
     "express": "^5.1.0",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
+
+    // Fastify framework dependencies
+    "fastify": "^5.3.3",
+    "@fastify/cors": "^11.0.1",
+    "@fastify/helmet": "^13.0.1",
+    "@fastify/cookie": "^11.0.2",
 
     // Database dependencies
     "pg": "^8.16.0",
@@ -41,7 +46,10 @@ export const DEV_DEPENDENCIES = {
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
 
+    // Linter and formatter
+    "@biomejs/biome": "^2.4.15",
+
     // ORM tools
     "prisma": "^6.9.0",
     "drizzle-kit": "^0.31.1"
-} as const; 
+} as const;

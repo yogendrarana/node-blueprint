@@ -1,0 +1,58 @@
+<%_ if (auth === "jwt") { _%>
+<%_ if (database === "postgres") { _%>
+import { relations } from "drizzle-orm";
+import { type InferInsertModel, type InferSelectModel } from "drizzle-orm";
+import { pgTable, text, timestamp, varchar, uuid } from "drizzle-orm/pg-core";
+
+import { userSchema } from "./user.schema.js";
+import { TokenTypes, type TokenType } from "../../../shared/constants/tokens.js";
+
+export const tokenSchema = pgTable(
+    "tokens",
+    {
+        id: uuid("id")
+            .primaryKey()
+            .notNull()
+            .defaultRandom(),
+        userId: uuid("user_id").notNull().references(() => userSchema.id),
+        value: text("value").notNull(),
+        type: varchar("type", { length: 50 }).$type<TokenType>().notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at").defaultNow().notNull()
+    }
+);
+
+export const tokenRelations = relations(tokenSchema, ({ one }) => ({
+    user: one(userSchema, { fields: [tokenSchema.userId], references: [userSchema.id] })
+}));
+
+export type Token = InferSelectModel<typeof tokenSchema>;
+export type NewToken = InferInsertModel<typeof tokenSchema>;
+<%_ } _%>
+<%_ if (database === "mysql") { _%>
+import { type InferInsertModel, type InferSelectModel, relations } from "drizzle-orm";
+import { mysqlTable, text, timestamp, varchar, int } from "drizzle-orm/mysql-core";
+
+import { userSchema } from "./user.schema.js";
+import { TokenTypes, type TokenType } from "../../../shared/constants/tokens.js";
+
+export const tokenSchema = mysqlTable(
+    "tokens",
+    {
+        id: int("id").primaryKey().autoincrement(),
+        userId: int("user_id").notNull(),
+        value: text("value").notNull(),
+        type: varchar("type", { length: 50 }).$type<TokenType>().notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at").defaultNow().notNull()
+    }
+);
+
+export const tokenRelations = relations(tokenSchema, ({ one }) => ({
+    user: one(userSchema, { fields: [tokenSchema.userId], references: [userSchema.id] })
+}));
+
+export type Token = InferSelectModel<typeof tokenSchema>;
+export type NewToken = InferInsertModel<typeof tokenSchema>;
+<%_ } _%>
+<%_ } _%>

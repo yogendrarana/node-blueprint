@@ -1,0 +1,42 @@
+# <%= projectName %>
+
+Generated with [create-node-blueprint](https://github.com/yogendrarana/node-blueprint).
+
+## Tech Stack
+
+- **Framework**: <%= framework %>
+- **Database**: <%= database %>
+- **ORM**: <%= orm %>
+<%_ if (auth === "jwt") { _%>
+- **Auth**: JWT
+<%_ } _%>
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Project Structure
+
+```
+src/
+├── app/           # Application layer (config, http server, middleware, routes)
+├── modules/       # Feature modules (health, users, auth)
+├── infrastructure/ # External services (database, cache, queue, etc.)
+├── shared/        # Shared utilities, types, enums, errors
+└── index.ts       # Entry point
+```
+
+If you find node-blueprint useful, please give it a star on GitHub!
+[Star node-blueprint](https://github.com/yogendrarana/node-blueprint)

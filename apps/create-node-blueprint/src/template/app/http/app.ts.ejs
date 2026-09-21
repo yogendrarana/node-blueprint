@@ -1,0 +1,78 @@
+<%_ if (framework === 'express') { _%>
+import cookieParser from "cookie-parser";
+import express, { type Request, type Response } from "express";
+
+import router from "../routes.js";
+import errorMiddleware from "./middleware/error.middleware.js";
+import { corsMiddleware } from "./middleware/cors.middleware.js";
+import { helmetMiddleware } from "./middleware/helmet.middleware.js";
+
+// create express app instance
+const app = express();
+
+// Security middleware
+app.use(helmetMiddleware);
+
+// CORS middleware
+app.use(corsMiddleware);
+
+// Body parsing middleware
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+
+// routes
+app.get("/", (req: Request, res: Response) => {
+    res.json({ message: "Hello from Node Blueprint Starter" });
+});
+app.use(router);
+
+// error middleware
+app.use(errorMiddleware);
+
+// export express app
+export default app;
+<%_ } else if (framework === 'fastify') { _%>
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import helmet from "@fastify/helmet";
+import cookie from "@fastify/cookie";
+
+import { registerRoutes } from "../routes.js";
+import { corsOptions } from "../config/cors.js";
+
+// create fastify app instance
+const app = Fastify({
+    logger: {
+        level: process.env.NODE_ENV === "production" ? "error" : "info"
+    }
+});
+
+// Register plugins
+await app.register(helmet);
+await app.register(cors, corsOptions);
+await app.register(cookie);
+
+// Root route
+app.get("/", async () => {
+    return { message: "Hello from Node Blueprint Starter" };
+});
+
+// Register routes
+await registerRoutes(app);
+
+// Error handler
+app.setErrorHandler((error: any, _request, reply) => {
+    const status = error.statusCode || 500;
+    const message = error.message || "Internal Server Error";
+
+    app.log.error(error);
+
+    reply.status(status).send({
+        success: false,
+        message
+    });
+});
+
+export { app };
+<%_ } _%>
