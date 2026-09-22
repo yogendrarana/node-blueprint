@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.0] 2025-09-22
+- added support for prisma 7
+- introduced domain driven structures in templates
+- added fastify support
+- replaced yarn with bun as package manager
+
 ## [1.6.0] 2025-06-14
 - added CORS and helmet support to generated templete
 
