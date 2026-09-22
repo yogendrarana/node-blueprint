@@ -20,6 +20,10 @@
 	},
 	"author": "Yogendra Rana <www.yogendrarana.com.np>",
 	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/yogendrarana/node-blueprint"
+	},
 	"dependencies": {
 		"@clack/prompts": "^0.11.0",
 		"consola": "^3.4.2",
