@@ -1,6 +1,10 @@
 # Node Blueprint CLI
 Node Blueprint is a zero-config CLI tool that helps you scaffold production-ready Node.js applications with your preferred tech stack in one command.
 
+[![npm version](https://img.shields.io/npm/v/create-node-blueprint.svg)](https://www.npmjs.com/package/create-node-blueprint)
+[![npm downloads](https://img.shields.io/npm/dm/create-node-blueprint)](https://www.npmjs.com/package/create-node-blueprint)
+[![license](https://img.shields.io/npm/l/create-node-blueprint)](https://www.npmjs.com/package/create-node-blueprint)
+
 ## Features ✨
 - Instant project boilerplate generation
 - Interactive prompt mode
