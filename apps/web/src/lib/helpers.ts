@@ -6,6 +6,241 @@ export interface FileType {
 	children?: FileType[];
 }
 
+const rawEjsTemplates = import.meta.glob("../../../create-node-blueprint/src/template/**/*.ejs", {
+	query: "?raw",
+	import: "default",
+	eager: true,
+}) as Record<string, string>;
+
+// Normalize template map keys to relative paths under `template/`, e.g. "root/env.ejs"
+const templateStore: Record<string, string> = {};
+for (const [fullPath, content] of Object.entries(rawEjsTemplates)) {
+	const marker = "/template/";
+	const idx = fullPath.indexOf(marker);
+	if (idx !== -1) {
+		templateStore[fullPath.slice(idx + marker.length)] = content;
+	}
+}
+
+/**
+ * Renders an EJS template string using the provided context variables.
+ * Supports `<%= expr %>`, `<%_ code _%>` (whitespace slurping), and `<% code %>`.
+ */
+const renderEjsTemplate = (template: string, context: Record<string, unknown>): string => {
+	// Slurp horizontal whitespace before `<%_` and horizontal whitespace + single newline after `_%>`
+	const normalized = template
+		.replace(/[ \t]*<%_/g, "<%_")
+		.replace(/_%>[ \t]*\r?\n?/g, "_%>");
+
+	const tagRegex = /<%([_=+-]?)([\s\S]*?)(_?)%>/g;
+	let cursor = 0;
+	let fnBody = 'let __out = "";\n';
+
+	let match: RegExpExecArray | null = tagRegex.exec(normalized);
+	while (match !== null) {
+		const [fullMatch, prefix, innerCode] = match;
+		const matchIndex = match.index;
+
+		if (matchIndex > cursor) {
+			const literal = normalized.slice(cursor, matchIndex);
+			fnBody += `__out += ${JSON.stringify(literal)};\n`;
+		}
+
+		if (prefix === "=" || prefix === "-") {
+			fnBody += `__out += String((${innerCode.trim()}) ?? "");\n`;
+		} else {
+			fnBody += `${innerCode}\n`;
+		}
+
+		cursor = matchIndex + fullMatch.length;
+		match = tagRegex.exec(normalized);
+	}
+
+	if (cursor < normalized.length) {
+		fnBody += `__out += ${JSON.stringify(normalized.slice(cursor))};\n`;
+	}
+
+	fnBody += "return __out;";
+
+	const keys = Object.keys(context);
+	const values = Object.values(context);
+	const renderer = new Function(...keys, fnBody);
+	return String(renderer(...values)).trimStart();
+};
+
+const DEPENDENCIES: Record<string, string> = {
+	"cookie-parser": "^1.4.6",
+	dotenv: "^16.5.0",
+	zod: "^3.25.64",
+	cors: "^2.8.5",
+	helmet: "^8.1.0",
+	express: "^5.1.0",
+	winston: "^3.17.0",
+	"winston-daily-rotate-file": "^5.0.0",
+	fastify: "^5.3.3",
+	"@fastify/cors": "^11.0.1",
+	"@fastify/helmet": "^13.0.1",
+	"@fastify/cookie": "^11.0.2",
+	pg: "^8.16.0",
+	mysql2: "^3.14.1",
+	mariadb: "^3.5.4",
+	mongoose: "^8.15.2",
+	"@prisma/client": "^7.10.0",
+	"@prisma/adapter-pg": "^7.10.0",
+	"@prisma/adapter-mariadb": "^7.10.0",
+	"drizzle-orm": "^0.44.2",
+	jsonwebtoken: "^9.0.2",
+	bcrypt: "^6.0.0",
+};
+
+const DEV_DEPENDENCIES: Record<string, string> = {
+	"@types/node": "^24.0.1",
+	typescript: "^5.8.3",
+	tsx: "^4.20.3",
+	"@types/cookie-parser": "^1.4.9",
+	"@types/cors": "^2.8.19",
+	"@types/express": "^5.0.3",
+	"@types/pg": "^8.15.4",
+	"@types/mongoose": "^5.11.97",
+	"@types/bcrypt": "^5.0.2",
+	"@types/jsonwebtoken": "^9.0.9",
+	"@biomejs/biome": "^2.4.15",
+	prisma: "^7.10.0",
+	"drizzle-kit": "^0.31.1",
+};
+
+const generatePackageJsonString = ({
+	projectName,
+	framework,
+	database,
+	orm,
+	auth,
+}: {
+	projectName: string;
+	framework: string;
+	database: string;
+	orm: string;
+	auth: string;
+}): string => {
+	const dependencies: Record<string, string> = {
+		dotenv: DEPENDENCIES["dotenv"],
+		zod: DEPENDENCIES["zod"],
+	};
+
+	const devDependencies: Record<string, string> = {
+		"@types/node": DEV_DEPENDENCIES["@types/node"],
+		typescript: DEV_DEPENDENCIES["typescript"],
+		tsx: DEV_DEPENDENCIES["tsx"],
+		"@biomejs/biome": DEV_DEPENDENCIES["@biomejs/biome"],
+	};
+
+	if (framework === "express") {
+		dependencies["express"] = DEPENDENCIES["express"];
+		dependencies["cookie-parser"] = DEPENDENCIES["cookie-parser"];
+		dependencies["cors"] = DEPENDENCIES["cors"];
+		dependencies["helmet"] = DEPENDENCIES["helmet"];
+		dependencies["winston"] = DEPENDENCIES["winston"];
+		dependencies["winston-daily-rotate-file"] = DEPENDENCIES["winston-daily-rotate-file"];
+
+		devDependencies["@types/cors"] = DEV_DEPENDENCIES["@types/cors"];
+		devDependencies["@types/express"] = DEV_DEPENDENCIES["@types/express"];
+		devDependencies["@types/cookie-parser"] = DEV_DEPENDENCIES["@types/cookie-parser"];
+	} else if (framework === "fastify") {
+		dependencies["fastify"] = DEPENDENCIES["fastify"];
+		dependencies["@fastify/cors"] = DEPENDENCIES["@fastify/cors"];
+		dependencies["@fastify/helmet"] = DEPENDENCIES["@fastify/helmet"];
+		dependencies["@fastify/cookie"] = DEPENDENCIES["@fastify/cookie"];
+	}
+
+	if (database === "postgres") {
+		dependencies["pg"] = DEPENDENCIES["pg"];
+		devDependencies["@types/pg"] = DEV_DEPENDENCIES["@types/pg"];
+	} else if (database === "mysql") {
+		if (orm === "prisma") {
+			dependencies["mariadb"] = DEPENDENCIES["mariadb"];
+		} else {
+			dependencies["mysql2"] = DEPENDENCIES["mysql2"];
+		}
+	}
+
+	if (orm === "prisma") {
+		dependencies["@prisma/client"] = DEPENDENCIES["@prisma/client"];
+		if (database === "postgres") {
+			dependencies["@prisma/adapter-pg"] = DEPENDENCIES["@prisma/adapter-pg"];
+		} else if (database === "mysql") {
+			dependencies["@prisma/adapter-mariadb"] = DEPENDENCIES["@prisma/adapter-mariadb"];
+		}
+		devDependencies["prisma"] = DEV_DEPENDENCIES["prisma"];
+	} else if (orm === "drizzle") {
+		dependencies["drizzle-orm"] = DEPENDENCIES["drizzle-orm"];
+		devDependencies["drizzle-kit"] = DEV_DEPENDENCIES["drizzle-kit"];
+	} else if (orm === "mongoose") {
+		dependencies["mongoose"] = DEPENDENCIES["mongoose"];
+		devDependencies["@types/mongoose"] = DEV_DEPENDENCIES["@types/mongoose"];
+	}
+
+	if (auth === "jwt") {
+		dependencies["jsonwebtoken"] = DEPENDENCIES["jsonwebtoken"];
+		dependencies["bcrypt"] = DEPENDENCIES["bcrypt"];
+		devDependencies["@types/bcrypt"] = DEV_DEPENDENCIES["@types/bcrypt"];
+		devDependencies["@types/jsonwebtoken"] = DEV_DEPENDENCIES["@types/jsonwebtoken"];
+	}
+
+	const ormScripts =
+		orm === "prisma"
+			? {
+					"db:seed": "tsx prisma/seed.ts",
+					"db:generate": "prisma generate",
+					"db:push": "prisma db push",
+					"db:migrate": "prisma migrate dev",
+					"db:reset": "prisma migrate reset",
+					"db:introspect": "prisma db pull",
+					"db:deploy": "prisma migrate deploy",
+					"db:studio": "prisma studio --port 4000",
+				}
+			: orm === "drizzle"
+				? {
+						"db:seed": "tsx src/infrastructure/database/seed.ts",
+						"db:generate": "npm run build && drizzle-kit generate",
+						"db:push": "drizzle-kit push",
+						"db:migrate": "tsx src/infrastructure/database/migrate.ts",
+						"db:drop-migration": "drizzle-kit drop",
+						"db:introspect": "drizzle-kit introspect",
+						"db:studio": "drizzle-kit studio --port 4000",
+					}
+				: orm === "mongoose"
+					? {
+							"db:seed": "tsx src/infrastructure/database/seed.ts",
+						}
+					: {};
+
+	return JSON.stringify(
+		{
+			name: projectName,
+			version: "1.0.0",
+			description: "",
+			main: "dist/index.js",
+			type: "module",
+			scripts: {
+				build: "npx tsc",
+				start: "node dist/index.js",
+				dev: "tsx watch src/index.ts",
+				lint: "biome lint .",
+				format: "biome format --write .",
+				check: "biome check .",
+				...ormScripts,
+			},
+			keywords: [],
+			author: "",
+			license: "ISC",
+			dependencies,
+			devDependencies,
+		},
+		null,
+		2,
+	);
+};
+
 const sortFileStructure = (a: FileType, b: FileType): number => {
 	if (a.type === "directory" && b.type === "file") {
 		return -1;
@@ -15,7 +250,6 @@ const sortFileStructure = (a: FileType, b: FileType): number => {
 		return 1;
 	}
 
-	// For files, put dotfiles (e.g., .env) before other files
 	if (a.type === "file" && b.type === "file") {
 		if (a.name.startsWith(".") && !b.name.startsWith(".")) {
 			return -1;
@@ -257,7 +491,6 @@ export const generateProjectStructure = ({ name, framework, orm, features = [], 
 		},
 	];
 
-	// Recursively sort directories
 	const sortDirectory = (dir: FileType) => {
 		if (dir.children) {
 			dir.children.sort(sortFileStructure);
@@ -293,6 +526,90 @@ export const countTreeNodes = (nodes: FileType[]): { files: number; directories:
 	return { files, directories };
 };
 
+const resolveTemplateKeyForRelativePath = (relativePath: string, activeOrm: string): string | null => {
+	// Root files
+	const rootMap: Record<string, string> = {
+		".env": "root/env.ejs",
+		".gitignore": "root/gitignore.ejs",
+		"biome.json": "root/biome.json.ejs",
+		"tsconfig.json": "root/tsconfig.json.ejs",
+		"README.md": "root/readme.md.ejs",
+		".dockerignore": "root/dockerignore.ejs",
+		Dockerfile: "root/dockerfile.ejs",
+		"docker-compose.yml": "root/docker-compose.yml.ejs",
+		"drizzle.config.ts": "infrastructure/database/drizzle/drizzle.config.ts.ejs",
+		"prisma.config.ts": "infrastructure/database/prisma/prisma.config.ts.ejs",
+		"src/index.ts": "root/index.ts.ejs",
+	};
+
+	if (rootMap[relativePath]) {
+		return rootMap[relativePath];
+	}
+
+	// Prisma root directory files
+	const prismaMap: Record<string, string> = {
+		"prisma/schema.prisma": "infrastructure/database/prisma/schema.prisma.ejs",
+		"prisma/models/user.prisma": "infrastructure/database/prisma/models/user.prisma.ejs",
+		"prisma/models/token.prisma": "infrastructure/database/prisma/models/token.prisma.ejs",
+		"prisma/enums/common.prisma": "infrastructure/database/prisma/enums/common.prisma.ejs",
+		"prisma/seed.ts": "infrastructure/database/prisma/seed.ts.ejs",
+	};
+
+	if (prismaMap[relativePath]) {
+		return prismaMap[relativePath];
+	}
+
+	// Infrastructure database files
+	if (relativePath === "src/infrastructure/database/index.ts") {
+		if (activeOrm === "prisma") return "infrastructure/database/prisma/client.ts.ejs";
+		if (activeOrm === "mongoose") return "infrastructure/database/mongoose/connection.ts.ejs";
+		return "infrastructure/database/drizzle/index.ts.ejs";
+	}
+
+	if (relativePath === "src/infrastructure/database/seed.ts") {
+		if (activeOrm === "mongoose") return "infrastructure/database/mongoose/seed.ts.ejs";
+		return "infrastructure/database/drizzle/seed.ts.ejs";
+	}
+
+	if (relativePath === "src/infrastructure/database/schema.ts") {
+		return "infrastructure/database/drizzle/schema.ts.ejs";
+	}
+
+	if (relativePath === "src/infrastructure/database/schema/user.schema.ts") {
+		return "infrastructure/database/drizzle/user.schema.ts.ejs";
+	}
+
+	if (relativePath === "src/infrastructure/database/schema/token.schema.ts") {
+		return "infrastructure/database/drizzle/token.schema.ts.ejs";
+	}
+
+	if (relativePath === "src/infrastructure/database/models/user.model.ts") {
+		return "infrastructure/database/mongoose/user.model.ts.ejs";
+	}
+
+	if (relativePath === "src/infrastructure/database/models/token.model.ts") {
+		return "infrastructure/database/mongoose/token.model.ts.ejs";
+	}
+
+	// Generic src/* files map directly to `<path-without-src/>.ejs`
+	if (relativePath.startsWith("src/")) {
+		const stripped = relativePath.slice(4); // remove "src/"
+		return `${stripped}.ejs`;
+	}
+
+	return null;
+};
+
+const detectLanguage = (relativePath: string): string => {
+	if (relativePath.endsWith(".json")) return "json";
+	if (relativePath.endsWith(".md")) return "markdown";
+	if (relativePath.endsWith(".yml") || relativePath.endsWith(".yaml")) return "yaml";
+	if (relativePath.endsWith(".prisma")) return "prisma";
+	if (relativePath === "Dockerfile") return "dockerfile";
+	if (relativePath.startsWith(".")) return "env / config";
+	return "typescript";
+};
+
 export const getFilePreviewContent = (
 	filePath: string,
 	{ name, framework, orm, features = [], auth, database }: ProjectConfig & { database?: string },
@@ -301,235 +618,89 @@ export const getFilePreviewContent = (
 	const fw = framework || "express";
 	const db = database || (orm === "mongoose" ? "mongodb" : "postgres");
 	const activeOrm = orm || (db === "mongodb" ? "mongoose" : "drizzle");
-	const hasJwt = auth === "jwt" || auth === "jwt-auth";
-	const hasDocker = features.includes("docker");
+	const activeAuth = auth === "jwt" || auth === "jwt-auth" ? "jwt" : "none";
 
-	const fileName = filePath.split("/").pop() || "index.ts";
+	// Strip `<projectName>/` prefix to get the project-relative path
+	const slashIndex = filePath.indexOf("/");
+	const relativePath = slashIndex !== -1 ? filePath.slice(slashIndex + 1) : filePath;
+	const language = detectLanguage(relativePath);
 
-	if (fileName === "package.json") {
-		const deps: Record<string, string> = {
-			...(fw === "fastify"
-				? { fastify: "^5.2.0", "@fastify/cors": "^10.0.1", "@fastify/helmet": "^13.0.0" }
-				: { express: "^5.0.1", cors: "^2.8.5", helmet: "^8.0.0", pino: "^9.6.0" }),
-			...(activeOrm === "drizzle" ? { "drizzle-orm": "^0.39.0" } : {}),
-			...(activeOrm === "prisma" ? { "@prisma/client": "^6.3.0" } : {}),
-			...(activeOrm === "mongoose" ? { mongoose: "^8.10.0" } : {}),
-			...(db === "postgres" && activeOrm !== "mongoose" ? { pg: "^8.13.3" } : {}),
-			...(db === "mysql" && activeOrm !== "mongoose" ? { mysql2: "^3.12.0" } : {}),
-			...(hasJwt ? { jsonwebtoken: "^9.0.2", bcryptjs: "^3.0.2" } : {}),
-			dotenv: "^16.4.7",
-			zod: "^3.24.2",
-		};
-
+	// 1. package.json
+	if (relativePath === "package.json") {
 		return {
 			language: "json",
-			description: "Generated workspace manifest with zero-config scripts and strict ESM.",
-			code: JSON.stringify(
-				{
-					name: projectName,
-					version: "0.1.0",
-					private: true,
-					type: "module",
-					scripts: {
-						dev: "tsx watch src/index.ts",
-						build: "tsc -b",
-						start: "node dist/index.js",
-						check: "biome check --write .",
-						...(activeOrm === "drizzle" ? { "db:generate": "drizzle-kit generate", "db:migrate": "drizzle-kit migrate" } : {}),
-						...(activeOrm === "prisma" ? { "db:generate": "prisma generate", "db:push": "prisma db push" } : {}),
-					},
-					dependencies: deps,
-				},
-				null,
-				2,
-			),
+			description: `Generated package.json for ${projectName} (${fw} + ${db} + ${activeOrm}).`,
+			code: generatePackageJsonString({
+				projectName,
+				framework: fw,
+				database: db,
+				orm: activeOrm,
+				auth: activeAuth,
+			}),
 		};
 	}
 
-	if (fileName === "server.ts" || fileName === "app.ts" || filePath.endsWith("src/index.ts")) {
-		if (fw === "fastify") {
-			return {
-				language: "typescript",
-				description: "Fastify HTTP server bootstrap with structured logging & graceful shutdown.",
-				code: `import Fastify from "fastify";
-import cors from "@fastify/cors";
-import helmet from "@fastify/helmet";
-import { env } from "@/app/config/env";
-import { registerRoutes } from "@/app/routes";
-
-export async function buildServer() {
-  const app = Fastify({ logger: true });
-
-  await app.register(helmet);
-  await app.register(cors, { origin: env.CORS_ORIGIN });
-  await registerRoutes(app);
-
-  return app;
-}
-
-const start = async () => {
-  const server = await buildServer();
-  await server.listen({ port: env.PORT, host: "0.0.0.0" });
-};
-
-start();`,
-			};
-		}
-
+	// 2. Test placeholder files (created directly in create-project-structure.ts)
+	if (relativePath === "tests/unit/index.ts") {
 		return {
 			language: "typescript",
-			description: "Express HTTP application layer with security middleware & clean route mounting.",
-			code: `import express from "express";
-import { env } from "@/app/config/env";
-import { logger } from "@/app/config/logger";
-import { corsMiddleware } from "@/app/http/middleware/cors.middleware";
-import { helmetMiddleware } from "@/app/http/middleware/helmet.middleware";
-import { errorMiddleware } from "@/app/http/middleware/error.middleware";
-import { apiRouter } from "@/app/routes";
-
-const app = express();
-
-app.use(helmetMiddleware);
-app.use(corsMiddleware);
-app.use(express.json());
-
-app.use("/api/v1", apiRouter);
-app.use(errorMiddleware);
-
-app.listen(env.PORT, () => {
-  logger.info(\`[${projectName}] Server listening on port \${env.PORT}\`);
-});`,
+			description: "Unit test suite entry file.",
+			code: "// Unit tests\n// Place unit tests for isolated functions, services, and modules here.\n",
 		};
 	}
-
-	if (
-		fileName.includes("schema") ||
-		fileName === "drizzle.config.ts" ||
-		fileName.endsWith(".prisma") ||
-		fileName.includes("model")
-	) {
-		if (activeOrm === "prisma") {
-			return {
-				language: "prisma",
-				description: `Prisma multi-file schema configured for ${db.toUpperCase()}.`,
-				code: `datasource db {
-  provider = "${db === "mysql" ? "mysql" : "postgresql"}"
-  url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["prismaSchemaFolder"]
-}
-
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}`,
-			};
-		}
-
-		if (activeOrm === "mongoose") {
-			return {
-				language: "typescript",
-				description: "Mongoose typed document schema with timestamps and indexes.",
-				code: `import { Schema, model, type InferSchemaType } from "mongoose";
-
-const userSchema = new Schema(
-  {
-    email: { type: String, required: true, unique: true, lowercase: true },
-    name: { type: String, required: true, trim: true },
-    role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
-  },
-  { timestamps: true }
-);
-
-export type UserDocument = InferSchemaType<typeof userSchema>;
-export const UserModel = model<UserDocument>("User", userSchema);`,
-			};
-		}
-
+	if (relativePath === "tests/integration/index.ts") {
 		return {
 			language: "typescript",
-			description: `Drizzle ORM type-safe ${db.toUpperCase()} table definition.`,
-			code: `import { ${db === "mysql" ? "mysqlTable, varchar, timestamp" : "pgTable, uuid, text, timestamp"} } from "drizzle-orm/${db === "mysql" ? "mysql-core" : "pg-core"}";
-
-export const users = ${db === "mysql" ? "mysqlTable" : "pgTable"}("users", {
-  id: ${db === "mysql" ? 'varchar("id", { length: 36 }).primaryKey()' : 'uuid("id").defaultRandom().primaryKey()'},
-  email: ${db === "mysql" ? 'varchar("email", { length: 255 }).notNull().unique()' : 'text("email").notNull().unique()'},
-  name: ${db === "mysql" ? 'varchar("name", { length: 120 }).notNull()' : 'text("name").notNull()'},
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});`,
+			description: "Integration test suite entry file.",
+			code: "// Integration tests\n// Place integration tests for API routes, database queries, and middleware here.\n",
 		};
 	}
-
-	if (fileName === "Dockerfile" || fileName === "docker-compose.yml") {
-		return {
-			language: "yaml",
-			description: `Container orchestration for ${projectName} + ${db.toUpperCase()} service.`,
-			code: `services:
-  api:
-    build: .
-    ports:
-      - "3000:3000"
-    env_file: .env
-    depends_on:
-      - ${db}
-
-  ${db}:
-    image: ${db === "postgres" ? "postgres:17-alpine" : db === "mysql" ? "mysql:9.0" : "mongo:8.0"}
-    restart: unless-stopped
-    ports:
-      - "${db === "postgres" ? "5432:5432" : db === "mysql" ? "3306:3306" : "27017:27017"}"`,
-		};
-	}
-
-	if (filePath.includes("auth")) {
+	if (relativePath === "tests/e2e/index.ts") {
 		return {
 			language: "typescript",
-			description: "Stateless JWT authentication service with access & refresh token rotation.",
-			code: `import jwt from "jsonwebtoken";
-import { env } from "@/app/config/env";
-import { TOKEN_EXPIRY } from "@/shared/constants/tokens";
-
-export class AuthService {
-  static signTokens(payload: { sub: string; role: string }) {
-    const accessToken = jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-      expiresIn: TOKEN_EXPIRY.ACCESS,
-    });
-    const refreshToken = jwt.sign(payload, env.JWT_REFRESH_SECRET, {
-      expiresIn: TOKEN_EXPIRY.REFRESH,
-    });
-    return { accessToken, refreshToken };
-  }
-}`,
+			description: "End-to-end (E2E) test suite entry file.",
+			code: "// End-to-end (E2E) tests\n// Place end-to-end scenario and full system workflow tests here.\n",
 		};
+	}
+
+	// 3. Resolve & render actual .ejs template
+	const templateKey = resolveTemplateKeyForRelativePath(relativePath, activeOrm);
+	const rawTemplate = templateKey ? templateStore[templateKey] : undefined;
+
+	if (rawTemplate) {
+		try {
+			const rendered = renderEjsTemplate(rawTemplate, {
+				projectName,
+				framework: fw,
+				database: db,
+				orm: activeOrm,
+				auth: activeAuth,
+				features,
+				pkgManager: "npm",
+				pkgLock: "package-lock.json",
+				nodeVersion: "22",
+				pgVersion: "16",
+				mysqlVersion: "8",
+				mongoVersion: "7",
+			});
+
+			return {
+				language,
+				description: `Scaffolded from template/${templateKey}`,
+				code: rendered,
+			};
+		} catch {
+			return {
+				language,
+				description: `Template preview (${relativePath})`,
+				code: rawTemplate,
+			};
+		}
 	}
 
 	return {
-		language: "typescript",
-		description: `Clean architecture module (${fw.toUpperCase()} + ${activeOrm.toUpperCase()}${hasJwt ? " + JWT" : ""}${hasDocker ? " + Docker" : ""}).`,
-		code: `// ${filePath}
-import { AppError } from "@/shared/errors/app-error";
-import { ERROR_CODES } from "@/shared/errors/error-codes";
-
-export class ModuleController {
-  async handleRequest(id: string) {
-    if (!id) {
-      throw new AppError("Resource identifier is required", ERROR_CODES.BAD_REQUEST, 400);
-    }
-    return {
-      project: "${projectName}",
-      framework: "${fw}",
-      database: "${db}",
-      orm: "${activeOrm}",
-      status: "operational",
-    };
-  }
-}`,
+		language,
+		description: `Generated file (${relativePath})`,
+		code: `// ${relativePath}\n`,
 	};
 };

@@ -5,10 +5,14 @@ import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area";
 
 function ScrollArea({ className, children, ...props }: ScrollAreaPrimitive.Root.Props) {
 	return (
-		<ScrollAreaPrimitive.Root data-slot="scroll-area" className={cn("relative overflow-hidden", className)} {...props}>
+		<ScrollAreaPrimitive.Root
+			data-slot="scroll-area"
+			className={cn("relative flex flex-col overflow-hidden", className)}
+			{...props}
+		>
 			<ScrollAreaPrimitive.Viewport
 				data-slot="scroll-area-viewport"
-				className="size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
+				className="size-full flex-1 min-h-0 min-w-0 rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
 			>
 				{children}
 			</ScrollAreaPrimitive.Viewport>

@@ -179,10 +179,10 @@ export default function ProjectStructure({ name, orm, framework, features, auth,
 	};
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-border">
+		<div className="max-h-[800px] lg:h-[800px] overflow-hidden grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-border">
 			{/* Left Column: Explorer Tree */}
-			<div className="lg:col-span-5 flex flex-col bg-background min-w-0">
-				<div className="px-4 py-2.5 border-b border-border bg-muted/50 flex items-center justify-between">
+			<div className="h-full max-h-[400px] lg:max-h-[800px] min-h-0 overflow-hidden lg:col-span-5 flex flex-col bg-background min-w-0">
+				<div className="h-10 shrink-0 px-4 py-2.5 border-b border-border bg-muted/50 flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<Layers size={13} className="text-muted-foreground" />
 						<span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground font-medium">
@@ -199,14 +199,15 @@ export default function ProjectStructure({ name, orm, framework, features, auth,
 						Toggle
 					</button>
 				</div>
-				<ScrollArea className="h-[420px] w-full">
+
+				<ScrollArea className="w-full flex-1 min-h-0">
 					<div className="p-2">{structure.map((root) => renderFileTree(root))}</div>
 				</ScrollArea>
 			</div>
 
 			{/* Right Column: Live Code Inspector */}
-			<div className="lg:col-span-7 flex flex-col bg-muted/30 text-foreground min-w-0">
-				<div className="px-4 py-2.5 border-b border-border bg-muted/50 flex items-center justify-between gap-2">
+			<div className="h-full max-h-[400px] lg:max-h-[800px] min-h-0 overflow-hidden lg:col-span-7 flex flex-col bg-muted/30 text-foreground min-w-0">
+				<div className="h-10 shrink-0 px-4 py-2.5 border-b border-border bg-muted/50 flex items-center justify-between gap-2">
 					<div className="flex items-center gap-2 min-w-0">
 						<span className="inline-block w-2 h-2 rounded-full bg-foreground shrink-0" />
 						<span className="text-xs font-mono text-foreground truncate">{activeFile}</span>
@@ -224,11 +225,11 @@ export default function ProjectStructure({ name, orm, framework, features, auth,
 					</button>
 				</div>
 
-				<div className="px-4 py-2 border-b border-border bg-background text-[11px] font-mono text-muted-foreground">
+				<div className="shrink-0 px-4 py-2 border-b border-border bg-background text-[11px] font-mono text-muted-foreground">
 					{preview.description}
 				</div>
 
-				<ScrollArea className="h-[370px] w-full flex-1">
+				<ScrollArea className="w-full flex-1 min-h-0">
 					<pre className="p-4 text-xs font-mono leading-relaxed text-foreground w-max min-w-full">
 						<code>{preview.code}</code>
 					</pre>
