@@ -273,3 +273,263 @@ export const generateProjectStructure = ({ name, framework, orm, features = [], 
 
 	return baseStructure;
 };
+
+export const countTreeNodes = (nodes: FileType[]): { files: number; directories: number } => {
+	let files = 0;
+	let directories = 0;
+
+	const traverse = (items: FileType[]) => {
+		for (const item of items) {
+			if (item.type === "directory") {
+				directories += 1;
+				if (item.children) traverse(item.children);
+			} else {
+				files += 1;
+			}
+		}
+	};
+
+	traverse(nodes);
+	return { files, directories };
+};
+
+export const getFilePreviewContent = (
+	filePath: string,
+	{ name, framework, orm, features = [], auth, database }: ProjectConfig & { database?: string },
+): { language: string; code: string; description: string } => {
+	const projectName = name || "my-app";
+	const fw = framework || "express";
+	const db = database || (orm === "mongoose" ? "mongodb" : "postgres");
+	const activeOrm = orm || (db === "mongodb" ? "mongoose" : "drizzle");
+	const hasJwt = auth === "jwt" || auth === "jwt-auth";
+	const hasDocker = features.includes("docker");
+
+	const fileName = filePath.split("/").pop() || "index.ts";
+
+	if (fileName === "package.json") {
+		const deps: Record<string, string> = {
+			...(fw === "fastify"
+				? { fastify: "^5.2.0", "@fastify/cors": "^10.0.1", "@fastify/helmet": "^13.0.0" }
+				: { express: "^5.0.1", cors: "^2.8.5", helmet: "^8.0.0", pino: "^9.6.0" }),
+			...(activeOrm === "drizzle" ? { "drizzle-orm": "^0.39.0" } : {}),
+			...(activeOrm === "prisma" ? { "@prisma/client": "^6.3.0" } : {}),
+			...(activeOrm === "mongoose" ? { mongoose: "^8.10.0" } : {}),
+			...(db === "postgres" && activeOrm !== "mongoose" ? { pg: "^8.13.3" } : {}),
+			...(db === "mysql" && activeOrm !== "mongoose" ? { mysql2: "^3.12.0" } : {}),
+			...(hasJwt ? { jsonwebtoken: "^9.0.2", bcryptjs: "^3.0.2" } : {}),
+			dotenv: "^16.4.7",
+			zod: "^3.24.2",
+		};
+
+		return {
+			language: "json",
+			description: "Generated workspace manifest with zero-config scripts and strict ESM.",
+			code: JSON.stringify(
+				{
+					name: projectName,
+					version: "0.1.0",
+					private: true,
+					type: "module",
+					scripts: {
+						dev: "tsx watch src/index.ts",
+						build: "tsc -b",
+						start: "node dist/index.js",
+						check: "biome check --write .",
+						...(activeOrm === "drizzle" ? { "db:generate": "drizzle-kit generate", "db:migrate": "drizzle-kit migrate" } : {}),
+						...(activeOrm === "prisma" ? { "db:generate": "prisma generate", "db:push": "prisma db push" } : {}),
+					},
+					dependencies: deps,
+				},
+				null,
+				2,
+			),
+		};
+	}
+
+	if (fileName === "server.ts" || fileName === "app.ts" || filePath.endsWith("src/index.ts")) {
+		if (fw === "fastify") {
+			return {
+				language: "typescript",
+				description: "Fastify HTTP server bootstrap with structured logging & graceful shutdown.",
+				code: `import Fastify from "fastify";
+import cors from "@fastify/cors";
+import helmet from "@fastify/helmet";
+import { env } from "@/app/config/env";
+import { registerRoutes } from "@/app/routes";
+
+export async function buildServer() {
+  const app = Fastify({ logger: true });
+
+  await app.register(helmet);
+  await app.register(cors, { origin: env.CORS_ORIGIN });
+  await registerRoutes(app);
+
+  return app;
+}
+
+const start = async () => {
+  const server = await buildServer();
+  await server.listen({ port: env.PORT, host: "0.0.0.0" });
+};
+
+start();`,
+			};
+		}
+
+		return {
+			language: "typescript",
+			description: "Express HTTP application layer with security middleware & clean route mounting.",
+			code: `import express from "express";
+import { env } from "@/app/config/env";
+import { logger } from "@/app/config/logger";
+import { corsMiddleware } from "@/app/http/middleware/cors.middleware";
+import { helmetMiddleware } from "@/app/http/middleware/helmet.middleware";
+import { errorMiddleware } from "@/app/http/middleware/error.middleware";
+import { apiRouter } from "@/app/routes";
+
+const app = express();
+
+app.use(helmetMiddleware);
+app.use(corsMiddleware);
+app.use(express.json());
+
+app.use("/api/v1", apiRouter);
+app.use(errorMiddleware);
+
+app.listen(env.PORT, () => {
+  logger.info(\`[${projectName}] Server listening on port \${env.PORT}\`);
+});`,
+		};
+	}
+
+	if (
+		fileName.includes("schema") ||
+		fileName === "drizzle.config.ts" ||
+		fileName.endsWith(".prisma") ||
+		fileName.includes("model")
+	) {
+		if (activeOrm === "prisma") {
+			return {
+				language: "prisma",
+				description: `Prisma multi-file schema configured for ${db.toUpperCase()}.`,
+				code: `datasource db {
+  provider = "${db === "mysql" ? "mysql" : "postgresql"}"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}`,
+			};
+		}
+
+		if (activeOrm === "mongoose") {
+			return {
+				language: "typescript",
+				description: "Mongoose typed document schema with timestamps and indexes.",
+				code: `import { Schema, model, type InferSchemaType } from "mongoose";
+
+const userSchema = new Schema(
+  {
+    email: { type: String, required: true, unique: true, lowercase: true },
+    name: { type: String, required: true, trim: true },
+    role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
+  },
+  { timestamps: true }
+);
+
+export type UserDocument = InferSchemaType<typeof userSchema>;
+export const UserModel = model<UserDocument>("User", userSchema);`,
+			};
+		}
+
+		return {
+			language: "typescript",
+			description: `Drizzle ORM type-safe ${db.toUpperCase()} table definition.`,
+			code: `import { ${db === "mysql" ? "mysqlTable, varchar, timestamp" : "pgTable, uuid, text, timestamp"} } from "drizzle-orm/${db === "mysql" ? "mysql-core" : "pg-core"}";
+
+export const users = ${db === "mysql" ? "mysqlTable" : "pgTable"}("users", {
+  id: ${db === "mysql" ? 'varchar("id", { length: 36 }).primaryKey()' : 'uuid("id").defaultRandom().primaryKey()'},
+  email: ${db === "mysql" ? 'varchar("email", { length: 255 }).notNull().unique()' : 'text("email").notNull().unique()'},
+  name: ${db === "mysql" ? 'varchar("name", { length: 120 }).notNull()' : 'text("name").notNull()'},
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});`,
+		};
+	}
+
+	if (fileName === "Dockerfile" || fileName === "docker-compose.yml") {
+		return {
+			language: "yaml",
+			description: `Container orchestration for ${projectName} + ${db.toUpperCase()} service.`,
+			code: `services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - ${db}
+
+  ${db}:
+    image: ${db === "postgres" ? "postgres:17-alpine" : db === "mysql" ? "mysql:9.0" : "mongo:8.0"}
+    restart: unless-stopped
+    ports:
+      - "${db === "postgres" ? "5432:5432" : db === "mysql" ? "3306:3306" : "27017:27017"}"`,
+		};
+	}
+
+	if (filePath.includes("auth")) {
+		return {
+			language: "typescript",
+			description: "Stateless JWT authentication service with access & refresh token rotation.",
+			code: `import jwt from "jsonwebtoken";
+import { env } from "@/app/config/env";
+import { TOKEN_EXPIRY } from "@/shared/constants/tokens";
+
+export class AuthService {
+  static signTokens(payload: { sub: string; role: string }) {
+    const accessToken = jwt.sign(payload, env.JWT_ACCESS_SECRET, {
+      expiresIn: TOKEN_EXPIRY.ACCESS,
+    });
+    const refreshToken = jwt.sign(payload, env.JWT_REFRESH_SECRET, {
+      expiresIn: TOKEN_EXPIRY.REFRESH,
+    });
+    return { accessToken, refreshToken };
+  }
+}`,
+		};
+	}
+
+	return {
+		language: "typescript",
+		description: `Clean architecture module (${fw.toUpperCase()} + ${activeOrm.toUpperCase()}${hasJwt ? " + JWT" : ""}${hasDocker ? " + Docker" : ""}).`,
+		code: `// ${filePath}
+import { AppError } from "@/shared/errors/app-error";
+import { ERROR_CODES } from "@/shared/errors/error-codes";
+
+export class ModuleController {
+  async handleRequest(id: string) {
+    if (!id) {
+      throw new AppError("Resource identifier is required", ERROR_CODES.BAD_REQUEST, 400);
+    }
+    return {
+      project: "${projectName}",
+      framework: "${fw}",
+      database: "${db}",
+      orm: "${activeOrm}",
+      status: "operational",
+    };
+  }
+}`,
+	};
+};

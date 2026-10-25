@@ -35,3 +35,43 @@ export const features: CommandOption[] = [
 		status: "available",
 	},
 ];
+
+export interface StackPreset {
+	id: string;
+	name: string;
+	framework: string;
+	database: string;
+	orm: string;
+	auth: string;
+	features: string[];
+}
+
+export const stackPresets: StackPreset[] = [
+	{
+		id: "modern-sql",
+		name: "Modern SQL API",
+		framework: "express",
+		database: "postgres",
+		orm: "drizzle",
+		auth: "jwt",
+		features: ["docker"],
+	},
+	{
+		id: "high-perf",
+		name: "Fastify + Prisma",
+		framework: "fastify",
+		database: "postgres",
+		orm: "prisma",
+		auth: "jwt",
+		features: ["docker"],
+	},
+	{
+		id: "document-nosql",
+		name: "Mongo Document Stack",
+		framework: "express",
+		database: "mongodb",
+		orm: "mongoose",
+		auth: "jwt",
+		features: ["docker"],
+	},
+];

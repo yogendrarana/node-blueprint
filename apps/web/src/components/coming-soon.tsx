@@ -1,12 +1,8 @@
-import { Badge } from "./ui/badge";
-
 function ComingSoon() {
 	return (
-		<div className="ml-auto text-muted-foreground text-xs">
-			<Badge className="border border-gray-200 text-gray-600" variant="outline">
-				coming soon
-			</Badge>
-		</div>
+		<span className="ml-auto text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 border border-border bg-muted text-muted-foreground">
+			soon
+		</span>
 	);
 }
 

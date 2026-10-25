@@ -1,17 +1,16 @@
-import Container from "../container";
 import SiteBody from "../site-body";
 import SiteFooter from "../site-footer";
 import SiteHeader from "../site-header";
 
 const Index = () => {
 	return (
-		<Container>
-			<div className="min-h-screen py-8 flex flex-col gap-4">
-				<SiteHeader />
+		<div className="min-h-screen flex flex-col bg-background text-foreground">
+			<SiteHeader />
+			<div className="flex-1">
 				<SiteBody />
-				<SiteFooter />
 			</div>
-		</Container>
+			<SiteFooter />
+		</div>
 	);
 };
 

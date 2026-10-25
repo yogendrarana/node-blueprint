@@ -1,57 +1,87 @@
-import { cn } from "../lib/utils";
-import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import TerminalIcon from "./icons/terminal";
+import { ArrowUpRight, Star } from "lucide-react";
 
 export default function SiteHeader() {
-	const [stars, setStars] = useState(0);
+	const [stars, setStars] = useState<string | number>("—");
 
 	useEffect(() => {
+		let mounted = true;
 		const fetchStars = async () => {
 			try {
 				const response = await fetch("https://api.github.com/repos/yogendrarana/node-blueprint");
-
-				if (response.ok) {
+				if (response.ok && mounted) {
 					const data = await response.json();
 					const starsCount =
-						data.stargazers_count >= 1000 ? `${(data.stargazers_count / 1000).toFixed(2)}k` : data.stargazers_count;
+						data.stargazers_count >= 1000 ? `${(data.stargazers_count / 1000).toFixed(1)}k` : data.stargazers_count;
 					setStars(starsCount);
 				}
-			} catch (error) {
-				console.error("Error fetching GitHub stars:", error);
+			} catch {
+				// fallback silently when offline or rate-limited
 			}
 		};
 
 		fetchStars();
-	}, [stars, setStars]);
+		return () => {
+			mounted = false;
+		};
+	}, []);
 
 	return (
-		<div className="flex justify-between items-center">
-			<a href="/" className="text-lg font-semibold flex items-center gap-2">
-				<TerminalIcon className="h-5 w-5" /> Node Blueprint
-			</a>
+		<header className="sticky top-0 z-40 w-full border-b border-border bg-background/90 backdrop-blur-md">
+			<div className="max-w-6xl mx-auto border-x border-border flex items-stretch justify-between h-14">
+				{/* Left: Brand Cell */}
+				<a href="/" className="px-4 sm:px-6 flex items-center gap-2.5 hover:bg-muted/60 transition-colors shrink-0">
+					<span className="font-semibold tracking-tight text-sm sm:text-base text-foreground whitespace-nowrap">
+						Node Blueprint
+					</span>
+					<span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium bg-muted text-muted-foreground border border-border whitespace-nowrap">
+						v1.7.0
+					</span>
+				</a>
 
-			<motion.a
-				href="https://github.com/yogendrarana/node-blueprint"
-				target="_blank"
-				rel="noopener noreferrer"
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ duration: 0.5 }}
-				className={"flex items-center"}
-			>
-				<button
-					className={cn(
-						"px-2 py-1 gap-2 border-2 cursor-pointer text-sm bg-white text-black font-mono border-black shadow-[4px_4px_0_0_#000]",
-						"hover:bg-gray-100 transition-all duration-200",
-						"active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0_0_#000]",
-						"disabled:opacity-50 disabled:pointer-events-none",
-						"dark:border-gray-800 dark:bg-black dark:text-white dark:shadow-gray-800 dark:hover:bg-gray-900",
-					)}
-				>
-					GithHub {stars}
-				</button>
-			</motion.a>
-		</div>
+				{/* Right: Grouped Navigation & External Links */}
+				<div className="flex items-stretch divide-x divide-border border-l border-border ml-auto text-xs font-mono">
+					<a
+						href="#composer"
+						className="hidden md:flex px-4 items-center text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors whitespace-nowrap"
+					>
+						Builder
+					</a>
+					<a
+						href="#preview"
+						className="hidden md:flex px-4 items-center text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors whitespace-nowrap"
+					>
+						Project Structure
+					</a>
+					<a
+						href="#cli"
+						className="hidden md:flex px-4 items-center text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors whitespace-nowrap"
+					>
+						CLI
+					</a>
+
+					<a
+						href="https://www.npmjs.com/package/create-node-blueprint"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="flex items-center gap-1 px-3.5 sm:px-4 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+					>
+						npm
+						<ArrowUpRight size={13} className="text-muted-foreground" />
+					</a>
+
+					<a
+						href="https://github.com/yogendrarana/node-blueprint"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="px-4 sm:px-5 flex items-center gap-2 font-medium bg-background text-foreground hover:bg-muted/60 transition-colors"
+					>
+						<Star size={13} className="text-foreground fill-foreground" />
+						<span>GitHub</span>
+						<span className="px-1.5 py-0.5 text-[11px] border border-border bg-muted text-muted-foreground">{stars}</span>
+					</a>
+				</div>
+			</div>
+		</header>
 	);
 }

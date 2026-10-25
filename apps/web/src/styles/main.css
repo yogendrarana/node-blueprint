@@ -76,6 +76,8 @@
 }
 
 @theme inline {
+	--font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	--font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -120,6 +122,22 @@
 	}
 
 	body {
-		@apply bg-background text-foreground;
+		@apply bg-background text-foreground font-sans;
 	}
+}
+
+/* Architectural / Bordered UI surface patterns */
+.bg-blueprint-grid {
+	background-size: 32px 32px;
+	background-image:
+		linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+}
+
+.bg-dot-matrix {
+	background-image: radial-gradient(var(--border) 1px, transparent 1px);
+	background-size: 16px 16px;
+}
+
+.bg-diagonal-hatch {
+	background-image: repeating-linear-gradient(-45deg, var(--border), var(--border) 1px, transparent 1px, transparent 8px);
 }

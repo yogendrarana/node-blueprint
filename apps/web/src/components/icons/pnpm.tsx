@@ -9,6 +9,7 @@ const Pnpm = (props: SVGProps<SVGSVGElement>) => (
 		height="1em"
 		{...props}
 	>
+		<title>PNPM</title>
 		<defs>
 			<path d="M237.6 95L187.6 95L187.6 45L237.6 45L237.6 95Z" id="arNRoK435" />
 			<path d="M182.59 95L132.59 95L132.59 45L182.59 45L182.59 95Z" id="a3H2WU7Px" />
