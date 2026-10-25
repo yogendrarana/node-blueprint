@@ -7,7 +7,8 @@ import { createProject } from "./src/program/create-project.js";
 import { AuthEnum, DatabaseEnum, FrameworkEnum, OrmEnum } from "./src/enums/enums.js";
 
 async function init() {
-	const argv = await yargs(hideBin(process.argv))
+	const nodeProcess = (globalThis as typeof globalThis & { process: { argv: string[] } }).process;
+	const argv = await yargs(hideBin(nodeProcess.argv))
 		.scriptName("create-node-blueprint")
 		.option("name", { alias: "n", type: "string", description: "Project name", default: "" })
 		.option("framework", { alias: "f", type: "string", description: "Framework to use", default: "" })
