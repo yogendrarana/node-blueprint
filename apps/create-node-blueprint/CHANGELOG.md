@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.7.1] 2026-11-16
+- fixed using `.` as project name to scaffold in the current directory
+
 ## [1.7.0] 2025-09-22
 - added support for prisma 7
 - introduced domain driven structures in templates

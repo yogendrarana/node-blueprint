@@ -102,3 +102,16 @@ export const createFileWithContent = async (filePath: string, content: string): 
 		throw new Error(`Failed to create file: ${err.message}`);
 	}
 };
+
+// Sanitize a directory name into a valid project/package name
+export const toValidProjectName = (name: string): string => {
+	const sanitized = name
+		.trim()
+		.toLowerCase()
+		.replace(/\s+/g, "-")
+		.replace(/^[._]+/, "")
+		.replace(/[^a-z0-9-]+/g, "-")
+		.replace(/-+/g, "-")
+		.replace(/^-|-$/g, "");
+	return sanitized || "node-blueprint-starter";
+};

@@ -10,24 +10,47 @@ import { createPackageJson } from "./create-package-json.js";
 import { installPackages } from "./install-packages.js";
 import { createProjectStructure } from "./create-project-structure.js";
 import { showPostCreationInstructions } from "./post-creation-instructions.js";
-import { checkDirExists, packageManagerConfig, packgeManageFromUserAgent } from "../utils/utils.js";
+import { checkDirExists, packageManagerConfig, packgeManageFromUserAgent, toValidProjectName } from "../utils/utils.js";
 import getOverwriteExistingDirectory from "../prompts/get-overwrite-existing-directory.js";
 
 export async function createProject(options: ProjectConfig): Promise<void> {
 	const { projectName, installDependencies, initializeGit, orm } = options;
 
 	const cwd = process.cwd();
-	const root = path.join(cwd, projectName);
+	const root = path.resolve(cwd, projectName);
+	const isCurrentDir = root === cwd;
+	const resolvedProjectName = isCurrentDir ? toValidProjectName(path.basename(root)) : projectName;
+	const resolvedOptions: ProjectConfig = { ...options, projectName: resolvedProjectName };
 
 	console.log(pc.yellow("\n\nCreating project...\n"));
-	intro(`Creating "${pc.cyan(projectName)}"`);
+	intro(isCurrentDir ? `Creating "${pc.cyan(resolvedProjectName)}" in current directory` : `Creating "${pc.cyan(resolvedProjectName)}"`);
 	const pkgInfo = packgeManageFromUserAgent(process.env.npm_config_user_agent);
 	const pkgManagerCommands = packageManagerConfig(pkgInfo?.name || "npm");
 	const s = spinner();
 
 	try {
 		// Validate project directory
-		if (await checkDirExists(root)) {
+		if (isCurrentDir) {
+			const entries = await fs.readdir(root);
+			if (entries.length > 0) {
+				const overwrite = await getOverwriteExistingDirectory(resolvedProjectName, true);
+				if (!overwrite) {
+					process.exit(0);
+				}
+
+				try {
+					s.start("Clearing current directory...");
+					for (const entry of entries) {
+						await fs.rm(path.join(root, entry), { recursive: true, force: true });
+					}
+					s.stop("Current directory cleared");
+				} catch (error: any) {
+					s.stop(pc.red("Failed to clear current directory"));
+					log.error(`Error: ${error.message}`);
+					process.exit(1);
+				}
+			}
+		} else if (await checkDirExists(root)) {
 			const overwrite = await getOverwriteExistingDirectory(projectName);
 			if (!overwrite) {
 				process.exit(0);
@@ -47,7 +70,7 @@ export async function createProject(options: ProjectConfig): Promise<void> {
 		// Create project structure
 		s.start("Creating project files...");
 		await fs.mkdir(root, { recursive: true });
-		await createProjectStructure(options, {
+		await createProjectStructure(resolvedOptions, {
 			root,
 			pkgManager: pkgInfo?.name || "npm",
 			pkgLock: pkgManagerCommands.files.packageLockJson,
@@ -56,13 +79,13 @@ export async function createProject(options: ProjectConfig): Promise<void> {
 
 		// Create package.json
 		s.start("Creating package.json...");
-		await createPackageJson(options, { root, pkgManager: pkgInfo?.name || "npm" });
+		await createPackageJson(resolvedOptions, { root, pkgManager: pkgInfo?.name || "npm" });
 		s.stop("Package.json created");
 
 		// Install dependencies if requested
 		if (installDependencies) {
 			s.start("Installing dependencies...");
-			await installPackages(root, (pkgInfo?.name || "npm") as PackageManagerEnum, s, options);
+			await installPackages(root, (pkgInfo?.name || "npm") as PackageManagerEnum, s, resolvedOptions);
 			s.stop("Dependencies installed");
 		}
 

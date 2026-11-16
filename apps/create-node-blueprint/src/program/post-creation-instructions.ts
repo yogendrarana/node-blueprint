@@ -23,12 +23,18 @@ export function showPostCreationInstructions(options: PostCreationInstructionsOp
 		[OrmEnum.mongoose]: ["No migrations needed for MongoDB"],
 	}[orm];
 
+	const nextSteps = relativePath
+		? [
+				`${pc.cyan("1.")} cd ${relativePath.includes(" ") ? `"${relativePath}"` : relativePath}`,
+				`${pc.cyan("2.")} ${installDependencies ? pmCommands.commands.dev : pmCommands.commands.install}`,
+			]
+		: [`${pc.cyan("1.")} ${installDependencies ? pmCommands.commands.dev : pmCommands.commands.install}`];
+
 	consola.box({
-		title: pc.bold(pc.green("🎉 Project created successfully!")),
+		title: pc.bold(pc.green("Project created successfully!")),
 		message: [
 			pc.bold("Next steps:"),
-			`${pc.cyan("1.")} cd ${relativePath.includes(" ") ? `"${relativePath}"` : relativePath}`,
-			`${pc.cyan("2.")} ${installDependencies ? pmCommands.commands.dev : pmCommands.commands.install}`,
+			...nextSteps,
 			"",
 			pc.bold("Your app is available at:"),
 			pc.gray("The server is available on port 8000"),

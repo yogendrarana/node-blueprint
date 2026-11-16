@@ -7,6 +7,7 @@
 		"resolveJsonModule": true,
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
-		"rootDir": "."
+		"rootDir": ".",
+		"types": ["node"]
 	}
 }
