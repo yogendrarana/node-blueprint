@@ -35,7 +35,7 @@ export default function SiteHeader() {
 						Node Blueprint
 					</span>
 					<span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium bg-muted text-muted-foreground border border-border whitespace-nowrap">
-						v1.7.0
+						v1.7.1
 					</span>
 				</a>
 

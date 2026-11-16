@@ -9,9 +9,6 @@ export default function SiteFooter() {
 					<div className="md:col-span-6 p-6 sm:p-8 flex flex-col justify-between gap-4">
 						<div className="flex items-center gap-2.5">
 							<span className="font-semibold tracking-tight text-foreground whitespace-nowrap">Node Blueprint</span>
-							<span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium bg-muted text-muted-foreground border border-border">
-								v1.7.0
-							</span>
 						</div>
 						<p className="text-xs sm:text-sm text-muted-foreground max-w-md leading-relaxed">
 							Zero-config CLI tool that scaffolds production-ready Node.js applications with your preferred HTTP framework,
